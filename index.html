@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v1.6</title>
+<title>FC Hàng Hóa — v1.7</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -110,13 +110,13 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v1.6</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v1.7</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions">
     <button class="btn btn-success btn-sm" style="width:100%;margin-bottom:4px" onclick="loadData()">📥 Load data</button>
     <button class="btn btn-outline btn-sm" style="width:100%;background:rgba(255,255,255,.08);color:#ccc;border-color:rgba(255,255,255,.15)" onclick="exportFC()">📥 Xuất Excel</button>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v1.6 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v1.7 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
@@ -193,7 +193,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <div class="table-wrap" style="max-height:220px">
             <table id="recapTable">
               <thead><tr>
-                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>NCC</th>
+                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>NCC</th>
                 <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
                 <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th><th></th>
               </tr></thead>
@@ -386,7 +386,7 @@ function loadData(){
     const c=l.split('\t');if(c.length<2)return;const maCH=c[0].trim(),maSP=c[1].trim();
     const st=STATE.storelist[maCH]||{},sk=STATE.skuList[maSP]||{};
     const nhom=STATE.nhomN[maCH+'|'+sk.mch3]||'N6';
-    if(!fc.recapTable.find(r=>r.maSP===maSP))fc.recapTable.push({maSP,tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,giaMua:sk.cogs||0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
+    if(!fc.recapTable.find(r=>r.maSP===maSP))fc.recapTable.push({maSP,tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,giaMua:sk.cogs||0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
     fc.fcTable.push({maCHSP:maCH+maSP,maCH,maSP,tinh:st.tinh||'',qlkv:st.qlkv||'',gdv:st.gdv||'',tenCH:st.tenCH||'',tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,cogs:sk.cogs||0,mch2:sk.mch2||'',mch3:sk.mch3||'',nhomN:nhom,nccCTKM:'Chia hàng',min:0,slTon:0,gtTon:0,slBan:0,gtBan:0,slCG:0,gtCG:0,slFC:0,gtFC:0,checkDR:1,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,slFCRound:0,gtFCRound:0,movStatus:'',movNCCtinh:0});
   });
 
@@ -447,6 +447,8 @@ function renderRecapTable(){
     h+='<td>'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td>';
     h+='<td><input value="'+r.qc+'" size="3" onchange="current().recapTable['+i+'].qc=parseInt(this.value)||1"></td>';
     h+='<td><input value="'+r.giaMua+'" size="8" onchange="current().recapTable['+i+'].giaMua=parseFloat(this.value)||0"></td>';
+    h+='<td><input value="'+(r.giaThuong||0)+'" size="8" onchange="current().recapTable['+i+'].giaThuong=parseFloat(this.value)||0"></td>';
+    h+='<td><input value="'+(r.giaKM||0)+'" size="8" onchange="current().recapTable['+i+'].giaKM=parseFloat(this.value)||0"></td>';
     h+='<td><input value="'+r.ncc+'" size="10" onchange="current().recapTable['+i+'].ncc=this.value"></td>';
     ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td><input value="'+(r[n]||0)+'" size="4" onchange="current().recapTable['+i+'].'+n+'=parseInt(this.value)||0"></td>');
     h+='<td><input value="'+r.block+'" size="3" onchange="current().recapTable['+i+'].block=parseInt(this.value)||1"></td>';
@@ -459,10 +461,10 @@ function renderRecapTable(){
     tb.innerHTML+=h;
   });
 }
-function addRecapRow(){current().recapTable.push({maSP:'',tenSP:'',dvt:'',qc:1,giaMua:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});renderRecapTable()}
+function addRecapRow(){current().recapTable.push({maSP:'',tenSP:'',dvt:'',qc:1,giaMua:0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});renderRecapTable()}
 function syncRecapFromFC(){
   const fc=current(),s=new Set();
-  fc.fcTable.forEach(r=>{if(!s.has(r.maSP)){s.add(r.maSP);if(!fc.recapTable.find(x=>x.maSP===r.maSP))fc.recapTable.push({maSP:r.maSP,tenSP:r.tenSP,dvt:r.dvt,qc:r.qc,giaMua:r.cogs,ncc:r.nccCTKM||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1})}});
+  fc.fcTable.forEach(r=>{if(!s.has(r.maSP)){s.add(r.maSP);if(!fc.recapTable.find(x=>x.maSP===r.maSP))fc.recapTable.push({maSP:r.maSP,tenSP:r.tenSP,dvt:r.dvt,qc:r.qc,giaMua:r.cogs,giaThuong:0,giaKM:0,ncc:r.nccCTKM||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1})}});
   renderRecapTable();toast('✅ Đồng bộ','success');
 }
 function saveConfig(){
