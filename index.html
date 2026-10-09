@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v2.5</title>
+<title>FC Hàng Hóa — v2.6</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -115,6 +115,19 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 .pivot-tab{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-size:10px;font-weight:600;background:transparent;color:#666}
 .pivot-tab:hover{background:rgba(255,255,255,.6)}
 .pivot-tab.active{background:#fff;color:#1e3a5f;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:10px;width:500px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.modal-header{padding:12px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:14px;color:#1e3a5f}
+.modal-body{padding:12px 16px;overflow-y:auto;flex:1}
+.modal-footer{padding:10px 16px;border-top:1px solid #eee;display:flex;gap:6px;justify-content:flex-end}
+.saved-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid #eee;border-radius:6px;margin-bottom:4px;font-size:11px}
+.saved-item:hover{background:#f8fafc}
+.saved-item .name{font-weight:600;color:#1e3a5f}
+.saved-item .meta{font-size:9px;color:#999}
+.saved-item .actions{display:flex;gap:3px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -122,18 +135,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.5</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.6</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v2.5 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v2.6 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v2.5">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v2.6">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -143,6 +156,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
       <button class="btn btn-success btn-sm" onclick="loadData()" style="padding:4px 10px;font-size:10px">📥 Load data</button>
       <button class="btn btn-outline btn-sm" onclick="exportFC()" style="padding:4px 10px;font-size:10px">📥 Xuất</button>
+      <button class="btn btn-outline btn-sm" onclick="showSaveModal()" style="padding:4px 10px;font-size:10px">💾 Lưu</button>
+      <button class="btn btn-outline btn-sm" onclick="showLoadModal()" style="padding:4px 10px;font-size:10px">📂 Mở</button>
     </div>
   </div>
 
@@ -270,6 +285,39 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 </div>
 
 <div id="toast" class="toast hidden"></div>
+
+<!-- SAVE MODAL -->
+<div class="modal-overlay hidden" id="saveModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3>💾 Lưu cấu hình</h3><button class="btn btn-xs" onclick="$('saveModal').classList.add('hidden')" style="background:#eee">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:8px">
+        <label style="font-size:10px;font-weight:600">Tên lưu:</label>
+        <input id="saveName" placeholder="VD: FC Ambient T10.2026" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-top:3px">
+      </div>
+      <div style="font-size:10px;color:#999">
+        <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><input type="checkbox" id="saveStores" checked> Danh sách CH đã chọn (<span id="saveStoreCount">0</span>)</label>
+        <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><input type="checkbox" id="saveTemplate" checked> Danh mục FC (Template SKU)</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="saveConfig" checked> Cấu hình FC (RECAP + MOV)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
+      <button class="btn btn-success btn-sm" onclick="doSave()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOAD MODAL -->
+<div class="modal-overlay hidden" id="loadModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3>📂 Danh sách đã lưu</h3><button class="btn btn-xs" onclick="$('loadModal').classList.add('hidden')" style="background:#eee">✕</button></div>
+    <div class="modal-body" id="savedList"><p style="color:#999;font-size:11px">Chưa có dữ liệu lưu</p></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="$('loadModal').classList.add('hidden')">Đóng</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============ FC TYPES ============
@@ -808,6 +856,81 @@ function exportFC(){
   a.href=URL.createObjectURL(new Blob([tsv],{type:'text/tab-separated-values'}));
   a.download='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.tsv';
   a.click();URL.revokeObjectURL(a.href);toast('✅ Đã xuất!','success');
+}
+
+// ============ SAVE / LOAD ============
+function showSaveModal(){
+  $('saveStoreCount').textContent=STATE.selectedTinh.size||Object.keys(STATE.storelist).length;
+  $('saveModal').classList.remove('hidden');
+  $('saveName').value=FC_TYPES[STATE.currentFC].name+' - '+new Date().toLocaleDateString('vi-VN');
+  $('saveName').focus();
+}
+
+function showLoadModal(){
+  const items=getSavedItems();
+  let h='';
+  if(!items.length) h='<p style="color:#999;font-size:11px">Chưa có dữ liệu lưu</p>';
+  else items.sort((a,b)=>b.savedAt-a.savedAt).forEach((item,i)=>{
+    h+='<div class="saved-item">';
+    h+='<div><div class="name">'+item.name+'</div><div class="meta">'+new Date(item.savedAt).toLocaleString('vi-VN')+' · '+item.fcType+' · '+(item.data.stores?item.data.stores.length+' CH':'')+' · '+(item.data.template?item.data.template.split('\n').length+' SKU':'')+'</div></div>';
+    h+='<div class="actions">';
+    h+='<button class="btn btn-xs btn-primary" onclick="doLoad('+i+')">📥 Load</button>';
+    h+='<button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="doDelete('+i+')">×</button>';
+    h+='</div></div>';
+  });
+  $('savedList').innerHTML=h;
+  $('loadModal').classList.remove('hidden');
+}
+
+function getSavedItems(){
+  try{return JSON.parse(localStorage.getItem('fc-saved')||'[]')}catch(e){return []}
+}
+
+function doSave(){
+  const name=$('saveName').value.trim();
+  if(!name) return toast('Nhập tên lưu!','error');
+  const items=getSavedItems();
+  const data={};
+  if($('saveStores').checked) data.stores=[...STATE.selectedTinh];
+  if($('saveTemplate').checked) data.template=$('tmplPaste').value;
+  if($('saveConfig').checked){
+    const fc=current();
+    data.config={recapTable:fc.recapTable,movTable:fc.movTable};
+  }
+  items.push({name,savedAt:Date.now(),fcType:FC_TYPES[STATE.currentFC].name,data});
+  localStorage.setItem('fc-saved',JSON.stringify(items));
+  $('saveModal').classList.add('hidden');
+  toast('💾 Đã lưu: '+name,'success');
+}
+
+function doLoad(idx){
+  const items=getSavedItems();
+  if(idx<0||idx>=items.length) return;
+  const item=items[idx];
+  if(item.data.template) $('tmplPaste').value=item.data.template;
+  if(item.data.stores){
+    STATE.selectedTinh=new Set(item.data.stores);
+    buildVungTree();
+  }
+  if(item.data.config){
+    const fc=current();
+    fc.recapTable=item.data.config.recapTable||[];
+    fc.movTable=item.data.config.movTable||[];
+    renderRecapTable();renderMOVTable();
+    $('resultsSection').classList.remove('hidden');
+    fc.configSaved=true;$('configSaved').style.display='inline';
+  }
+  $('loadModal').classList.add('hidden');
+  toast('📂 Đã load: '+item.name,'success');
+}
+
+function doDelete(idx){
+  if(!confirm('Xóa mục này?')) return;
+  const items=getSavedItems();
+  items.splice(idx,1);
+  localStorage.setItem('fc-saved',JSON.stringify(items));
+  showLoadModal();
+  toast('🗑 Đã xóa','info');
 }
 
 // INIT
