@@ -3,28 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v1.4</title>
+<title>FC Hàng Hóa — v1.5</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
 
 /* SIDEBAR */
-.sidebar{width:230px;background:#1e3a5f;color:#fff;padding:14px 0;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-.sidebar .logo{padding:0 14px 10px;font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+.sidebar{width:240px;background:#1e3a5f;color:#fff;padding:0;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar .logo{padding:14px 14px 10px;font-size:14px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 .sidebar .logo span{color:#4fc3f7}
 .sidebar .logo small{font-weight:400;color:#90a4ae;font-size:10px}
-.fc-type-list{list-style:none;margin:4px 0}
-.fc-type-list li{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;border-left:3px solid transparent;transition:all .15s}
+
+/* Miền sections in sidebar */
+.mien-section{padding:6px 0}
+.mien-title{padding:8px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#90a4ae;display:flex;align-items:center;justify-content:space-between}
+.mien-title .toggle{font-size:9px;cursor:pointer;color:#4fc3f7}
+.gdv-checkbox{padding:6px 14px 6px 22px;cursor:pointer;display:flex;align-items:center;gap:7px;font-size:11px;transition:all .12s}
+.gdv-checkbox:hover{background:rgba(255,255,255,.05)}
+.gdv-checkbox input[type=checkbox]{accent-color:#4fc3f7;width:13px;height:13px;cursor:pointer}
+.gdv-checkbox .count{font-size:9px;color:#90a4ae;margin-left:auto}
+
+/* FC type tabs */
+.fc-type-section{padding:8px 0;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1)}
+.fc-type-list{list-style:none}
+.fc-type-list li{padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;border-left:3px solid transparent;transition:all .12s}
 .fc-type-list li:hover{background:rgba(255,255,255,.06)}
 .fc-type-list li.active{background:rgba(255,255,255,.1);border-left-color:#4fc3f7;font-weight:700}
-.fc-type-list li .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.fc-type-list li .badge-fc{font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.12);margin-left:auto}
-.sidebar-actions{padding:8px 14px;border-top:1px solid rgba(255,255,255,.1);margin-top:auto}
-.sidebar-footer{padding:8px 14px;font-size:9px;color:rgba(255,255,255,.3);text-align:center}
+.fc-type-list li .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+.sidebar-actions{padding:8px 14px;margin-top:auto;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-footer{padding:8px 14px;font-size:9px;color:rgba(255,255,255,.25);text-align:center}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:#fff;padding:8px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar{background:#fff;padding:8px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:6px}
 .topbar h2{font-size:15px;font-weight:700;color:#1e3a5f}
 .topbar .meta{display:flex;gap:12px;align-items:center;font-size:11px;color:#888}
 .content{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
@@ -43,32 +55,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-warning{background:#ef6c00;color:#fff}
 .btn-sm{padding:5px 10px;font-size:11px}
 .btn-xs{padding:3px 7px;font-size:10px}
-.btn-lg{padding:10px 22px;font-size:14px}
+.btn-lg{padding:10px 24px;font-size:14px}
 
 /* BADGES */
 .badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#e3f2fd;color:#1565c0}
 .badge.green{background:#e8f5e9;color:#2e7d32}
 .badge.orange{background:#fff3e0;color:#ef6c00}
 
-/* GRID */
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-
 /* TABLE */
-.table-wrap{overflow-x:auto;max-height:400px;border:1px solid #e0e0e0;border-radius:6px}
+.table-wrap{overflow-x:auto;max-height:450px;border:1px solid #e0e0e0;border-radius:6px}
 table{width:100%;border-collapse:collapse;font-size:11px}
 thead th{background:#f5f7fa;padding:7px 6px;text-align:left;font-weight:600;position:sticky;top:0;z-index:1;border-bottom:2px solid #e0e0e0;white-space:nowrap}
 td{padding:5px 6px;border-bottom:1px solid #f0f0f0}
 td input,td select{width:100%;border:1px solid #ddd;border-radius:3px;padding:4px 6px;font-size:11px;min-width:50px;font-family:inherit}
-td input:focus,td select:focus{border-color:#4fc3f7;outline:none;box-shadow:0 0 0 2px rgba(79,195,247,.15)}
+td input:focus,td select:focus{border-color:#4fc3f7;outline:none}
 tr:hover td{background:#fafbfc}
 tr.row-du td{background:#e8f5e9}
 tr.row-thieu td{background:#fff3e0}
 tr.row-loai td{background:#ffebee}
-tr.row-section td{background:#e3f2fd!important;font-weight:700;font-size:12px;cursor:pointer}
+tr.row-section td{background:#e3f2fd!important;font-weight:700;cursor:pointer}
 tr.row-subtotal td{background:#f5f5f5;font-weight:700}
 
 /* FORMS */
-textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:10px;font-family:'SF Mono',Monaco,'Cascadia Code',Consolas,monospace;font-size:11px;resize:vertical;line-height:1.6}
+textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:10px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:11px;resize:vertical;line-height:1.6}
 textarea:focus{border-color:#4fc3f7;outline:none}
 select,input[type=text],input[type=number]{padding:6px 10px;border:1px solid #ddd;border-radius:5px;font-size:12px}
 select:focus,input:focus{border-color:#4fc3f7;outline:none}
@@ -79,32 +88,47 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* MISC */
-.info-text{font-size:11px;color:#999;line-height:1.5}
+.info-text{font-size:11px;color:#999}
 .flex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .hidden{display:none!important}
-.section-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:2px;font-weight:600}
-.kpi-row{display:flex;gap:12px;flex-wrap:wrap}
-.kpi-box{flex:1;min-width:100px;background:#f8fafc;border-radius:6px;padding:10px 14px;text-align:center}
-.kpi-box .kpi-val{font-size:22px;font-weight:700;color:#1e3a5f}
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:4px;font-weight:600}
+.kpi-row{display:flex;gap:10px;flex-wrap:wrap}
+.kpi-box{flex:1;min-width:90px;background:#f8fafc;border-radius:6px;padding:10px 12px;text-align:center}
+.kpi-box .kpi-val{font-size:20px;font-weight:700;color:#1e3a5f}
 .kpi-box .kpi-label{font-size:10px;color:#999;margin-top:2px}
 
-/* Collapsible */
-.collapse-toggle{cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px}
-.collapse-toggle .arrow{transition:transform .2s;font-size:10px}
-.collapse-toggle.open .arrow{transform:rotate(90deg)}
+/* Import compact */
+.import-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.import-box{border:1px solid #e0e0e0;border-radius:6px;overflow:hidden}
+.import-box .import-title{padding:6px 10px;background:#f8fafc;font-size:11px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0}
+.import-box textarea{border:none;border-radius:0;height:100px}
+
+/* Pivot tabs */
+.pivot-tabs{display:flex;gap:2px;background:#e8ecf1;border-radius:5px;padding:2px}
+.pivot-tab{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-size:10px;font-weight:600;background:transparent;color:#666}
+.pivot-tab:hover{background:rgba(255,255,255,.6)}
+.pivot-tab.active{background:#fff;color:#1e3a5f;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small>v1.4</small></div>
-  <ul class="fc-type-list" id="fcTypeList"></ul>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v1.5</small></div>
+
+  <!-- FC Type selector -->
+  <div class="fc-type-section">
+    <ul class="fc-type-list" id="fcTypeList"></ul>
+  </div>
+
+  <!-- GĐV by Miền -->
+  <div id="gdvByMien"></div>
+
   <div class="sidebar-actions">
-    <button class="btn btn-success btn-sm" style="width:100%;margin-bottom:4px" onclick="runFC()">▶ Chạy bảng FC</button>
+    <button class="btn btn-success btn-sm" style="width:100%;margin-bottom:4px" onclick="loadData()">📥 Load data</button>
     <button class="btn btn-outline btn-sm" style="width:100%;background:rgba(255,255,255,.08);color:#ccc;border-color:rgba(255,255,255,.15)" onclick="exportFC()">📥 Xuất Excel</button>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v1.4 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v1.5 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
@@ -112,146 +136,132 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
   <div class="topbar">
     <h2 id="currentFCLabel">🌡 FC Ambient</h2>
     <div class="meta">
-      <span>🏪 <b id="metaCH">—</b> CH</span>
-      <span>📋 <b id="metaSKU">—</b> SKU</span>
-      <span>📦 <b id="metaFC">—</b> dòng</span>
+      <span>🏪 <b id="metaCH">—</b></span>
+      <span>📋 <b id="metaSKU">—</b></span>
+      <span>📦 <b id="metaFC">—</b></span>
       <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
     </div>
   </div>
 
   <div class="content" id="mainContent">
 
-    <!-- 1. Import Danh mục FC -->
+    <!-- IMPORT COMPACT -->
     <div class="card">
       <div class="card-header">
-        <h3>1️⃣ Import Danh mục FC</h3>
+        <h3>📥 Import Dữ Liệu</h3>
         <div class="flex-row">
-          <select id="quickGDV" onchange="quickSelectGDV()" style="font-size:11px;width:180px">
-            <option value="">🎯 Chọn nhanh GĐV...</option>
-          </select>
-          <span class="badge orange" id="dmfcCount">0 CH × 0 SKU</span>
+          <label style="font-size:10px">Ngày KD:</label>
+          <input type="number" id="ngayKD" value="30" style="width:50px;text-align:center;padding:3px 5px;font-size:11px">
+          <span class="badge orange" id="importBadge">Chưa có dữ liệu</span>
         </div>
       </div>
-      <div class="card-body">
-        <p class="info-text" style="margin-bottom:6px">Dán Mã CH + Mã SP (tab-separated). Hệ thống tự lookup Storelist &amp; SKU.</p>
-        <div class="grid-2">
-          <textarea id="fcInput" rows="6" placeholder="2797	10007893
+      <div class="card-body" style="padding:8px 14px">
+        <div class="import-grid">
+          <!-- Danh mục -->
+          <div class="import-box">
+            <div class="import-title">
+              🏪 Danh mục FC (Mã CH · Mã SP)
+              <button class="btn btn-xs btn-outline" onclick="$('fcInput').value=''" style="font-size:9px;padding:1px 5px">Clear</button>
+            </div>
+            <textarea id="fcInput" placeholder="2797	10007893
 2924	10007893
 3088	10007893">2797	10007893
 2924	10007893
 3088	10007893</textarea>
-          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding-bottom:4px">
-            <button class="btn btn-success" onclick="importDanhMuc()">📥 Import Danh mục</button>
-            <p class="info-text">→ Tự động lookup Storelist + SKU + Phân nhóm N</p>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Import Sale/Tồn/Chờ giao -->
-    <div class="card">
-      <div class="card-header collapse-toggle open" onclick="toggleSection('saleBody',this)">
-        <h3><span class="arrow">▼</span> 2️⃣ Import Sale · Tồn · Chờ giao</h3>
-        <div class="flex-row">
-          <label style="font-size:11px">Ngày KD:</label>
-          <input type="number" id="ngayKD" value="30" style="width:55px;text-align:center">
-          <span class="badge orange" id="saleCount">Chưa import</span>
-        </div>
-      </div>
-      <div class="card-body" id="saleBody">
-        <p class="info-text" style="margin-bottom:6px">Format: Mã CH&amp;SP · Mã CH · Mã SP · SL Bán · SL Tồn · SL Chờ giao</p>
-        <div class="grid-2">
-          <textarea id="salePaste" rows="6" placeholder="279710007893	2797	10007893	87	444	0"></textarea>
-          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding-bottom:4px">
-            <button class="btn btn-primary" onclick="importSale()">📊 Import Sale</button>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span class="info-text">hoặc</span>
-              <input type="file" id="fileUpload" accept=".csv,.tsv,.txt,.xlsx,.xlsb" onchange="handleFileUpload(this)" style="font-size:10px;max-width:160px">
+          <!-- Sale -->
+          <div class="import-box">
+            <div class="import-title">
+              📊 Sale · Tồn · CG (Mã CH · Mã SP · SL Bán · SL Tồn · SL CG)
+              <div style="display:flex;gap:4px">
+                <input type="file" id="fileUpload" accept=".csv,.tsv,.txt" onchange="handleFileUpload(this)" style="font-size:9px;max-width:100px;display:none">
+                <button class="btn btn-xs btn-outline" onclick="$('#fileUpload').click()" style="font-size:9px;padding:1px 5px">📎 File</button>
+                <button class="btn btn-xs btn-outline" onclick="$('salePaste').value=''" style="font-size:9px;padding:1px 5px">Clear</button>
+              </div>
             </div>
+            <textarea id="salePaste" placeholder="2797	10007893	87	444	0
+2924	10007893	163	360	0
+3088	10007893	494	0	90"></textarea>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. Cấu hình -->
-    <div class="card">
-      <div class="card-header">
-        <h3>3️⃣ Cấu hình RECAP &amp; MOV</h3>
-        <div class="flex-row">
-          <button class="btn btn-primary btn-sm" onclick="runConfig()">⚡ Chạy cấu hình</button>
-          <button class="btn btn-outline btn-sm" onclick="syncRecapFromFC()">🔄 Đồng bộ SKU</button>
-          <button class="btn btn-outline btn-sm" onclick="addRecapRow()">+ Thêm SKU</button>
-          <button class="btn btn-warning btn-sm" onclick="saveConfig()">💾 Lưu cấu hình</button>
-          <span class="badge green" id="configSaved" style="display:none">✅ Đã lưu</span>
+    <!-- RESULTS (shown after Load data) -->
+    <div id="resultsSection" class="hidden" style="display:flex;flex-direction:column;gap:10px">
+
+      <!-- Cấu hình Min -->
+      <div class="card">
+        <div class="card-header">
+          <h3>⚙️ Cấu hình Min &amp; RECAP</h3>
+          <div class="flex-row">
+            <button class="btn btn-primary btn-sm" onclick="runConfig()">⚡ Chạy cấu hình</button>
+            <button class="btn btn-outline btn-sm" onclick="syncRecapFromFC()">🔄 Đồng bộ SKU</button>
+            <button class="btn btn-outline btn-sm" onclick="addRecapRow()">+ SKU</button>
+            <button class="btn btn-warning btn-sm" onclick="saveConfig()">💾 Lưu</button>
+            <span class="badge green" id="configSaved" style="display:none">✅ Đã lưu</span>
+          </div>
         </div>
-      </div>
-      <div class="card-body">
-        <div style="margin-bottom:10px">
-          <p class="section-label">📐 RECAP — Thông số đặt hàng theo SKU</p>
-          <div class="table-wrap" style="max-height:300px">
+        <div class="card-body" style="padding:8px 14px">
+          <div class="table-wrap" style="max-height:250px">
             <table id="recapTable">
               <thead><tr>
-                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>NCC/CTKM</th>
+                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>NCC</th>
                 <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
-                <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock Max</th><th>Cover</th><th>Rank</th><th></th>
+                <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th><th></th>
               </tr></thead>
               <tbody></tbody>
             </table>
           </div>
-        </div>
-        <div>
-          <p class="section-label">🚚 MOV NCC Theo Tỉnh</p>
-          <div class="table-wrap" style="max-height:200px">
-            <table id="movTable">
-              <thead><tr>
-                <th>NCC/CTKM</th><th>%MinMOV</th><th>All Tỉnh</th>
-                <th>TP.Hà Nội</th><th>TP.HCM</th><th>TP.Hải Phòng</th>
-                <th>T.Bắc Ninh</th><th>T.Tuyên Quang</th><th>T.Lạng Sơn</th><th></th>
-              </tr></thead>
-              <tbody></tbody>
-            </table>
+          <div style="margin-top:6px">
+            <p class="section-label">🚚 MOV NCC Theo Tỉnh</p>
+            <div class="table-wrap" style="max-height:150px">
+              <table id="movTable">
+                <thead><tr>
+                  <th>NCC</th><th>%Min</th><th>All Tỉnh</th><th>TP.HN</th><th>TP.HCM</th><th>TP.HP</th><th>T.BN</th><th>T.TQ</th><th>T.LS</th><th></th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button class="btn btn-outline btn-xs" style="margin-top:4px" onclick="addMOVRow()">+ NCC</button>
           </div>
-          <button class="btn btn-outline btn-xs" style="margin-top:6px" onclick="addMOVRow()">+ Thêm NCC</button>
         </div>
       </div>
-    </div>
 
-    <!-- 4. Bảng FC Chi Tiết -->
-    <div class="card">
-      <div class="card-header">
-        <h3>4️⃣ Bảng FC Chi Tiết</h3>
-        <div class="flex-row">
-          <span class="badge green" id="fcTableBadge">0 dòng</span>
-          <button class="btn btn-outline btn-xs" onclick="exportFC()">📥 Xuất</button>
+      <!-- Bảng FC Chi Tiết -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📊 Bảng FC Chi Tiết</h3>
+          <div class="flex-row">
+            <span class="badge green" id="fcTableBadge">0 dòng</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:8px 14px">
+          <!-- KPI -->
+          <div class="kpi-row" style="margin-bottom:8px">
+            <div class="kpi-box"><div class="kpi-val" id="kpiSLFC">—</div><div class="kpi-label">SL FC</div></div>
+            <div class="kpi-box"><div class="kpi-val" id="kpiGTFC">—</div><div class="kpi-label">GT FC</div></div>
+            <div class="kpi-box" style="background:#e8f5e9"><div class="kpi-val" id="kpiDu" style="color:#2e7d32">—</div><div class="kpi-label">Đủ MOV</div></div>
+            <div class="kpi-box" style="background:#fff3e0"><div class="kpi-val" id="kpiThieu" style="color:#ef6c00">—</div><div class="kpi-label">Thiếu MOV</div></div>
+            <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="kpiLoai" style="color:#c62828">—</div><div class="kpi-label">Loại FC</div></div>
+          </div>
+          <!-- Pivot tabs -->
+          <div class="flex-row" style="margin-bottom:6px">
+            <div class="pivot-tabs" id="pivotTabs">
+              <button class="pivot-tab active" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
+              <button class="pivot-tab" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
+              <button class="pivot-tab" onclick="switchPivotView('mch3-sku',this)">📦 MCH3/SKU</button>
+            </div>
+            <input type="text" id="pivotSearch" placeholder="Tìm..." oninput="renderPivot()" style="font-size:11px;width:120px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;margin-left:auto">
+            <span class="info-text" id="pivotSummary"></span>
+          </div>
+          <div class="table-wrap" id="pivotWrap">
+            <p style="padding:30px;color:#999;text-align:center">Bấm 📥 Load data →</p>
+          </div>
         </div>
       </div>
-      <div class="card-body">
-        <div class="kpi-row" style="margin-bottom:10px">
-          <div class="kpi-box"><div class="kpi-val" id="kpiSLFC">—</div><div class="kpi-label">SL FC</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="kpiGTFC">—</div><div class="kpi-label">GT FC</div></div>
-          <div class="kpi-box" style="background:#e8f5e9"><div class="kpi-val" id="kpiDu" style="color:#2e7d32">—</div><div class="kpi-label">Đủ MOV</div></div>
-          <div class="kpi-box" style="background:#fff3e0"><div class="kpi-val" id="kpiThieu" style="color:#ef6c00">—</div><div class="kpi-label">Thiếu MOV</div></div>
-          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="kpiLoai" style="color:#c62828">—</div><div class="kpi-label">Loại FC</div></div>
-        </div>
-        <div class="flex-row" style="margin-bottom:8px">
-          <span style="font-size:11px;font-weight:600">Nhóm:</span>
-          <select id="pivotLevel" onchange="renderPivot()" style="font-size:11px;width:110px">
-            <option value="tinh">Miền/Tỉnh</option><option value="gdv">GĐV</option><option value="qlkv">QLKV</option>
-            <option value="mch3">MCH3</option><option value="ncc">NCC</option><option value="sku">SKU</option>
-          </select>
-          <select id="pivotSub" onchange="renderPivot()" style="font-size:11px;width:100px">
-            <option value="">-- Sub --</option><option value="gdv">Sub: GĐV</option>
-            <option value="qlkv">Sub: QLKV</option><option value="tinh">Sub: Tỉnh</option><option value="mch3">Sub: MCH3</option>
-          </select>
-          <input type="text" id="pivotSearch" placeholder="Tìm..." oninput="renderPivot()" style="font-size:11px;width:110px;padding:4px 8px;border:1px solid #ddd;border-radius:4px">
-          <span class="info-text" id="pivotSummary"></span>
-        </div>
-        <div class="table-wrap" id="pivotWrap">
-          <p style="padding:30px;color:#999;text-align:center">Import Danh mục &amp; Chạy cấu hình →</p>
-        </div>
-      </div>
-    </div>
 
+    </div>
   </div>
 </div>
 
@@ -269,31 +279,76 @@ const FC_TYPES={
 
 const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'164583655',gidSKU:'514849690',gidNhom:'879484655'};
 
-let STATE={currentFC:'ambient',ngayKD:30,storelist:{},skuList:{},nhomN:{},fcTypes:{}};
-Object.keys(FC_TYPES).forEach(k=>{STATE.fcTypes[k]={saleData:{},fcTable:[],recapTable:[],movTable:[],configSaved:false}});
+// ============ STATE ============
+let STATE={
+  currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,
+  storelist:{},skuList:{},nhomN:{},
+  selectedGDVs:new Set(), // multi-select GĐV
+  fcTypes:{}
+};
+Object.keys(FC_TYPES).forEach(k=>{
+  STATE.fcTypes[k]={saleData:{},fcTable:[],recapTable:[],movTable:[],configSaved:false};
+});
 
 function current(){return STATE.fcTypes[STATE.currentFC]}
 function $(id){return document.getElementById(id)}
 function toast(m,t='info'){const e=$('toast');e.textContent=m;e.className='toast '+t;setTimeout(()=>e.classList.add('hidden'),3000)}
 function fmt(n){return n!=null?Number(n).toLocaleString('vi-VN'):'0'}
 
-// SIDEBAR
+// ============ SIDEBAR BUILD ============
 function buildFCSidebar(){
   $('fcTypeList').innerHTML=Object.values(FC_TYPES).map(t=>
     '<li class="'+(t.id===STATE.currentFC?'active':'')+'" onclick="switchFC(\''+t.id+'\')">'+
-    '<span class="dot" style="background:'+t.dot+'"></span>'+t.name+
-    '<span class="badge-fc">'+(STATE.fcTypes[t.id].fcTable.length||0)+'</span></li>').join('');
+    '<span class="dot" style="background:'+t.dot+'"></span>'+t.name+'</li>').join('');
 }
+function buildGDVByMien(){
+  // Group stores by Miền -> GĐV
+  const mienMap={};
+  Object.values(STATE.storelist).forEach(s=>{
+    const mien=s.tinh||'(Khác)';
+    if(!mienMap[mien]) mienMap[mien]={};
+    const gdv=s.gdv||'(Không GĐV)';
+    if(!mienMap[mien][gdv]) mienMap[mien][gdv]=0;
+    mienMap[mien][gdv]++;
+  });
+
+  let h='';
+  for(const [mien,gdvs] of Object.entries(mienMap).sort()){
+    const totalCH=Object.values(gdvs).reduce((a,b)=>a+b,0);
+    h+='<div class="mien-section">';
+    h+='<div class="mien-title">📍 '+mien+' <span class="toggle">'+totalCH+' CH</span></div>';
+    for(const [gdv,count] of Object.entries(gdvs).sort()){
+      const checked=STATE.selectedGDVs.has(gdv);
+      h+='<label class="gdv-checkbox">';
+      h+='<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleGDV(\''+gdv.replace(/'/g,"\\'")+'\',this.checked)">';
+      h+=gdv+'<span class="count">'+count+'</span></label>';
+    }
+    h+='</div>';
+  }
+  $('gdvByMien').innerHTML=h;
+}
+
+function toggleGDV(gdv,on){
+  if(on) STATE.selectedGDVs.add(gdv); else STATE.selectedGDVs.delete(gdv);
+  if(STATE.selectedGDVs.size>0){
+    const chs=Object.entries(STATE.storelist).filter(([,v])=>STATE.selectedGDVs.has(v.gdv));
+    const sku=Object.keys(STATE.skuList)[0]||'10007893';
+    $('fcInput').value=chs.map(([m])=>m+'\t'+sku).join('\n');
+    toast(chs.length+' CH từ '+STATE.selectedGDVs.size+' GĐV','info');
+  }
+}
+
 function switchFC(id){
-  STATE.currentFC=id;buildFCSidebar();$('currentFCLabel').textContent=FC_TYPES[id].name;
-  renderRecapTable();renderMOVTable();
-  const c=current();$('configSaved').style.display=c.configSaved?'inline':'none';
-  if(c.fcTable.length)renderPivot();else $('pivotWrap').innerHTML='<p style="padding:30px;color:#999;text-align:center">Import Danh mục &amp; Chạy cấu hình →</p>';
+  STATE.currentFC=id;buildFCSidebar();
+  $('currentFCLabel').textContent=FC_TYPES[id].name;
+  const c=current();
+  $('configSaved').style.display=c.configSaved?'inline':'none';
+  if(c.fcTable.length){$('resultsSection').classList.remove('hidden');renderAll()}else{$('resultsSection').classList.add('hidden')}
   updateMetaBar();updateKPIs();
   try{localStorage.setItem('fc-current',id)}catch(e){}
 }
 
-// GOOGLE SHEETS
+// ============ GOOGLE SHEETS ============
 async function fetchCSV(sid,gid){
   const u='https://docs.google.com/spreadsheets/d/'+sid+'/gviz/tq?tqx=out:csv&gid='+gid;
   const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text();
@@ -317,59 +372,89 @@ async function loadSharedData(){
     const cn=await fetchCSV(PROD.sheetGoc,PROD.gidNhom);const rn=parseCSV(cn);STATE.nhomN={};
     for(let i=1;i<rn.length;i++){const r=rn[i];if(r.length<3)continue;STATE.nhomN[r[0].trim()+'|'+r[1].trim()]=r[2].trim()}
 
-    updateMetaBar();updateGDVSelect();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
+    buildGDVByMien();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
   }catch(e){console.error(e);$('sheetDot').textContent='⚠️ Offline';$('sheetDot').style.color='#ef6c00'}
 }
+
 function updateMetaBar(){
   $('metaCH').textContent=fmt(Object.keys(STATE.storelist).length);
   $('metaSKU').textContent=fmt(Object.keys(STATE.skuList).length);
   $('metaFC').textContent=fmt(current().fcTable.length);
 }
-function updateGDVSelect(){
-  const gs=new Set();Object.values(STATE.storelist).forEach(v=>{if(v.gdv)gs.add(v.gdv)});
-  $('quickGDV').innerHTML='<option value="">🎯 Chọn nhanh GĐV...</option>'+[...gs].sort().map(g=>'<option value="'+g+'">'+g+'</option>').join('');
-}
-function quickSelectGDV(){
-  const g=$('quickGDV').value;if(!g)return;
-  const chs=Object.entries(STATE.storelist).filter(([,v])=>v.gdv===g);
-  if(!chs.length)return toast('Không có CH','error');
-  const sku=Object.keys(STATE.skuList)[0]||'10007893';
-  $('fcInput').value=chs.map(([m])=>m+'\t'+sku).join('\n');toast(chs.length+' CH của '+g,'info');
-}
 
-// 1. IMPORT DANH MỤC
-function importDanhMuc(){
-  const fc=current();const lines=$('fcInput').value.trim().split('\n');
+// ============ LOAD DATA ============
+function loadData(){
+  const fc=current();STATE.ngayKD=parseInt($('ngayKD').value)||30;
+
+  // 1. Import Danh mục
+  const fcLines=$('fcInput').value.trim().split('\n');
   fc.fcTable=[];fc.recapTable=[];fc.configSaved=false;$('configSaved').style.display='none';
-  lines.forEach(l=>{
+
+  fcLines.forEach(l=>{
     const c=l.split('\t');if(c.length<2)return;const maCH=c[0].trim(),maSP=c[1].trim();
     const st=STATE.storelist[maCH]||{},sk=STATE.skuList[maSP]||{};
     const nhom=STATE.nhomN[maCH+'|'+sk.mch3]||'N6';
     if(!fc.recapTable.find(r=>r.maSP===maSP))fc.recapTable.push({maSP,tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,giaMua:sk.cogs||0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
     fc.fcTable.push({maCHSP:maCH+maSP,maCH,maSP,tinh:st.tinh||'',qlkv:st.qlkv||'',gdv:st.gdv||'',tenCH:st.tenCH||'',tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,cogs:sk.cogs||0,mch2:sk.mch2||'',mch3:sk.mch3||'',nhomN:nhom,nccCTKM:'Chia hàng',min:0,slTon:0,gtTon:0,slBan:0,gtBan:0,slCG:0,gtCG:0,slFC:0,gtFC:0,checkDR:1,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,slFCRound:0,gtFCRound:0,movStatus:'',movNCCtinh:0});
   });
-  fc.fcTable.forEach(r=>{const sd=fc.saleData[r.maCHSP];if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs}});
-  renderRecapTable();renderMOVTable();buildFCSidebar();updateMetaBar();updateKPIs();
+
+  // 2. Import Sale (new format: Mã CH · Mã SP · SL Bán · SL Tồn · SL CG)
+  const saleLines=$('salePaste').value.trim().split('\n');
+  fc.saleData={};
+  saleLines.forEach(l=>{
+    const c=l.split('\t');if(c.length<5)return;
+    const key=c[0].trim()+c[1].trim();
+    fc.saleData[key]={salesQty:parseFloat(c[2])||0,closingQty:parseFloat(c[3])||0,choGiao:parseFloat(c[4])||0};
+  });
+
+  // Apply sale data to FC table
+  fc.fcTable.forEach(r=>{
+    const sd=fc.saleData[r.maCHSP];
+    if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs}
+  });
+
+  // Run config automatically
+  runConfigSilent();
+
+  // Show results
   const chSet=new Set(fc.fcTable.map(r=>r.maCH));
-  $('dmfcCount').textContent=chSet.size+' CH × '+fc.recapTable.length+' SKU';
-  toast('✅ '+fc.fcTable.length+' dòng FC, '+chSet.size+' CH','success');
+  $('importBadge').textContent=chSet.size+' CH × '+fc.recapTable.length+' SKU · '+Object.keys(fc.saleData).length+' dòng Sale';
+  $('importBadge').className='badge green';
+  $('resultsSection').classList.remove('hidden');
+  renderAll();
+  updateMetaBar();
+  toast('✅ Load hoàn tất! '+fc.fcTable.length+' dòng FC','success');
 }
 
-// 2. IMPORT SALE
-function importSale(){
-  const fc=current(),lines=$('salePaste').value.trim().split('\n');
-  fc.saleData={};STATE.ngayKD=parseInt($('ngayKD').value)||30;
-  lines.forEach(l=>{const c=l.split('\t');if(c.length>=5)fc.saleData[c[0].trim()]={salesQty:parseFloat(c[3])||0,closingQty:parseFloat(c[4])||0,choGiao:parseFloat(c[5])||0}});
-  fc.fcTable.forEach(r=>{const sd=fc.saleData[r.maCHSP];if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs}});
-  $('saleCount').textContent=Object.keys(fc.saleData).length+' dòng';
-  toast('✅ '+Object.keys(fc.saleData).length+' dòng Sale','success');
+function runConfigSilent(){
+  const fc=current();if(!fc.fcTable.length)return;
+  const nd=STATE.ngayKD||30,rm={};fc.recapTable.forEach(r=>{rm[r.maSP]=r});
+  fc.fcTable.forEach(r=>{const c=rm[r.maSP]||{};
+    r.block=c.block||1;r.plusStock=c.plusStock||1;r.plusCG=c.plusCG||1;r.lockMax=c.lockMax||2;r.coverDay=c.coverDay||14;r.nccCTKM=c.ncc||'Chia hàng';r.checkDR=1;
+    const J=r.qc||1,Q=r.slTon,AC=r.coverDay,N=c[r.nhomN]||0,O=r.slTon,Z=r.plusCG,S=r.slCG,AA=r.plusStock,AB=r.lockMax;r.min=N;
+    r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Q/nd*AC+N-O*Z-S*AA,AB*N))/J));
+    r.gtFC=r.slFC*r.cogs;r.slFCRound=r.slFC;r.gtFCRound=r.gtFC;
+  });
+  fc.recapTable.forEach(rc=>{['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{const v=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slFC);rc[n]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0})});
+  const ml={};fc.movTable.forEach(m=>{ml[m.ncc]=m});const gs={};
+  fc.fcTable.forEach((r,i)=>{const k=r.maCH+'||'+r.nccCTKM+'||'+r.tinh;if(!gs[k])gs[k]=[];gs[k].push({idx:i,...r})});
+  for(const[,its] of Object.entries(gs)){
+    const nc=its[0].nccCTKM,tn=its[0].tinh,mc=ml[nc];if(!mc)continue;const tg=its.reduce((s,it)=>s+it.gtFC,0),M=mc.tinhMOV?.[tn]||mc.allTinh||0,mM=M*(mc.pctMinMOV||0.7);
+    if(tg>=M){its.forEach(it=>{fc.fcTable[it.idx].movStatus='✅ Đủ MOV';fc.fcTable[it.idx].movNCCtinh=M})}
+    else if(tg>=mM){const sc=M/tg;its.forEach(it=>{const ns=Math.ceil(it.slFC*sc/it.qc)*it.qc;fc.fcTable[it.idx].slFCRound=ns;fc.fcTable[it.idx].gtFCRound=ns*it.cogs;fc.fcTable[it.idx].movStatus='⚠️ Thiếu MOV (×'+sc.toFixed(1)+')';fc.fcTable[it.idx].movNCCtinh=M})}
+    else{its.forEach(it=>{fc.fcTable[it.idx].slFCRound=0;fc.fcTable[it.idx].gtFCRound=0;fc.fcTable[it.idx].movStatus='❌ Loại FC';fc.fcTable[it.idx].movNCCtinh=M})}
+  }
 }
+
+function runConfig(){runConfigSilent();renderRecapTable();toast('⚡ Đã chạy cấu hình!','success')}
+
+// ============ FILE UPLOAD ============
 function handleFileUpload(inp){
   const f=inp.files[0];if(!f)return;
-  const r=new FileReader();r.onload=function(e){$('salePaste').value=e.target.result;toast('✅ File loaded. Bấm Import Sale.','success')};r.readAsText(f);
+  const r=new FileReader();r.onload=function(e){$('salePaste').value=e.target.result;toast('✅ File loaded. Bấm 📥 Load data.','success')};r.readAsText(f);
 }
 
-// 3. CONFIG
+// ============ RECAP TABLE ============
 function renderRecapTable(){
   const fc=current(),tb=document.querySelector('#recapTable tbody');tb.innerHTML='';
   fc.recapTable.forEach((r,i)=>{
@@ -401,7 +486,7 @@ function saveConfig(){
   toast('💾 Đã lưu!','success');
 }
 
-// MOV
+// MOV TABLE
 function addMOVRow(){current().movTable.push({ncc:'',pctMinMOV:0.7,allTinh:0,tinhMOV:{}});renderMOVTable()}
 function renderMOVTable(){
   const fc=current();if(!fc.movTable.length)fc.movTable.push({ncc:'Chia hàng',pctMinMOV:0.7,allTinh:500000,tinhMOV:{'TP. Hà Nội':1000000,'TP. Hải Phòng':500000}});
@@ -417,74 +502,96 @@ function renderMOVTable(){
   });
 }
 
-// RUN
-function runConfig(){
-  const fc=current();if(!fc.fcTable.length)return toast('Import Danh mục trước!','error');
-  const nd=STATE.ngayKD||30,rm={};fc.recapTable.forEach(r=>{rm[r.maSP]=r});
-  fc.fcTable.forEach(r=>{const c=rm[r.maSP]||{};
-    r.block=c.block||1;r.plusStock=c.plusStock||1;r.plusCG=c.plusCG||1;r.lockMax=c.lockMax||2;r.coverDay=c.coverDay||14;r.nccCTKM=c.ncc||'Chia hàng';r.checkDR=1;
-    const J=r.qc||1,Q=r.slTon,AC=r.coverDay,N=c[r.nhomN]||0,O=r.slTon,Z=r.plusCG,S=r.slCG,AA=r.plusStock,AB=r.lockMax;r.min=N;
-    r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Q/nd*AC+N-O*Z-S*AA,AB*N))/J));
-    r.gtFC=r.slFC*r.cogs;r.slFCRound=r.slFC;r.gtFCRound=r.gtFC;
-  });
-  fc.recapTable.forEach(rc=>{['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{const v=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slFC);rc[n]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0})});
-  const ml={};fc.movTable.forEach(m=>{ml[m.ncc]=m});const gs={};
-  fc.fcTable.forEach((r,i)=>{const k=r.maCH+'||'+r.nccCTKM+'||'+r.tinh;if(!gs[k])gs[k]=[];gs[k].push({idx:i,...r})});
-  for(const[,its] of Object.entries(gs)){
-    const nc=its[0].nccCTKM,tn=its[0].tinh,mc=ml[nc];if(!mc)continue;const tg=its.reduce((s,it)=>s+it.gtFC,0),M=mc.tinhMOV?.[tn]||mc.allTinh||0,mM=M*(mc.pctMinMOV||0.7);
-    if(tg>=M){its.forEach(it=>{fc.fcTable[it.idx].movStatus='✅ Đủ MOV';fc.fcTable[it.idx].movNCCtinh=M})}
-    else if(tg>=mM){const sc=M/tg;its.forEach(it=>{const ns=Math.ceil(it.slFC*sc/it.qc)*it.qc;fc.fcTable[it.idx].slFCRound=ns;fc.fcTable[it.idx].gtFCRound=ns*it.cogs;fc.fcTable[it.idx].movStatus='⚠️ Thiếu MOV (×'+sc.toFixed(1)+')';fc.fcTable[it.idx].movNCCtinh=M})}
-    else{its.forEach(it=>{fc.fcTable[it.idx].slFCRound=0;fc.fcTable[it.idx].gtFCRound=0;fc.fcTable[it.idx].movStatus='❌ Loại FC';fc.fcTable[it.idx].movNCCtinh=M})}
-  }
-  renderRecapTable();toast('⚡ Đã chạy cấu hình!','success');
+// ============ PIVOT ============
+function switchPivotView(view,btn){
+  STATE.currentPivot=view;
+  document.querySelectorAll('.pivot-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderPivot();
 }
 
-function runFC(){runConfig();renderPivot();updateKPIs();toast('✅ Bảng FC sẵn sàng!','success')}
-
-// 4. PIVOT + KPIs
 function renderPivot(){
   const fc=current();if(!fc.fcTable.length)return;
-  const lv=$('pivotLevel').value,sb=$('pivotSub').value,sr=($('pivotSearch').value||'').toLowerCase();
-  let d=fc.fcTable;if(sr)d=d.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(sr)>=0);
-  const gs={};
-  d.forEach(r=>{let k=r.tinh||'(Trống)';if(lv==='gdv')k=r.gdv||'(Trống)';else if(lv==='qlkv')k=r.qlkv||'(Trống)';else if(lv==='mch3')k=r.mch3||'(Trống)';else if(lv==='ncc')k=r.nccCTKM||'(Trống)';else if(lv==='sku')k=r.maSP+' - '+r.tenSP;
-    if(!gs[k])gs[k]={items:[],ch:new Set(),slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
-    const g=gs[k];g.items.push(r);g.ch.add(r.maCH);g.slB+=r.slBan;g.gtB+=r.gtBan;g.slT+=r.slTon;g.gtT+=r.gtTon;g.slCG+=r.slCG;g.gtCG+=r.gtCG;g.slFC+=r.slFC;g.gtFC+=r.gtFC;g.slR+=r.slFCRound;g.gtR+=r.gtFCRound;
+  const view=STATE.currentPivot,sr=($('pivotSearch').value||'').toLowerCase();
+  let data=fc.fcTable;if(sr)data=data.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(sr)>=0);
+
+  let level,sub;
+  if(view==='mien-tinh'){level='tinh';sub=null}
+  else if(view==='gdv-qlkv'){level='gdv';sub='qlkv'}
+  else if(view==='mch3-sku'){level='mch3';sub='sku'}
+
+  const grps={};
+  data.forEach(r=>{
+    let k;if(level==='tinh')k=r.tinh||'(Trống)';else if(level==='gdv')k=r.gdv||'(Trống)';else if(level==='mch3')k=r.mch3||'(Trống)';else k='';
+    if(!grps[k])grps[k]={items:[],ch:new Set(),slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
+    const g=grps[k];g.items.push(r);g.ch.add(r.maCH);g.slB+=r.slBan;g.gtB+=r.gtBan;g.slT+=r.slTon;g.gtT+=r.gtTon;g.slCG+=r.slCG;g.gtCG+=r.gtCG;g.slFC+=r.slFC;g.gtFC+=r.gtFC;g.slR+=r.slFCRound;g.gtR+=r.gtFCRound;
   });
-  let h='<table><thead><tr><th>'+$('pivotLevel').selectedOptions[0].text+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th>'+(sb?'<th></th>':'')+'</tr></thead><tbody>';
+
+  const labels={tinh:'🗺 Miền/Tỉnh',gdv:'👤 GĐV',mch3:'📦 MCH3'};
+  let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th>'+(sub?'<th></th>':'')+'</tr></thead><tbody>';
   let gd={ch:0,slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
-  for(const k of Object.keys(gs).sort()){const g=gs[k];
-    h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td><td>'+g.ch.size+'</td>'+'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+fmt(Math.round(g.gtT))+'</td><td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td><td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td><td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'+(sb?'<td>'+g.items.length+' dòng</td>':'')+'</tr>';
-    if(sb){const sg={};g.items.forEach(r=>{let sk=r.gdv||'(Trống)';if(sb==='tinh')sk=r.tinh||'(Trống)';else if(sb==='qlkv')sk=r.qlkv||'(Trống)';else if(sb==='mch3')sk=r.mch3||'(Trống)';if(!sg[sk])sg[sk]=[];sg[sk].push(r)});
-    for(const[sk,its] of Object.entries(sg)){const sF=its.reduce((s,r)=>s+r.slFCRound,0),gF=its.reduce((s,r)=>s+r.gtFCRound,0);h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td><td>'+new Set(its.map(r=>r.maCH)).size+'</td><td colspan="8"></td><td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+its.length+' dòng</td></tr>'}}
+
+  for(const k of Object.keys(grps).sort()){const g=grps[k];
+    h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td><td>'+g.ch.size+'</td>'
+      +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+fmt(Math.round(g.gtT))+'</td>'
+      +'<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>'
+      +'<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>'
+      +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'
+      +(sub?'<td>'+g.items.length+' dòng</td>':'')+'</tr>';
+    if(sub){
+      const sg={};g.items.forEach(r=>{
+        let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else sk='';
+        if(!sg[sk])sg[sk]=[];sg[sk].push(r);
+      });
+      for(const[sk,its]of Object.entries(sg)){
+        const sF=its.reduce((s,r)=>s+r.slFCRound,0),gF=its.reduce((s,r)=>s+r.gtFCRound,0);
+        h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td>'
+          +'<td>'+new Set(its.map(r=>r.maCH)).size+'</td><td colspan="8"></td>'
+          +'<td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+its.length+' dòng</td></tr>';
+      }
+    }
     gd.ch+=g.ch.size;gd.slB+=g.slB;gd.gtB+=g.gtB;gd.slT+=g.slT;gd.gtT+=g.gtT;gd.slCG+=g.slCG;gd.gtCG+=g.gtCG;gd.slFC+=g.slFC;gd.gtFC+=g.gtFC;gd.slR+=g.slR;gd.gtR+=g.gtR;
   }
-  h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+gd.ch+'</td>'+'<td>'+fmt(Math.round(gd.slB))+'</td><td>'+fmt(Math.round(gd.gtB))+'</td><td>'+fmt(Math.round(gd.slT))+'</td><td>'+fmt(Math.round(gd.gtT))+'</td><td>'+fmt(Math.round(gd.slCG))+'</td><td>'+fmt(Math.round(gd.gtCG))+'</td><td><b>'+fmt(Math.round(gd.slFC))+'</b></td><td><b>'+fmt(Math.round(gd.gtFC))+'</b></td><td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td>'+(sb?'<td></td>':'')+'</tr></tbody></table>';
-  $('pivotWrap').innerHTML=h;$('pivotSummary').textContent=Object.keys(gs).length+' nhóm · '+d.length+' dòng';$('fcTableBadge').textContent=fc.fcTable.length+' dòng';
-}
-function togglePivot(row){const k=row.getAttribute('data-k'),ic=row.querySelector('td'),op=ic.textContent.startsWith('▼');ic.textContent=(op?'▶ ':'▼ ')+k;document.querySelectorAll('.sub-row[data-p="'+CSS.escape(k)+'"]').forEach(el=>el.style.display=op?'none':'')}
-function updateKPIs(){
-  const fc=current();let sl=0,gt=0,du=0,th=0,lo=0;
-  fc.fcTable.forEach(r=>{sl+=r.slFCRound;gt+=r.gtFCRound;if(r.movStatus.startsWith('✅'))du++;else if(r.movStatus.startsWith('⚠️'))th++;else if(r.movStatus.startsWith('❌'))lo++});
-  $('kpiSLFC').textContent=fmt(Math.round(sl));$('kpiGTFC').textContent=fmt(Math.round(gt));$('kpiDu').textContent=du;$('kpiThieu').textContent=th;$('kpiLoai').textContent=lo;
+  h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+gd.ch+'</td>'
+    +'<td>'+fmt(Math.round(gd.slB))+'</td><td>'+fmt(Math.round(gd.gtB))+'</td><td>'+fmt(Math.round(gd.slT))+'</td><td>'+fmt(Math.round(gd.gtT))+'</td>'
+    +'<td>'+fmt(Math.round(gd.slCG))+'</td><td>'+fmt(Math.round(gd.gtCG))+'</td>'
+    +'<td><b>'+fmt(Math.round(gd.slFC))+'</b></td><td><b>'+fmt(Math.round(gd.gtFC))+'</b></td>'
+    +'<td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td>'
+    +(sub?'<td></td>':'')+'</tr></tbody></table>';
+  $('pivotWrap').innerHTML=h;
+  $('pivotSummary').textContent=Object.keys(grps).length+' nhóm · '+data.length+' dòng';
+  $('fcTableBadge').textContent=fc.fcTable.length+' dòng';
+  updateKPIs();
 }
 
-// EXPORT
+function togglePivot(row){
+  const k=row.getAttribute('data-k'),ic=row.querySelector('td'),op=ic.textContent.startsWith('▼');
+  ic.textContent=(op?'▶ ':'▼ ')+k;
+  document.querySelectorAll('.sub-row[data-p="'+CSS.escape(k)+'"]').forEach(el=>el.style.display=op?'none':'');
+}
+
+function renderAll(){renderRecapTable();renderMOVTable();renderPivot()}
+
+function updateKPIs(){
+  const fc=current();let sl=0,gt=0,du=0,th=0,lo=0;
+  fc.fcTable.forEach(r=>{sl+=r.slFCRound;gt+=r.gtFCRound;if(r.movStatus&&r.movStatus.startsWith('✅'))du++;else if(r.movStatus&&r.movStatus.startsWith('⚠️'))th++;else if(r.movStatus&&r.movStatus.startsWith('❌'))lo++});
+  $('kpiSLFC').textContent=fmt(Math.round(sl));$('kpiGTFC').textContent=fmt(Math.round(gt));
+  $('kpiDu').textContent=du;$('kpiThieu').textContent=th;$('kpiLoai').textContent=lo;
+}
+
+// ============ EXPORT ============
 function exportFC(){
   const fc=current();if(!fc.fcTable.length)return toast('Chưa có dữ liệu!','error');
   const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC','Min','SL Tồn','GT Tồn','SL Bán','GT Bán','SL CG','GT CG','SL FC','GT FC','Block','+Stock','+CG','Lock','Cover','SL Final','GT Final','MOV'];
   const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus'];
   let tsv='\ufeff'+cols.join('\t')+'\n'+fc.fcTable.map(r=>keys.map(k=>r[k]!=null?r[k]:'').join('\t')).join('\n');
-  const dt=new Date(),a=document.createElement('a');
+  const d=new Date(),a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([tsv],{type:'text/tab-separated-values'}));
-  a.download='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(dt.getMonth()+1).padStart(2,'0')+String(dt.getDate()).padStart(2,'0')+'.tsv';
+  a.download='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.tsv';
   a.click();URL.revokeObjectURL(a.href);toast('✅ Đã xuất!','success');
 }
 
-// COLLAPSE
-function toggleSection(id,tg){const el=$(id);el.classList.toggle('hidden');tg.classList.toggle('open')}
-
-// INIT
+// ============ INIT ============
 async function init(){
   buildFCSidebar();
   try{const s=localStorage.getItem('fc-current');if(s&&FC_TYPES[s]){STATE.currentFC=s;buildFCSidebar()}}catch(e){}
