@@ -87,17 +87,25 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 /* Import 3-col */
 .import-row{display:flex;gap:10px;align-items:stretch}
 .import-col{display:flex;flex-direction:column;gap:4px}
-.import-col.vung{width:200px;flex-shrink:0}
+.import-col.vung{width:260px;flex-shrink:0}
 .import-col.dm{flex:1;min-width:0}
 .import-col.sale{flex:1;min-width:0}
 .import-col .import-title{font-size:10px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;justify-content:space-between}
 .import-col textarea{height:110px}
-.vung-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:110px;overflow-y:auto;padding:4px;border:1px solid #e0e0e0;border-radius:6px;background:#fafbfc}
-.vung-chip{padding:3px 8px;border-radius:10px;font-size:10px;cursor:pointer;border:1px solid #ddd;background:#fff;transition:all .12s;white-space:nowrap}
-.vung-chip:hover{background:#e3f2fd;border-color:#4fc3f7}
-.vung-chip.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-.vung-chip .count{opacity:.6;font-size:9px;margin-left:2px}
-.vung-mien-label{font-size:9px;font-weight:700;color:#999;padding:2px 0;width:100%}
+.vung-tree{max-height:160px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;background:#fafbfc;padding:2px 0;font-size:10px;user-select:none}
+.tree-mien{cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:4px;font-weight:700;color:#1e3a5f;border-bottom:1px solid #f0f0f0}
+.tree-mien:hover{background:#f0f4f8}
+.tree-mien .tree-arrow{font-size:9px;width:12px;text-align:center;transition:transform .15s}
+.tree-mien.open .tree-arrow{transform:rotate(90deg)}
+.tree-gdv{cursor:pointer;padding:3px 8px 3px 20px;display:flex;align-items:center;gap:4px;font-weight:600;color:#555;font-size:10px}
+.tree-gdv:hover{background:#f0f4f8}
+.tree-gdv.open{color:#1e3a5f}
+.tree-gdv .tree-arrow{font-size:9px;width:12px;text-align:center;transition:transform .15s}
+.tree-gdv.open .tree-arrow{transform:rotate(90deg)}
+.tree-tinh{padding:2px 8px 2px 34px;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:9px;color:#777}
+.tree-tinh:hover{background:#e8f0f8}
+.tree-tinh input[type=checkbox]{width:12px;height:12px;accent-color:#4fc3f7;cursor:pointer;flex-shrink:0}
+.tree-tinh.selected{color:#1e3a5f;font-weight:600}
 
 /* Pivot tabs */
 .pivot-tabs{display:flex;gap:2px;background:#e8ecf1;border-radius:5px;padding:2px}
@@ -146,10 +154,11 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <!-- Chọn Vùng -->
           <div class="import-col vung">
             <div class="import-title">📍 Chọn Vùng / GĐV</div>
-            <div class="vung-chips" id="vungChips"></div>
+            <div class="vung-tree" id="vungTree"></div>
             <div style="display:flex;gap:4px;margin-top:4px">
               <button class="btn btn-xs btn-outline" onclick="selectAllGDV()" style="font-size:9px">Tất cả</button>
               <button class="btn btn-xs btn-outline" onclick="clearGDV()" style="font-size:9px">Clear</button>
+              <span class="info-text" id="vungCount" style="margin-left:4px"></span>
             </div>
           </div>
           <!-- Import Danh mục -->
@@ -263,8 +272,8 @@ const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'16
 let STATE={
   currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,
   storelist:{},skuList:{},nhomN:{},
-  selectedGDVs:new Set(),
-  mienGDV:{}, // {mien: [gdv,...]}
+  selectedTinh:new Set(), // selected "gdv|tinh" keys
+  treeData:{}, // {mien: {gdv: {tinh: count}}}
   fcTypes:{}
 };
 Object.keys(FC_TYPES).forEach(k=>{
@@ -291,51 +300,93 @@ function switchFC(id){
   try{localStorage.setItem('fc-current',id)}catch(e){}
 }
 
-// ============ VÙNG CHIPS ============
-function buildVungChips(){
-  const mm={};
-  Object.values(STATE.storelist).forEach(s=>{
-    const m=s.tinh||'(Khác)';
-    if(!mm[m])mm[m]={};
-    const g=s.gdv||'(Không GĐV)';
-    if(!mm[m][g])mm[m][g]=0;
-    mm[m][g]++;
-  });
-  STATE.mienGDV=mm;
+// ============ VÙNG TREE ============
+const MIEN_MAP = (()=>{
+  const bac=['TP. Hà Nội','TP. Hải Phòng','T. Bắc Ninh','T. Thái Nguyên','T. Phú Thọ','T. Hòa Bình','T. Sơn La','T. Điện Biên','T. Lào Cai','T. Yên Bái','T. Tuyên Quang','T. Hà Giang','T. Lạng Sơn','T. Cao Bằng','T. Bắc Kạn','T. Thái Bình','T. Nam Định','T. Hà Nam','T. Ninh Bình','T. Hải Dương','T. Hưng Yên','T. Vĩnh Phúc','T. Quảng Ninh','T. Bắc Giang'];
+  const trung=['T. Thanh Hóa','T. Nghệ An','T. Hà Tĩnh','T. Quảng Bình','T. Quảng Trị','T. Thừa Thiên Huế','TP. Đà Nẵng','T. Quảng Nam','T. Quảng Ngãi','T. Bình Định','T. Phú Yên','T. Khánh Hòa','T. Ninh Thuận','T. Bình Thuận','T. Kon Tum','T. Gia Lai','T. Đắk Lắk','T. Đắk Nông','T. Lâm Đồng'];
+  const nam=['TP. Hồ Chí Minh','T. Bình Dương','T. Bình Phước','T. Tây Ninh','T. Đồng Nai','T. Bà Rịa - Vũng Tàu','T. Long An','T. Tiền Giang','T. Bến Tre','T. Vĩnh Long','T. Trà Vinh','T. Đồng Tháp','T. An Giang','T. Kiên Giang','TP. Cần Thơ','T. Hậu Giang','T. Sóc Trăng','T. Bạc Liêu','T. Cà Mau','T. Ninh Thuận'];
+  const map={};bac.forEach(t=>map[t]='BẮC');trung.forEach(t=>map[t]='TRUNG');nam.forEach(t=>map[t]='NAM');
+  return map;
+})();
 
-  let h='';
-  for(const [mien,gdvs] of Object.entries(mm).sort()){
-    h+='<div class="vung-mien-label">📍 '+mien+'</div>';
-    for(const [gdv,count] of Object.entries(gdvs).sort()){
-      const active=STATE.selectedGDVs.has(gdv);
-      h+='<span class="vung-chip'+(active?' active':'')+'" onclick="toggleGDVChip(\''+gdv.replace(/'/g,"\\'")+'\')" data-gdv="'+gdv.replace(/"/g,'&quot;')+'">'+gdv+'<span class="count">('+count+')</span></span>';
+function getMien(tinh){return MIEN_MAP[tinh]||'KHÁC'}
+
+function buildVungTree(){
+  const tree={};
+  Object.values(STATE.storelist).forEach(s=>{
+    const mien=getMien(s.tinh), gdv=s.gdv||'(Không GĐV)', tinh=s.tinh||'(Khác)';
+    if(!tree[mien]) tree[mien]={};
+    if(!tree[mien][gdv]) tree[mien][gdv]={};
+    if(!tree[mien][gdv][tinh]) tree[mien][gdv][tinh]=0;
+    tree[mien][gdv][tinh]++;
+  });
+  STATE.treeData=tree;
+
+  let h='', totalSelected=0;
+  const mienOrder=['BẮC','TRUNG','NAM','KHÁC'];
+  for(const mien of mienOrder){
+    if(!tree[mien]) continue;
+    const gdvs=tree[mien];
+    let mienTotal=0, mienOpen=true;
+    for(const gdv of Object.keys(gdvs).sort()){
+      for(const tinh of Object.keys(gdvs[gdv])){
+        const k=gdv+'||'+tinh;
+        mienTotal+=gdvs[gdv][tinh];
+        if(STATE.selectedTinh.has(k)) mienOpen=true;
+      }
     }
+    h+='<div class="tree-mien open" onclick="toggleTreeNode(this,\\'mien\\')"><span class="tree-arrow">▼</span>📍 '+mien+' ('+mienTotal+' CH)</div>';
+    h+='<div class="tree-mien-children">';
+    for(const [gdv,tinhs] of Object.entries(gdvs).sort()){
+      let gdvTotal=0;for(const c of Object.values(tinhs)) gdvTotal+=c;
+      h+='<div class="tree-gdv" onclick="toggleTreeNode(this,\\'gdv\\')"><span class="tree-arrow">▶</span>👤 '+gdv+' ('+gdvTotal+')</div>';
+      h+='<div class="tree-gdv-children" style="display:none">';
+      for(const [tinh,count] of Object.entries(tinhs).sort()){
+        const key=gdv+'||'+tinh, checked=STATE.selectedTinh.has(key);
+        if(checked) totalSelected++;
+        h+='<label class="tree-tinh'+(checked?' selected':'')+'"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleTinh(\\''+gdv.replace(/'/g,"\\\\'")+'\\',\\''+tinh.replace(/'/g,"\\\\'")+'\\',this.checked)">'+tinh+' <span style="color:#aaa;font-size:8px">('+count+')</span></label>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
   }
-  $('vungChips').innerHTML=h;
+  $('vungTree').innerHTML=h;
+  $('vungCount').textContent=totalSelected>0?totalSelected+' tỉnh đã chọn':'';
 }
 
-function toggleGDVChip(gdv){
-  if(STATE.selectedGDVs.has(gdv)) STATE.selectedGDVs.delete(gdv);
-  else STATE.selectedGDVs.add(gdv);
-  buildVungChips();
-  fillFCInput();
+function toggleTreeNode(el,level){
+  el.classList.toggle('open');
+  const children=el.nextElementSibling;
+  if(children) children.style.display=el.classList.contains('open')?'':'none';
+}
+
+function toggleTinh(gdv,tinh,on){
+  const key=gdv+'||'+tinh;
+  if(on) STATE.selectedTinh.add(key); else STATE.selectedTinh.delete(key);
+  buildVungTree();
+  fillFCInputFromTinh();
 }
 
 function selectAllGDV(){
-  Object.values(STATE.mienGDV).forEach(gdvs=>Object.keys(gdvs).forEach(g=>STATE.selectedGDVs.add(g)));
-  buildVungChips();fillFCInput();
+  Object.values(STATE.treeData).forEach(gdvs=>{
+    Object.entries(gdvs).forEach(([gdv,tinhs])=>{
+      Object.keys(tinhs).forEach(tinh=>STATE.selectedTinh.add(gdv+'||'+tinh));
+    });
+  });
+  buildVungTree();fillFCInputFromTinh();
 }
 
 function clearGDV(){
-  STATE.selectedGDVs.clear();
-  buildVungChips();
+  STATE.selectedTinh.clear();
+  buildVungTree();
   $('fcInput').value='';
 }
 
-function fillFCInput(){
-  if(STATE.selectedGDVs.size===0) return;
+function fillFCInputFromTinh(){
+  if(STATE.selectedTinh.size===0) return;
   const sku=Object.keys(STATE.skuList)[0]||'10007893';
-  const chs=Object.entries(STATE.storelist).filter(([,v])=>STATE.selectedGDVs.has(v.gdv));
+  const chs=Object.entries(STATE.storelist).filter(([,v])=>STATE.selectedTinh.has(v.gdv+'||'+v.tinh));
+  if(chs.length===0){$('fcInput').value='';return}
   $('fcInput').value=chs.map(([m])=>m+'\t'+sku).join('\n');
 }
 
@@ -363,7 +414,7 @@ async function loadSharedData(){
     const cn=await fetchCSV(PROD.sheetGoc,PROD.gidNhom);const rn=parseCSV(cn);STATE.nhomN={};
     for(let i=1;i<rn.length;i++){const r=rn[i];if(r.length<3)continue;STATE.nhomN[r[0].trim()+'|'+r[1].trim()]=r[2].trim()}
 
-    buildVungChips();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
+    buildVungTree();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
   }catch(e){console.error(e);$('sheetDot').textContent='⚠️ Offline';$('sheetDot').style.color='#ef6c00'}
 }
 
