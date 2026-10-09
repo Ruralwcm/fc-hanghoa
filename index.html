@@ -343,17 +343,22 @@ function buildVungTree(){
   for(const mien of mienOrder){
     if(!tree[mien]) continue;
     const gdvs=tree[mien];
-    let mienTotal=0;
+    let mienTotal=0, mienAllChecked=true;
     for(const gdv of Object.keys(gdvs).sort()){
       for(const tinh of Object.keys(gdvs[gdv])){
         mienTotal+=gdvs[gdv][tinh];
+        if(!STATE.selectedTinh.has(gdv+'||'+tinh)) mienAllChecked=false;
       }
     }
-    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span>📍 '+mien+' ('+mienTotal+' CH)</div>';
+    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span><input type="checkbox" '+(mienAllChecked&&mienTotal>0?'checked':'')+' data-mien="'+mien+'" style="width:12px;height:12px;accent-color:#4fc3f7;margin-right:2px">📍 '+mien+' ('+mienTotal+' CH)</div>';
     h+='<div class="tree-mien-children">';
     for(const [gdv,tinhs] of Object.entries(gdvs).sort()){
-      let gdvTotal=0;for(const c of Object.values(tinhs)) gdvTotal+=c;
-      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span>👤 '+gdv+' ('+gdvTotal+')</div>';
+      let gdvTotal=0, gdvAllChecked=true;
+      for(const c of Object.values(tinhs)) gdvTotal+=c;
+      for(const tinh of Object.keys(tinhs)){
+        if(!STATE.selectedTinh.has(gdv+'||'+tinh)) gdvAllChecked=false;
+      }
+      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span><input type="checkbox" '+(gdvAllChecked&&gdvTotal>0?'checked':'')+' data-gdv="'+gdv+'" style="width:12px;height:12px;accent-color:#4fc3f7;margin-right:2px">👤 '+gdv+' ('+gdvTotal+')</div>';
       h+='<div class="tree-gdv-children" style="display:none">';
       for(const [tinh,count] of Object.entries(tinhs).sort()){
         const key=gdv+'||'+tinh, checked=STATE.selectedTinh.has(key);
@@ -367,22 +372,60 @@ function buildVungTree(){
   $('vungTree').innerHTML=h;
   $('vungCount').textContent=totalSelected>0?totalSelected+' tỉnh đã chọn':'';
 
-  // Attach event listeners after DOM is built
+  // Attach event listeners
   $('vungTree').querySelectorAll('.tree-mien, .tree-gdv').forEach(el=>{
     el.addEventListener('click',function(e){
+      if(e.target.tagName==='INPUT') return; // don't toggle on checkbox click
       e.stopPropagation();
       this.classList.toggle('open');
       const children=this.nextElementSibling;
       if(children) children.style.display=this.classList.contains('open')?'':'none';
     });
   });
+
+  // Miền checkbox → toggle all GĐV/tỉnh under it
+  $('vungTree').querySelectorAll('.tree-mien input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(e){
+      e.stopPropagation();
+      const mien=this.getAttribute('data-mien');
+      const gdvs=STATE.treeData[mien]||{};
+      if(this.checked){
+        Object.entries(gdvs).forEach(([gdv,tinhs])=>{
+          Object.keys(tinhs).forEach(tinh=>STATE.selectedTinh.add(gdv+'||'+tinh));
+        });
+      } else {
+        Object.entries(gdvs).forEach(([gdv,tinhs])=>{
+          Object.keys(tinhs).forEach(tinh=>STATE.selectedTinh.delete(gdv+'||'+tinh));
+        });
+      }
+      buildVungTree(); fillFCInputFromTinh();
+    });
+  });
+
+  // GĐV checkbox → toggle all tỉnh under it
+  $('vungTree').querySelectorAll('.tree-gdv input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(e){
+      e.stopPropagation();
+      const gdv=this.getAttribute('data-gdv');
+      // Find all miens containing this GĐV
+      Object.values(STATE.treeData).forEach(gdvs=>{
+        const tinhs=gdvs[gdv];
+        if(tinhs){
+          if(this.checked) Object.keys(tinhs).forEach(t=>STATE.selectedTinh.add(gdv+'||'+t));
+          else Object.keys(tinhs).forEach(t=>STATE.selectedTinh.delete(gdv+'||'+t));
+        }
+      });
+      buildVungTree(); fillFCInputFromTinh();
+    });
+  });
+
+  // Tỉnh checkbox
   $('vungTree').querySelectorAll('.tree-tinh input[type=checkbox]').forEach(cb=>{
     cb.addEventListener('change',function(){
       const gdv=this.getAttribute('data-gdv'), tinh=this.getAttribute('data-tinh');
       const key=gdv+'||'+tinh;
       if(this.checked) STATE.selectedTinh.add(key); else STATE.selectedTinh.delete(key);
-      buildVungTree();
-      fillFCInputFromTinh();
+      buildVungTree(); fillFCInputFromTinh();
     });
   });
 }function toggleTreeNode(el,level){
