@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v2.4</title>
+<title>FC Hàng Hóa — v2.5</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -122,18 +122,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.4</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.5</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v2.4 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v2.5 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v2.4">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v2.5">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -217,6 +217,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <table id="recapTable">
               <thead><tr>
                 <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>NCC</th>
+                <th colspan="8" id="recapRefCols">📊 Sale Ref (N1–N8) <button class="btn btn-xs btn-outline" onclick="toggleSaleRef()" style="font-size:8px;padding:1px 4px;margin-left:4px" id="saleRefBtn">Hiện</button></th>
                 <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
                 <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th><th></th>
               </tr></thead>
@@ -284,7 +285,7 @@ const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'16
 
 // STATE
 let STATE={
-  currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,
+  currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,showSaleRef:false,
   storelist:{},skuList:{},nhomN:{},
   selectedTinh:new Set(), // selected "gdv|tinh" keys
   treeData:{}, // {mien: {gdv: {tinh: count}}}
@@ -648,7 +649,15 @@ function runConfigSilent(){
     r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Q/nd*AC+N-O*Z-S*AA,AB*N))/J));
     r.gtFC=r.slFC*r.cogs;r.slFCRound=r.slFC;r.gtFCRound=r.gtFC;
   });
-  fc.recapTable.forEach(rc=>{['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{const v=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slFC);rc[n]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0})});
+  fc.recapTable.forEach(rc=>{
+    rc._saleRef={};
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{
+      const vals=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slBan);
+      rc._saleRef[n]=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+      const vfc=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slFC);
+      rc[n]=vfc.length?Math.round(vfc.reduce((a,b)=>a+b,0)/vfc.length):0;
+    });
+  });
   const ml={};fc.movTable.forEach(m=>{ml[m.ncc]=m});const gs={};
   fc.fcTable.forEach((r,i)=>{const k=r.maCH+'||'+r.nccCTKM+'||'+r.tinh;if(!gs[k])gs[k]=[];gs[k].push({idx:i,...r})});
   for(const[,its] of Object.entries(gs)){
@@ -662,25 +671,43 @@ function runConfig(){runConfigSilent();renderRecapTable();toast('⚡ Đã chạy
 
 function renderRecapTable(){
   const fc=current(),tb=document.querySelector('#recapTable tbody');tb.innerHTML='';
+  const showRef=STATE.showSaleRef||false;
   fc.recapTable.forEach((r,i)=>{
+    const refVals=r._saleRef||{};
     let h='<tr>';
-    h+='<td>'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td>';
+    // Mã SP + NCC: fixed (read-only text)
+    h+='<td style="font-weight:600">'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td>';
     h+='<td><input value="'+r.qc+'" size="3" onchange="current().recapTable['+i+'].qc=parseInt(this.value)||1"></td>';
     h+='<td><input value="'+r.giaMua+'" size="8" onchange="current().recapTable['+i+'].giaMua=parseFloat(this.value)||0"></td>';
     h+='<td><input value="'+(r.giaThuong||0)+'" size="8" onchange="current().recapTable['+i+'].giaThuong=parseFloat(this.value)||0"></td>';
     h+='<td><input value="'+(r.giaKM||0)+'" size="8" onchange="current().recapTable['+i+'].giaKM=parseFloat(this.value)||0"></td>';
-    h+='<td><input value="'+r.ncc+'" size="10" onchange="current().recapTable['+i+'].ncc=this.value"></td>';
+    h+='<td style="color:#555;font-size:10px">'+r.ncc+'</td>';
+    // Sale Ref columns (toggle)
+    if(showRef){
+      ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td style="font-size:9px;color:#999;text-align:center">'+(refVals[n]||'-')+'</td>');
+    }
+    // Editable N1-N8
     ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td><input value="'+(r[n]||0)+'" size="4" onchange="current().recapTable['+i+'].'+n+'=parseInt(this.value)||0"></td>');
-    h+='<td><input value="'+r.block+'" size="3" onchange="current().recapTable['+i+'].block=parseInt(this.value)||1"></td>';
-    h+='<td><input value="'+r.plusStock+'" size="3" onchange="current().recapTable['+i+'].plusStock=parseInt(this.value)||1"></td>';
-    h+='<td><input value="'+r.plusCG+'" size="3" onchange="current().recapTable['+i+'].plusCG=parseInt(this.value)||1"></td>';
+    // Block, +Stock, +CG: checkboxes
+    h+='<td style="text-align:center"><input type="checkbox" '+(r.block?'checked':'')+' onchange="current().recapTable['+i+'].block=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
+    h+='<td style="text-align:center"><input type="checkbox" '+(r.plusStock?'checked':'')+' onchange="current().recapTable['+i+'].plusStock=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
+    h+='<td style="text-align:center"><input type="checkbox" '+(r.plusCG?'checked':'')+' onchange="current().recapTable['+i+'].plusCG=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
     h+='<td><input value="'+r.lockMax+'" size="3" onchange="current().recapTable['+i+'].lockMax=parseInt(this.value)||2"></td>';
     h+='<td><input value="'+r.coverDay+'" size="3" onchange="current().recapTable['+i+'].coverDay=parseInt(this.value)||14"></td>';
     h+='<td><input value="'+r.rank+'" size="3" onchange="current().recapTable['+i+'].rank=parseInt(this.value)||1"></td>';
     h+='<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="current().recapTable.splice('+i+',1);renderRecapTable()">×</button></td></tr>';
     tb.innerHTML+=h;
   });
+  // Update Sale Ref button text
+  $('saleRefBtn').textContent=showRef?'Ẩn':'Hiện';
+  // Hide/show ref columns
+  $('recapRefCols').style.display=showRef?'':'none';
 }
+function toggleSaleRef(){
+  STATE.showSaleRef=!STATE.showSaleRef;
+  renderRecapTable();
+}
+
 function addRecapRow(){current().recapTable.push({maSP:'',tenSP:'',dvt:'',qc:1,giaMua:0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});renderRecapTable()}
 function syncRecapFromFC(){
   const fc=current(),s=new Set();
@@ -791,6 +818,7 @@ async function init(){
   await loadSharedData();
   $('currentFCLabel').textContent=FC_TYPES[STATE.currentFC].name;
   renderMOVTable();renderRecapTable();updateMetaBar();
+  $('recapRefCols').style.display='none';
   if(current().configSaved)$('configSaved').style.display='inline';
   // Default RECAP from template (Temp_SKUs_FC)
   Object.values(STATE.fcTypes).forEach(fc=>{
