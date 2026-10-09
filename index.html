@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v2.3</title>
+<title>FC Hàng Hóa — v2.4</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -122,18 +122,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.3</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.4</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v2.3 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v2.4 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v2.3">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v2.4">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -166,14 +166,17 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <span class="info-text" id="vungCount" style="margin-left:4px"></span>
             </div>
           </div>
-          <!-- Import Danh mục -->
+          <!-- Template SKU (thay thế Danh mục FC) -->
           <div class="import-col dm">
-            <div class="import-title">🏪 Danh mục FC <span style="font-weight:400;color:#999">(Mã CH · Mã SP)</span></div>
-            <textarea id="fcInput"></textarea>
-            <div style="display:flex;gap:4px;align-items:center;margin-top:3px">
+            <div class="import-title">📋 Template SKU <span style="font-weight:400;color:#999">(Khai báo danh mục)</span></div>
+            <textarea id="tmplPaste" rows="3" placeholder="Format: Mã SP · Tên SP · ĐVT · QC · Giá mua · Giá thường · Giá KM · NCC
+10007893	HẢO HẢO Mì tôm chua cay 75g	G1	30	3580	43000	64900	Chia hàng" style="height:110px;font-size:10px"></textarea>
+            <div class="flex-row" style="margin-top:4px;gap:4px">
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
-              <span class="info-text">.xlsx .xlsb .csv</span>
+              <button class="btn btn-xs btn-outline" onclick="verifyTemplate()" style="font-size:9px;padding:3px 8px">🔍 Verify</button>
+              <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px;padding:3px 8px">✅ Import vào RECAP</button>
+              <span class="info-text" id="tmplVerifyResult"></span>
             </div>
           </div>
           <!-- Import Sale -->
@@ -189,22 +192,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <textarea id="salePaste"></textarea>
           </div>
         </div>
-        <!-- Template upload row -->
-        <div style="border-top:1px solid #f0f0f0;padding:6px 0 0;margin-top:6px">
-          <div class="flex-row" style="justify-content:space-between">
-            <span style="font-size:10px;font-weight:600;color:#1e3a5f">📋 Template SKU — Upload &amp; Verify</span>
-            <button class="btn btn-xs btn-outline" onclick="toggleTemplate()" id="tmplToggleBtn" style="font-size:9px;padding:2px 7px">+ Mở</button>
-          </div>
-          <div id="tmplSection" class="hidden" style="margin-top:4px">
-            <textarea id="tmplPaste" rows="3" placeholder="Format: Mã SP · Tên SP · ĐVT · QC · Giá mua · Giá thường · Giá KM · NCC
-10007893	HẢO HẢO Mì tôm chua cay 75g	G1	30	3580	43000	64900	Chia hàng" style="height:55px;font-size:10px"></textarea>
-            <div class="flex-row" style="margin-top:4px;gap:4px">
-              <button class="btn btn-xs btn-primary" onclick="verifyTemplate()" style="font-size:9px">🔍 Verify</button>
-              <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px">✅ Import vào RECAP</button>
-              <span class="info-text" id="tmplVerifyResult"></span>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
 
@@ -466,21 +454,8 @@ function clearGDV(){
   $('fcInput').value='';
 }
 
-function fillFCInputFromTinh(){
-  if(STATE.selectedTinh.size===0) return;
-  const sku=Object.keys(STATE.skuList)[0]||'10007893';
-  const chs=Object.entries(STATE.storelist).filter(([,v])=>STATE.selectedTinh.has(v.gdv+'||'+v.tinh));
-  if(chs.length===0){$('fcInput').value='';return}
-  $('fcInput').value=chs.map(([m])=>m+'\t'+sku).join('\n');
-}
 
 // ============ TEMPLATE UPLOAD & VERIFY ============
-function toggleTemplate(){
-  const sec=$('tmplSection'), btn=$('tmplToggleBtn');
-  sec.classList.toggle('hidden');
-  btn.textContent=sec.classList.contains('hidden')?'+ Mở':'− Đóng';
-}
-
 function verifyTemplate(){
   const lines=$('tmplPaste').value.trim().split('\n');
   if(!lines[0]) return toast('Chưa có dữ liệu!','error');
@@ -500,6 +475,22 @@ function verifyTemplate(){
     $('tmplImportBtn').classList.remove('hidden');
     toast('✅ Verify OK — '+ok+' SKU sẵn sàng import','success');
   }
+}
+
+function importTemplateSilent(){
+  const fc=current();
+  const lines=$('tmplPaste').value.trim().split('\n');
+  let count=0;
+  lines.forEach(l=>{
+    const c=l.split('\t');if(c.length<5)return;
+    const maSP=c[0].trim();
+    const existing=fc.recapTable.findIndex(r=>r.maSP===maSP);
+    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,ncc:c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1};
+    if(existing>=0) fc.recapTable[existing]=row;
+    else fc.recapTable.push(row);
+    count++;
+  });
+  return count;
 }
 
 function importTemplate(){
@@ -560,17 +551,31 @@ function updateMetaBar(){
 function loadData(){
   const fc=current();STATE.ngayKD=parseInt($('ngayKD').value)||30;
 
-  // Import Danh mục
-  const fcLines=$('fcInput').value.trim().split('\n');
-  if(!fcLines[0]) return toast('Nhập Danh mục FC trước!','error');
-  fc.fcTable=[];fc.recapTable=[];fc.configSaved=false;$('configSaved').style.display='none';
+  // First, import Template SKUs into RECAP
+  importTemplateSilent();
 
-  fcLines.forEach(l=>{
-    const c=l.split('\t');if(c.length<2)return;const maCH=c[0].trim(),maSP=c[1].trim();
-    const st=STATE.storelist[maCH]||{},sk=STATE.skuList[maSP]||{};
-    const nhom=STATE.nhomN[maCH+'|'+sk.mch3]||'N6';
-    if(!fc.recapTable.find(r=>r.maSP===maSP))fc.recapTable.push({maSP,tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,giaMua:sk.cogs||0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
-    fc.fcTable.push({maCHSP:maCH+maSP,maCH,maSP,tinh:st.tinh||'',qlkv:st.qlkv||'',gdv:st.gdv||'',tenCH:st.tenCH||'',tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,cogs:sk.cogs||0,mch2:sk.mch2||'',mch3:sk.mch3||'',nhomN:nhom,nccCTKM:'Chia hàng',min:0,slTon:0,gtTon:0,slBan:0,gtBan:0,slCG:0,gtCG:0,slFC:0,gtFC:0,checkDR:1,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,slFCRound:0,gtFCRound:0,movStatus:'',movNCCtinh:0});
+  // Then, get SKUs from RECAP and combine with selected Vùng stores
+  if(!fc.recapTable.length) return toast('Chưa có SKU trong RECAP! Import Template trước.','error');
+  
+  // Get stores from Vùng selection, or all stores if nothing selected
+  let stores;
+  if(STATE.selectedTinh.size>0){
+    stores=Object.entries(STATE.storelist).filter(([,v])=>STATE.selectedTinh.has(v.gdv+'||'+v.tinh));
+  } else {
+    stores=Object.entries(STATE.storelist);
+  }
+  if(!stores.length) return toast('Không có cửa hàng nào!','error');
+
+  fc.fcTable=[];fc.configSaved=false;$('configSaved').style.display='none';
+
+  // Cross-join stores × SKUs from RECAP
+  stores.forEach(([maCH,st])=>{
+    fc.recapTable.forEach(rcap=>{
+      if(!rcap.maSP) return;
+      const sk=STATE.skuList[rcap.maSP]||{};
+      const nhom=STATE.nhomN[maCH+'|'+sk.mch3]||'N6';
+      fc.fcTable.push({maCHSP:maCH+rcap.maSP,maCH,maSP:rcap.maSP,tinh:st.tinh||'',qlkv:st.qlkv||'',gdv:st.gdv||'',tenCH:st.tenCH||'',tenSP:rcap.tenSP||sk.tenSP||'',dvt:rcap.dvt||'G1',qc:rcap.qc||1,cogs:rcap.giaMua||sk.cogs||0,mch2:sk.mch2||'',mch3:sk.mch3||'',nhomN:nhom,nccCTKM:rcap.ncc||'Chia hàng',min:0,slTon:0,gtTon:0,slBan:0,gtBan:0,slCG:0,gtCG:0,slFC:0,gtFC:0,checkDR:1,block:rcap.block||1,plusStock:rcap.plusStock||1,plusCG:rcap.plusCG||1,lockMax:rcap.lockMax||2,coverDay:rcap.coverDay||14,slFCRound:0,gtFCRound:0,movStatus:'',movNCCtinh:0});
+    });
   });
 
   // Import Sale (format: Mã CH · Mã SP · SL Bán · SL Tồn · SL CG)
@@ -794,7 +799,7 @@ async function init(){
   // Default FC input placeholder
   if(Object.keys(STATE.skuList).length>0){
     const sku=Object.keys(STATE.skuList)[0];
-    $('fcInput').placeholder='2797\t'+sku+'\n2924\t'+sku+'\n3088\t'+sku;
+    $('tmplPaste').value='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\tChia hàng';
     $('salePaste').placeholder='2797\t'+sku+'\t87\t444\t0\n2924\t'+sku+'\t163\t360\t0\n3088\t'+sku+'\t494\t0\t90';
   }
 }
