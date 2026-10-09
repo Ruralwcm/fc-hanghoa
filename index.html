@@ -163,8 +163,12 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           </div>
           <!-- Import Danh mục -->
           <div class="import-col dm">
-            <div class="import-title">🏪 Danh mục FC <span style="font-weight:400;color:#999">(Mã CH · Mã SP)</span></div>
+            <div class="import-title">🏪 Danh mục FC <span style="font-weight:400;color:#999">(Mã CH · Mã SP)</span>
+                <button class="btn btn-xs btn-outline" onclick="$('tmplPaste').classList.toggle('hidden')" style="font-size:8px;padding:1px 5px">📋 Template</button></div>
             <textarea id="fcInput"></textarea>
+            <textarea id="tmplPaste" class="hidden" rows="2" placeholder="Template SKU: Mã SP · Tên SP · ĐVT · QC · Giá mua · Giá thường · Giá KM · NCC
+10007893	HẢO HẢO Mì tôm chua cay 75g	G1	30	3580	43000	64900	Chia hàng" style="height:50px;margin-top:2px;font-size:9px"></textarea>
+            <button id="tmplBtn" class="btn btn-xs btn-primary hidden" onclick="importTemplate()" style="font-size:8px;padding:1px 5px;margin-top:2px">📥 Import vào RECAP</button>
           </div>
           <!-- Import Sale -->
           <div class="import-col sale">
@@ -389,6 +393,35 @@ function fillFCInputFromTinh(){
   if(chs.length===0){$('fcInput').value='';return}
   $('fcInput').value=chs.map(([m])=>m+'\t'+sku).join('\n');
 }
+
+// ============ TEMPLATE IMPORT ============
+function importTemplate(){
+  const fc=current();
+  const lines=$('tmplPaste').value.trim().split('\n');
+  let count=0;
+  lines.forEach(l=>{
+    const c=l.split('\t');if(c.length<5)return;
+    // Format: Mã SP · Tên SP · ĐVT · QC · Giá mua · Giá thường · Giá KM · NCC
+    const maSP=c[0].trim();
+    const existing=fc.recapTable.findIndex(r=>r.maSP===maSP);
+    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,ncc:c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1};
+    if(existing>=0) fc.recapTable[existing]=row;
+    else fc.recapTable.push(row);
+    count++;
+  });
+  renderRecapTable();
+  $('tmplPaste').classList.add('hidden');$('tmplBtn').classList.add('hidden');
+  $('resultsSection').classList.remove('hidden');
+  toast('✅ Import '+count+' SKU từ Template vào RECAP!','success');
+}
+
+// Show/hide template button when tmplPaste visibility changes
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs=new MutationObserver(()=>{
+    $('tmplBtn').classList.toggle('hidden',$('tmplPaste').classList.contains('hidden'));
+  });
+  obs.observe($('tmplPaste'),{attributes:true,attributeFilter:['class']});
+});
 
 // ============ GOOGLE SHEETS ============
 async function fetchCSV(sid,gid){
@@ -623,6 +656,10 @@ async function init(){
   $('currentFCLabel').textContent=FC_TYPES[STATE.currentFC].name;
   renderMOVTable();renderRecapTable();updateMetaBar();
   if(current().configSaved)$('configSaved').style.display='inline';
+  // Default RECAP from template (Temp_SKUs_FC)
+  Object.values(STATE.fcTypes).forEach(fc=>{
+    if(!fc.recapTable.length) fc.recapTable.push({maSP:'10007893',tenSP:'HẢO HẢO Mì tôm chua cay 75g',dvt:'G1',qc:30,giaMua:3580,giaThuong:43000,giaKM:64900,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
+  });
   // Default FC input placeholder
   if(Object.keys(STATE.skuList).length>0){
     const sku=Object.keys(STATE.skuList)[0];
