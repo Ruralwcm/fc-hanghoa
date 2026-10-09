@@ -113,6 +113,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 .pivot-tab:hover{background:rgba(255,255,255,.6)}
 .pivot-tab.active{background:#fff;color:#1e3a5f;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -163,7 +164,11 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           </div>
           <!-- Import Danh mục -->
           <div class="import-col dm">
-            <div class="import-title">🏪 Danh mục FC <span style="font-weight:400;color:#999">(Mã CH · Mã SP)</span></div>
+            <div class="import-title">🏪 Danh mục FC <span style="font-weight:400;color:#999">(Mã CH · Mã SP)</span>
+                <div style="display:flex;gap:3px">
+                  <button class="btn btn-xs btn-outline" onclick="$('#dmFileUpload').click()" style="font-size:8px;padding:1px 5px">📎 Excel</button>
+                  <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
+                </div></div>
             <textarea id="fcInput"></textarea>
           </div>
           <!-- Import Sale -->
@@ -586,6 +591,38 @@ function loadData(){
 }
 
 // ============ FILE UPLOAD ============
+// ============ DANH MỤC FC FILE UPLOAD ============
+function handleDMFileUpload(inp){
+  const f=inp.files[0];if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  if(ext==='csv'||ext==='tsv'||ext==='txt'){
+    reader.onload=function(e){$('fcInput').value=e.target.result;toast('✅ File đã load vào Danh mục FC','success')};
+    reader.readAsText(f);
+  } else if(ext==='xlsx'||ext==='xlsb'){
+    reader.onload=function(e){
+      try{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const data=XLSX.utils.sheet_to_json(ws,{header:1});
+        // Extract first 2 columns (Mã CH, Mã SP), skip header
+        let lines=[];
+        for(let i=0;i<data.length;i++){
+          const r=data[i];
+          if(r&&r.length>=2&&r[0]&&r[1]){
+            // Skip header row if it looks like a header
+            if(i===0&&(String(r[0]).includes('Mã')||String(r[0]).includes('CH')||String(r[0]).includes('Store'))) continue;
+            lines.push(String(r[0]).trim()+'	'+String(r[1]).trim());
+          }
+        }
+        $('fcInput').value=lines.join('\n');
+        toast('✅ Import '+lines.length+' dòng từ Excel vào Danh mục FC','success');
+      }catch(err){toast('❌ Lỗi đọc Excel: '+err.message,'error')}
+    };
+    reader.readAsArrayBuffer(f);
+  }
+}
+
 function handleFileUpload(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=function(e){$('salePaste').value=e.target.result;toast('✅ File loaded','success')};r.readAsText(f);
