@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Hàng Hóa — v1.3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:#1e3a5f;color:#fff;padding:14px 0;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar .logo{padding:0 14px;font-size:15px;font-weight:700;margin-bottom:12px}
+.sidebar .logo span{color:#4fc3f7}
+.step-list{list-style:none}
+.step-list li{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;border-left:3px solid transparent;transition:all .15s}
+.step-list li:hover{background:rgba(255,255,255,.08)}
+.step-list li.active{background:rgba(255,255,255,.12);border-left-color:#4fc3f7;font-weight:600}
+.step-list li .num{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.step-list li.active .num{background:#4fc3f7;color:#1e3a5f}
+.step-list li.done .num{background:#66bb6a;color:#fff}
+.sidebar-divider{margin:8px 14px;border-top:1px solid rgba(255,255,255,.1);padding-top:8px}
+.sidebar-footer{margin-top:auto;padding:10px 14px;font-size:10px;color:rgba(255,255,255,.35)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{background:#fff;padding:10px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header h1{font-size:17px;font-weight:700;color:#1e3a5f}
+
+/* FC TYPE TABS */
+.fc-tabs{display:flex;gap:2px;background:#e8ecf1;border-radius:6px;padding:2px}
+.fc-tab{padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;background:transparent;color:#666;transition:all .15s;white-space:nowrap}
+.fc-tab:hover{background:rgba(255,255,255,.6);color:#1e3a5f}
+.fc-tab.active{background:#fff;color:#1e3a5f;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.fc-tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px}
+
+.btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:#1e3a5f;color:#fff}.btn-primary:hover{background:#2a4f7f}
+.btn-success{background:#2e7d32;color:#fff}.btn-success:hover{background:#388e3c}
+.btn-outline{background:#fff;color:#1e3a5f;border:1px solid #1e3a5f}.btn-outline:hover{background:#f5f5f5}
+.btn-warning{background:#ef6c00;color:#fff}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px}
+
+.content{flex:1;padding:12px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h3{font-size:13px;font-weight:600;margin-bottom:8px;color:#1e3a5f;display:flex;align-items:center;gap:6px}
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#e3f2fd;color:#1565c0}
+.badge.green{background:#e8f5e9;color:#2e7d32}
+.badge.orange{background:#fff3e0;color:#ef6c00}
+.badge.red{background:#ffebee;color:#c62828}
+
+.table-wrap{overflow-x:auto;max-height:450px;border:1px solid #e0e0e0;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:#f5f7fa;padding:6px 5px;text-align:left;font-weight:600;position:sticky;top:0;z-index:1;border-bottom:2px solid #e0e0e0;white-space:nowrap}
+td{padding:4px 5px;border-bottom:1px solid #f0f0f0}
+td input,td select{width:100%;border:1px solid #ddd;border-radius:3px;padding:3px 5px;font-size:11px;min-width:50px}
+td input:focus,td select:focus{border-color:#4fc3f7;outline:none}
+tr:hover td{background:#fafbfc}
+tr.row-du td{background:#e8f5e9}
+tr.row-thieu td{background:#fff3e0}
+tr.row-loai td{background:#ffebee}
+tr.row-section td{background:#e3f2fd!important;font-weight:700;font-size:12px;cursor:pointer}
+tr.row-subtotal td{background:#f5f5f5;font-weight:600}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}
+.filter-bar select,.filter-bar input{padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:11px}
+
+.status-bar{background:#fff;padding:7px 14px;border-top:1px solid #e0e0e0;display:flex;gap:14px;font-size:11px;color:#666;flex-shrink:0}
+.status-bar b{color:#1e3a5f}
+
+.hidden{display:none!important}
+.step-panel{display:none}
+.step-panel.active{display:flex;flex-direction:column;gap:10px}
+
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:6px;color:#fff;font-size:12px;font-weight:500;z-index:999;animation:slideUp .3s ease}
+.toast.success{background:#2e7d32}.toast.error{background:#c62828}.toast.info{background:#1565c0}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+textarea{width:100%;border:1px solid #ddd;border-radius:4px;padding:8px;font-family:monospace;font-size:11px;resize:vertical}
+.info-text{font-size:11px;color:#999}
+.setting-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.setting-row label{width:100px;font-size:11px;font-weight:500;flex-shrink:0}
+.setting-row input{flex:1;padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px}
+
+.loading{text-align:center;padding:30px;color:#999}
+.loading::after{content:'...';animation:dots 1.5s steps(4,end) infinite}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">📦 FC <span>Hàng Hóa</span><br><small style="font-weight:400;color:#90a4ae">v1.3 — Multi-Type</small></div>
+  <ul class="step-list" id="stepList">
+    <li class="active" data-step="1" onclick="switchStep(1)"><span class="num">1</span> Khai báo gốc</li>
+    <li data-step="2" onclick="switchStep(2)"><span class="num">2</span> Sale - Tồn - Chờ giao</li>
+    <li data-step="3" onclick="switchStep(3)"><span class="num">3</span> Chọn CH + SKU + Min</li>
+    <li data-step="4" onclick="switchStep(4)"><span class="num">4</span> RECAP</li>
+  </ul>
+  <div class="sidebar-divider">
+    <button class="btn btn-success" style="width:100%" onclick="runFC()">▶ CHẠY FC</button>
+  </div>
+  <div style="padding:4px 14px">
+    <button class="btn btn-outline btn-sm" style="width:100%;margin-top:4px;background:rgba(255,255,255,.08);color:#ccc;border-color:rgba(255,255,255,.15)" onclick="exportFC()">📥 Xuất Excel</button>
+  </div>
+  <div class="sidebar-footer">FC Hàng Hóa v1.3 · MsT ✨</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header" style="flex-wrap:wrap;gap:8px">
+    <h1>📦 FC Hàng Hóa</h1>
+    <div class="fc-tabs" id="fcTabs">
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span style="font-size:10px;color:#888" id="sheetStatus">⚙️</span>
+      <button class="btn btn-outline btn-sm" onclick="resetAll()">🔄 Reset</button>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+
+    <!-- STEP 1: Shared -->
+    <div class="step-panel active" id="step1">
+      <div class="card" id="cardSettings" style="display:none">
+        <h3>⚙️ Cấu hình Sheets <span class="badge green">Auto-load từ GitHub Pages</span></h3>
+        <div class="grid-2">
+          <div>
+            <div class="setting-row"><label>Sheet Gốc ID:</label><input id="cfgSheetGoc" onchange="saveSettings()"></div>
+            <div class="setting-row"><label>Storelist Gid:</label><input id="cfgGidStore" onchange="saveSettings()"></div>
+            <div class="setting-row"><label>SKU Gid:</label><input id="cfgGidSKU" onchange="saveSettings()"></div>
+            <div class="setting-row"><label>Phân nhóm Gid:</label><input id="cfgGidNhom" onchange="saveSettings()"></div>
+          </div>
+          <div>
+            <div class="setting-row"><label>Sheet Sale ID:</label><input id="cfgSheetSale" placeholder="(tạm thời nhập tay)" onchange="saveSettings()"></div>
+            <div class="setting-row"><label>Sale Gid:</label><input id="cfgGidSale" onchange="saveSettings()"></div>
+            <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="loadSharedData()">📥 LOAD từ Sheets</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>🏪 Storelist <span class="badge" id="storeCount">0 CH</span></h3>
+          <div class="table-wrap" style="max-height:200px">
+            <table id="storePreview"><thead><tr><th>Mã CH</th><th>Tên CH</th><th>Tỉnh</th><th>QLKV</th><th>GĐV</th></tr></thead><tbody><tr><td colspan="5" style="color:#999;text-align:center">Đang load...</td></tr></tbody></table>
+          </div>
+          <div style="margin-top:6px;display:flex;gap:4px">
+            <button class="btn btn-primary btn-xs" onclick="loadSharedData()">🔄 Load lại</button>
+            <button class="btn btn-outline btn-xs" onclick="$('storePaste').classList.toggle('hidden')">📋 Paste</button>
+          </div>
+          <textarea id="storePaste" rows="2" class="hidden" placeholder="2797&#9;WM+ Chợ Sủi&#9;Hà Nội&#9;Gia Lâm&#9;Hương&#9;Tạ Quốc Huy"></textarea>
+        </div>
+        <div class="card">
+          <h3>📋 Danh mục SKU <span class="badge" id="skuCount">0 SKU</span></h3>
+          <div class="table-wrap" style="max-height:200px">
+            <table id="skuPreview"><thead><tr><th>Article</th><th>Tên SP</th><th>ĐVT</th><th>MCH3</th><th>COGS</th></tr></thead><tbody><tr><td colspan="5" style="color:#999;text-align:center">Đang load...</td></tr></tbody></table>
+          </div>
+          <textarea id="skuPaste" rows="2" class="hidden" placeholder="10007893&#9;HẢO HẢO Mì tôm chua cay 75g&#9;G1&#9;30&#9;TPCN&#9;Thực phẩm khô&#9;3580"></textarea>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔢 Phân nhóm N (N1–N8) <span class="badge" id="nhomCount">0 mapping</span></h3>
+        <textarea id="nhomPaste" rows="2" class="hidden" placeholder="2797&#9;Thực phẩm khô&#9;N8"></textarea>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-primary btn-xs" onclick="loadSharedData()">🔄 Load từ Sheets</button>
+          <button class="btn btn-outline btn-xs" onclick="$('nhomPaste').classList.toggle('hidden')">📋 Paste</button>
+          <button class="btn btn-outline btn-xs" onclick="parseNhomN()">Parse</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Sale (manual for now) -->
+    <div class="step-panel" id="step2">
+      <div class="card">
+        <h3>📊 SALE · TỒN · CHỜ GIAO <span class="badge orange">Nhập tay</span></h3>
+        <p class="info-text" style="margin-bottom:8px">Dữ liệu 30 ngày. Format: Mã CH&SP · Mã CH · Mã SP · SL Bán · SL Tồn · SL Chờ giao</p>
+        <div class="grid-2">
+          <div>
+            <textarea id="salePaste" rows="6" placeholder="279710007893&#9;2797&#9;10007893&#9;87&#9;444&#9;0"></textarea>
+            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+              <button class="btn btn-primary btn-sm" onclick="parseSaleData()">📥 Parse dữ liệu</button>
+              <label style="font-size:11px">Ngày KD:</label>
+              <input type="number" id="ngayKD" value="30" style="width:50px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px">
+              <span class="info-text" id="saleStat">0 dòng</span>
+            </div>
+          </div>
+          <div style="background:#f8fafc;border-radius:8px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+            <p style="font-size:13px;font-weight:600">📎 Hoặc upload file</p>
+            <input type="file" id="fileUpload" accept=".xlsx,.xlsb,.csv,.tsv,.txt" onchange="handleFileUpload(this)" style="font-size:11px">
+            <p class="info-text">.csv .tsv .txt .xlsx</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 FC_Table Preview <span class="badge" id="fcTableBadge">0 dòng</span></h3>
+        <div class="table-wrap" id="fcTableWrap">
+          <p style="padding:30px;color:#999;text-align:center">Tạo bảng FC ở Bước 3 →</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Per-FC Config -->
+    <div class="step-panel" id="step3">
+      <div class="card">
+        <h3>📝 Chọn Cửa hàng × SKU</h3>
+        <p class="info-text">Dán Mã CH + Mã SP. Hệ thống tự lookup Storelist & SKU.</p>
+        <div class="grid-2">
+          <textarea id="fcInput" rows="10">2797	10007893
+2924	10007893
+3088	10007893
+3089	10007893
+3131	10007893
+3132	10007893
+3277	10007893
+3290	10007893
+3275	10007893
+3324	10007893</textarea>
+          <div style="display:flex;flex-direction:column;gap:6px;justify-content:center">
+            <button class="btn btn-primary" onclick="createFCTable()">🔨 Tạo bảng FC</button>
+            <p class="info-text" id="fcRowStat">0 dòng FC</p>
+            <select id="quickGDV" onchange="quickSelectGDV()" style="padding:4px;font-size:11px;border:1px solid #ddd;border-radius:4px;margin-top:6px">
+              <option value="">-- Chọn nhanh GĐV --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECAP Config -->
+      <div class="card">
+        <h3>📐 Cấu hình RECAP theo SKU <span class="badge" id="recapBadge">Block · Stock · CG · Lock · Cover · Rank</span></h3>
+        <div class="table-wrap" id="recapTableWrap">
+          <table id="recapTable"><thead><tr>
+            <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th>
+            <th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>NCC/CTKM</th>
+            <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
+            <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock Max</th><th>Cover</th><th>Rank</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn btn-outline btn-xs" onclick="addRecapRow()">+ Thêm SKU</button>
+          <button class="btn btn-outline btn-xs" onclick="syncRecapFromFC()">🔄 Đồng bộ từ FC Table</button>
+        </div>
+      </div>
+
+      <!-- MOV Config -->
+      <div class="card">
+        <h3>🚚 MOV NCC Theo Tỉnh <span class="badge orange">Cấu hình theo loại FC</span></h3>
+        <div class="table-wrap" id="movTableWrap">
+          <table id="movTable"><thead><tr>
+            <th>NCC/CTKM</th><th>%MinMOV</th><th>All Tỉnh</th>
+            <th>TP.Hà Nội</th><th>TP.HCM</th><th>TP.Hải Phòng</th>
+            <th>T.Bắc Ninh</th><th>T.Tuyên Quang</th><th>T.Lạng Sơn</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+        <button class="btn btn-outline btn-xs" style="margin-top:6px" onclick="addMOVRow()">+ Thêm NCC</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: RECAP Pivot -->
+    <div class="step-panel" id="step4">
+      <div class="card">
+        <h3>📊 RECAP — Kết quả FC <span class="badge green" id="pivotBadge">Pivot View</span></h3>
+        <div class="filter-bar">
+          <span style="font-size:11px;font-weight:600">Nhóm theo:</span>
+          <select id="pivotLevel" onchange="renderPivot()" style="width:120px">
+            <option value="tinh">Miền/Tỉnh</option>
+            <option value="gdv">GĐV</option>
+            <option value="qlkv">QLKV</option>
+            <option value="mch3">MCH3</option>
+            <option value="ncc">NCC/CTKM</option>
+            <option value="sku">SKU</option>
+          </select>
+          <select id="pivotSub" onchange="renderPivot()" style="width:110px">
+            <option value="">-- Sub --</option>
+            <option value="gdv">Sub: GĐV</option>
+            <option value="qlkv">Sub: QLKV</option>
+            <option value="tinh">Sub: Tỉnh</option>
+            <option value="mch3">Sub: MCH3</option>
+          </select>
+          <input type="text" id="pivotSearch" placeholder="Tìm..." oninput="renderPivot()" style="width:100px;padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:11px">
+          <span class="info-text" id="pivotSummary"></span>
+        </div>
+        <div class="table-wrap" id="pivotWrap">
+          <p style="padding:30px;color:#999;text-align:center">Chạy FC để xem RECAP →</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>🟢 <b id="appStatus">Đang load dữ liệu...</b></span>
+    <span>🏪 <b id="statCH">—</b> CH</span>
+    <span>📋 <b id="statSKU">—</b> SKU</span>
+    <span>📦 <b id="statFC">—</b> FC</span>
+    <span>📊 <b id="statPivot">—</b></span>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ============ CONSTANTS ============
+const FC_TYPES = {
+  ambient:  { id:'ambient',  name:'🌡 FC Ambient',     color:'#ef6c00', dot:'#ef6c00' },
+  dongmat:  { id:'dongmat',  name:'❄️ FC Đông/Mát',    color:'#1565c0', dot:'#1565c0' },
+  traicay:  { id:'traicay',  name:'🍎 FC Trái Cây',    color:'#c62828', dot:'#c62828' },
+  rau:      { id:'rau',      name:'🥬 FC Rau',          color:'#2e7d32', dot:'#2e7d32' },
+  are:      { id:'are',      name:'🏗 FC Dự án ARE',    color:'#6a1b9a', dot:'#6a1b9a' }
+};
+
+// Hardcoded Sheet IDs for production (GitHub Pages auto-load)
+const PROD_SHEET_GOC = '1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk';
+const PROD_GID_STORE = '164583655';
+const PROD_GID_SKU = '514849690';
+const PROD_GID_NHOM = '879484655';
+
+// ============ APP STATE ============
+let STATE = {
+  currentFC: 'ambient',
+  step: 1,
+  ngayKD: 30,
+  // Shared data
+  storelist: {},   // maCH -> {tenCH,tinh,huyen,qlkv,gdv}
+  skuList: {},     // article -> {tenSP,dvt,qc,mch2,mch3,cogs}
+  nhomN: {},       // "maCH|mch3" -> "N1"..."N8"
+  // Per-FC data
+  fcTypes: {}
+};
+
+// Initialize FC types
+Object.keys(FC_TYPES).forEach(k => {
+  STATE.fcTypes[k] = {
+    saleData: {},      // "maCHSP" -> {salesQty,closingQty,choGiao}
+    fcTable: [],       // the main FC calculation rows
+    recapTable: [],    // per-SKU config
+    movTable: [],      // MOV per NCC/tỉnh
+  };
+});
+
+// ============ HELPERS ============
+function $(id){return document.getElementById(id)}
+function toast(m,t='info'){const e=$('toast');e.textContent=m;e.className='toast '+t;setTimeout(()=>e.classList.add('hidden'),3000)}
+function setStatus(s){$('appStatus').textContent=s}
+function fmt(n){return n?Number(n).toLocaleString('vi-VN'):'0'}
+function currentFC(){return STATE.fcTypes[STATE.currentFC]}
+
+function switchStep(n){
+  STATE.step=n;
+  document.querySelectorAll('.step-list li').forEach(el=>el.classList.remove('active'));
+  document.querySelector('[data-step="'+n+'"]').classList.add('active');
+  document.querySelectorAll('.step-panel').forEach(el=>el.classList.remove('active'));
+  $('step'+n).classList.add('active');
+}
+
+// ============ FC TYPE TABS ============
+function buildFCTabs(){
+  const tabs=$('fcTabs');
+  tabs.innerHTML=Object.values(FC_TYPES).map(t=>
+    '<button class="fc-tab'+(t.id===STATE.currentFC?' active':'')+'" onclick="switchFC(\''+t.id+'\')" style="'+(t.id===STATE.currentFC?'border-bottom:2px solid '+t.color:'')+'">'+
+    '<span class="dot" style="background:'+t.dot+'"></span>'+t.name+
+    '</button>'
+  ).join('');
+}
+
+function switchFC(fcId){
+  STATE.currentFC=fcId;
+  buildFCTabs();
+  // Refresh step content
+  if(STATE.step===2) renderFCTable();
+  if(STATE.step===3){ renderRecapTable(); renderMOVTable(); }
+  if(STATE.step===4) renderPivot();
+  updateStatusBar();
+  // Save to localStorage
+  try{localStorage.setItem('fc-currentFC',fcId)}catch(e){}
+}
+
+// ============ GOOGLE SHEETS ============
+async function fetchSheetCSV(sheetId, gid){
+  const url='https://docs.google.com/spreadsheets/d/'+sheetId+'/gviz/tq?tqx=out:csv&gid='+gid;
+  const resp=await fetch(url);
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  return await resp.text();
+}
+
+function parseCSV(csv){
+  const rows=[], lines=csv.split('\n');
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const cols=[], cur=[];
+    let inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ;continue}
+      if(ch===','&&!inQ){cols.push(cur.join('').trim());cur.length=0;continue}
+      cur.push(ch);
+    }
+    cols.push(cur.join('').trim());
+    rows.push(cols);
+  }
+  return rows;
+}
+
+async function loadSharedData(silent){
+  const sid=PROD_SHEET_GOC;
+  if(!silent) setStatus('Đang load dữ liệu từ Google Sheets...');
+
+  // Load Storelist
+  try{
+    const csv=await fetchSheetCSV(sid, PROD_GID_STORE);
+    const rows=parseCSV(csv);
+    STATE.storelist={};
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i]; if(r.length<9) continue;
+      // A=Mã SAP, B=Tên CH, F=Tỉnh, H=QLKV, I=GĐV
+      STATE.storelist[r[0].trim()]={tenCH:r[1]||'',tinh:r[5]||'',huyen:r[6]||'',qlkv:r[7]||'',gdv:r[8]||''};
+    }
+    const n=Object.keys(STATE.storelist).length;
+    $('storeCount').textContent=n+' CH';
+    $('statCH').textContent=fmt(n);
+    renderStorePreview();
+    updateGDVSelect();
+  }catch(e){console.error('Storelist load error:',e);if(!silent)toast('❌ Lỗi load Storelist: '+e.message,'error')}
+
+  // Load SKU
+  try{
+    const csv=await fetchSheetCSV(sid, PROD_GID_SKU);
+    const rows=parseCSV(csv);
+    STATE.skuList={};
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i]; if(r.length<7) continue;
+      // A=Article, B=Tên SKU, C=ĐVT, D=MCH2, E=MCH3, G=COGS
+      STATE.skuList[r[0].trim()]={tenSP:r[1]||'',dvt:r[2]||'G1',qc:1,mch2:r[3]||'',mch3:r[4]||'',cogs:parseFloat(r[6])||0};
+    }
+    const n=Object.keys(STATE.skuList).length;
+    $('skuCount').textContent=n+' SKU';
+    $('statSKU').textContent=fmt(n);
+    renderSKUPreview();
+  }catch(e){console.error('SKU load error:',e);if(!silent)toast('❌ Lỗi load SKU: '+e.message,'error')}
+
+  // Load Phân nhóm N
+  try{
+    const csv=await fetchSheetCSV(sid, PROD_GID_NHOM);
+    const rows=parseCSV(csv);
+    STATE.nhomN={};
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i]; if(r.length<3) continue;
+      // A=Mã SAP, B=MCH3, C=Nhóm N
+      STATE.nhomN[r[0].trim()+'|'+r[1].trim()]=r[2].trim();
+    }
+    $('nhomCount').textContent=Object.keys(STATE.nhomN).length+' mapping';
+  }catch(e){console.error('NhomN load error:',e);if(!silent)toast('❌ Lỗi load Phân nhóm: '+e.message,'error')}
+
+  updateStatusBar();
+  $('sheetStatus').textContent='🟢 Live';
+  $('sheetStatus').style.color='#2e7d32';
+  if(!silent){setStatus('✅ Sẵn sàng');toast('✅ Dữ liệu đã load từ Google Sheets','success')}
+}
+
+function renderStorePreview(){
+  const entries=Object.entries(STATE.storelist).slice(0,50);
+  let h=entries.map(([k,v])=>'<tr><td>'+k+'</td><td>'+v.tenCH+'</td><td>'+v.tinh+'</td><td>'+v.qlkv+'</td><td>'+v.gdv+'</td></tr>').join('');
+  const n=Object.keys(STATE.storelist).length;
+  if(n>50) h+='<tr><td colspan="5" style="color:#999">... và '+(n-50)+' CH nữa</td></tr>';
+  document.querySelector('#storePreview tbody').innerHTML=h||'<tr><td colspan="5" style="color:#999">Chưa có dữ liệu</td></tr>';
+}
+
+function renderSKUPreview(){
+  const entries=Object.entries(STATE.skuList).slice(0,30);
+  let h=entries.map(([k,v])=>'<tr><td>'+k+'</td><td>'+v.tenSP+'</td><td>'+v.dvt+'</td><td>'+v.mch3+'</td><td>'+fmt(v.cogs)+'</td></tr>').join('');
+  const n=Object.keys(STATE.skuList).length;
+  if(n>30) h+='<tr><td colspan="5" style="color:#999">... và '+(n-30)+' SKU nữa</td></tr>';
+  document.querySelector('#skuPreview tbody').innerHTML=h||'<tr><td colspan="5" style="color:#999">Chưa có dữ liệu</td></tr>';
+}
+
+function updateGDVSelect(){
+  const gdvs=new Set();
+  Object.values(STATE.storelist).forEach(v=>{if(v.gdv) gdvs.add(v.gdv)});
+  $('quickGDV').innerHTML='<option value="">-- Chọn nhanh GĐV --</option>'+[...gdvs].sort().map(g=>'<option value="'+g+'">'+g+'</option>').join('');
+}
+
+function quickSelectGDV(){
+  const gdv=$('quickGDV').value; if(!gdv) return;
+  const chs=Object.entries(STATE.storelist).filter(([,v])=>v.gdv===gdv);
+  if(!chs.length) return toast('Không có CH cho GĐV '+gdv,'error');
+  const sku=Object.keys(STATE.skuList)[0]||'10007893';
+  $('fcInput').value=chs.map(([ma])=>ma+'\t'+sku).join('\n');
+  toast('✅ '+chs.length+' CH của '+gdv,'info');
+}
+
+// ============ STEP 2: SALE DATA ============
+function parseSaleData(){
+  const fc=currentFC();
+  const lines=$('salePaste').value.trim().split('\n');
+  fc.saleData={}; STATE.ngayKD=parseInt($('ngayKD').value)||30;
+  lines.forEach(l=>{
+    const c=l.split('\t'); if(c.length<5) return;
+    fc.saleData[c[0].trim()]={salesQty:parseFloat(c[3])||0,closingQty:parseFloat(c[4])||0,choGiao:parseFloat(c[5])||0};
+  });
+  applySaleToFCTable();
+  $('saleStat').textContent=Object.keys(fc.saleData).length+' dòng';
+  if(fc.fcTable.length) renderFCTable();
+  updateStatusBar();
+  toast('✅ '+Object.keys(fc.saleData).length+' dòng Sale','success');
+}
+
+function applySaleToFCTable(){
+  const fc=currentFC();
+  fc.fcTable.forEach(r=>{
+    const sd=fc.saleData[r.maCHSP];
+    if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs}
+  });
+}
+
+function handleFileUpload(input){
+  const f=input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    $('salePaste').value=e.target.result;
+    toast('✅ File đã load. Bấm "Parse dữ liệu" để xử lý.','success');
+  };
+  reader.readAsText(f);
+}
+
+// ============ STEP 3: FC TABLE ============
+function createFCTable(){
+  const fc=currentFC();
+  const lines=$('fcInput').value.trim().split('\n');
+  fc.fcTable=[];
+  lines.forEach(l=>{
+    const c=l.split('\t'); if(c.length<2) return;
+    const maCH=c[0].trim(), maSP=c[1].trim();
+    const st=STATE.storelist[maCH]||{}, sk=STATE.skuList[maSP]||{};
+    const nhomKey=maCH+'|'+sk.mch3, nhom=STATE.nhomN[nhomKey]||'N6';
+
+    // Auto-add to RECAP if not exists
+    if(!fc.recapTable.find(r=>r.maSP===maSP)){
+      fc.recapTable.push({maSP,tenSP:sk.tenSP||'',dvt:sk.dvt||'G1',qc:sk.qc||1,giaMua:sk.cogs||0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
+    }
+
+    fc.fcTable.push({
+      maCHSP:maCH+maSP, maCH, maSP,
+      tinh:st.tinh||'', qlkv:st.qlkv||'', gdv:st.gdv||'',
+      tenCH:st.tenCH||'', tenSP:sk.tenSP||'', dvt:sk.dvt||'G1', qc:sk.qc||1, cogs:sk.cogs||0,
+      mch2:sk.mch2||'', mch3:sk.mch3||'', nhomN:nhom, nccCTKM:'Chia hàng',
+      min:0, slTon:0, gtTon:0, slBan:0, gtBan:0, slCG:0, gtCG:0,
+      slFC:0, gtFC:0, checkDR:1, block:1, plusStock:1, plusCG:1, lockMax:2, coverDay:14,
+      slFCRound:0, gtFCRound:0, movStatus:'', movNCCtinh:0,
+    });
+  });
+
+  applySaleToFCTable();
+  renderFCTable(); renderRecapTable(); renderMOVTable();
+  $('fcRowStat').textContent=fc.fcTable.length+' dòng FC';
+  $('fcTableBadge').textContent=fc.fcTable.length+' dòng';
+  switchStep(2);
+  updateStatusBar();
+  toast('✅ '+fc.fcTable.length+' dòng FC — Chuyển sang bước 2 để nhập Sale','success');
+}
+
+function renderFCTable(){
+  const fc=currentFC();
+  if(!fc.fcTable.length){$('fcTableWrap').innerHTML='<p style="padding:30px;color:#999;text-align:center">Tạo bảng FC ở Bước 3 →</p>';return}
+  const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC','Min','SL Tồn','GT Tồn','SL Bán','GT Bán','SL CG','GT CG','SL FC','GT FC','Block','+Stock','+CG','Lock','Cover','SL FC Final','GT FC Final','MOV'];
+  const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus'];
+  let h='<table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
+  fc.fcTable.forEach(r=>{
+    let cls=r.movStatus&&r.movStatus.startsWith('✅')?'row-du':r.movStatus&&r.movStatus.startsWith('⚠️')?'row-thieu':r.movStatus&&r.movStatus.startsWith('❌')?'row-loai':'';
+    h+='<tr class="'+cls+'">'+keys.map(k=>{let v=r[k]!==undefined?r[k]:'';if(typeof v==='number')v=Math.round(v*100)/100;return'<td>'+v+'</td>'}).join('')+'</tr>';
+  });
+  h+='</tbody></table>';
+  $('fcTableWrap').innerHTML=h;
+  $('fcTableBadge').textContent=fc.fcTable.length+' dòng';
+  $('statFC').textContent=fmt(fc.fcTable.length);
+}
+
+// ============ RECAP TABLE ============
+function renderRecapTable(){
+  const fc=currentFC();
+  const tbody=document.querySelector('#recapTable tbody'); tbody.innerHTML='';
+  fc.recapTable.forEach((r,i)=>{
+    let row='<tr>';
+    row+='<td>'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td><td>'+r.qc+'</td>';
+    row+='<td><input value="'+r.giaMua+'" size="8" onchange="currentFC().recapTable['+i+'].giaMua=parseFloat(this.value)||0"></td>';
+    row+='<td><input value="'+r.giaThuong+'" size="8" onchange="currentFC().recapTable['+i+'].giaThuong=parseFloat(this.value)||0"></td>';
+    row+='<td><input value="'+r.giaKM+'" size="8" onchange="currentFC().recapTable['+i+'].giaKM=parseFloat(this.value)||0"></td>';
+    row+='<td><input value="'+r.ncc+'" size="10" onchange="currentFC().recapTable['+i+'].ncc=this.value"></td>';
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{row+='<td><input value="'+(r[n]||0)+'" size="5" onchange="currentFC().recapTable['+i+'].'+n+'=parseInt(this.value)||0"></td>'});
+    row+='<td><input value="'+r.block+'" size="3" onchange="currentFC().recapTable['+i+'].block=parseInt(this.value)||1"></td>';
+    row+='<td><input value="'+r.plusStock+'" size="3" onchange="currentFC().recapTable['+i+'].plusStock=parseInt(this.value)||1"></td>';
+    row+='<td><input value="'+r.plusCG+'" size="3" onchange="currentFC().recapTable['+i+'].plusCG=parseInt(this.value)||1"></td>';
+    row+='<td><input value="'+r.lockMax+'" size="3" onchange="currentFC().recapTable['+i+'].lockMax=parseInt(this.value)||2"></td>';
+    row+='<td><input value="'+r.coverDay+'" size="3" onchange="currentFC().recapTable['+i+'].coverDay=parseInt(this.value)||14"></td>';
+    row+='<td><input value="'+r.rank+'" size="3" onchange="currentFC().recapTable['+i+'].rank=parseInt(this.value)||1"></td>';
+    row+='</tr>'; tbody.innerHTML+=row;
+  });
+  $('recapBadge').textContent=fc.recapTable.length+' SKU cấu hình';
+}
+
+function addRecapRow(){
+  currentFC().recapTable.push({maSP:'',tenSP:'',dvt:'',qc:1,giaMua:0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
+  renderRecapTable();
+}
+
+function syncRecapFromFC(){
+  const fc=currentFC();
+  const seen=new Set();
+  fc.fcTable.forEach(r=>{
+    if(!seen.has(r.maSP)){
+      seen.add(r.maSP);
+      if(!fc.recapTable.find(x=>x.maSP===r.maSP)){
+        fc.recapTable.push({maSP:r.maSP,tenSP:r.tenSP,dvt:r.dvt,qc:r.qc,giaMua:r.cogs,giaThuong:0,giaKM:0,ncc:r.nccCTKM||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});
+      }
+    }
+  });
+  renderRecapTable();
+  toast('✅ Đồng bộ từ FC Table','success');
+}
+
+// ============ MOV TABLE ============
+function addMOVRow(){currentFC().movTable.push({ncc:'',pctMinMOV:0.7,allTinh:0,tinhMOV:{}});renderMOVTable()}
+function renderMOVTable(){
+  const fc=currentFC();
+  if(!fc.movTable.length) fc.movTable.push({ncc:'Chia hàng',pctMinMOV:0.7,allTinh:500000,tinhMOV:{'TP. Hà Nội':1000000,'TP. Hải Phòng':500000}});
+  const tbody=document.querySelector('#movTable tbody'); tbody.innerHTML='';
+  fc.movTable.forEach((m,i)=>{
+    tbody.innerHTML+='<tr>'
+      +'<td><input value="'+m.ncc+'" size="12" onchange="currentFC().movTable['+i+'].ncc=this.value"></td>'
+      +'<td><input value="'+m.pctMinMOV+'" size="5" onchange="currentFC().movTable['+i+'].pctMinMOV=parseFloat(this.value)||0.7"></td>'
+      +'<td><input value="'+m.allTinh+'" size="10" onchange="currentFC().movTable['+i+'].allTinh=parseFloat(this.value)||0"></td>'
+      +'<td><input value="'+(m.tinhMOV?.['TP. Hà Nội']||'')+'" size="10" onchange="if(!currentFC().movTable['+i+'].tinhMOV)currentFC().movTable['+i+'].tinhMOV={};currentFC().movTable['+i+'].tinhMOV[\'TP. Hà Nội\']=parseFloat(this.value)||0"></td>'
+      +'<td><input size="10"></td><td><input size="10"></td><td><input size="10"></td><td><input size="10"></td><td><input size="10"></td>'
+      +'<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="currentFC().movTable.splice('+i+',1);renderMOVTable()">x</button></td></tr>';
+  });
+}
+
+// ============ STEP 4: RUN FC + PIVOT ============
+function runFC(){
+  const fc=currentFC();
+  if(!fc.fcTable.length) return toast('Chưa có bảng FC! Vào bước 3.','error');
+  setStatus('Đang chạy FC '+FC_TYPES[STATE.currentFC].name+'...');
+  const ngayKD=STATE.ngayKD||30;
+  const recapMap={}; fc.recapTable.forEach(r=>{recapMap[r.maSP]=r});
+
+  fc.fcTable.forEach(r=>{
+    const rcfg=recapMap[r.maSP]||{};
+    r.block=rcfg.block||1; r.plusStock=rcfg.plusStock||1; r.plusCG=rcfg.plusCG||1;
+    r.lockMax=rcfg.lockMax||2; r.coverDay=rcfg.coverDay||14; r.nccCTKM=rcfg.ncc||'Chia hàng'; r.checkDR=1;
+    const minVal=rcfg[r.nhomN]||0; r.min=minVal;
+    const J=r.qc||1, Q=r.slTon, AC=r.coverDay, N=minVal, O=r.slTon, Z=r.plusCG, S=r.slCG, AA=r.plusStock, AB=r.lockMax;
+    if(r.checkDR===0){r.slFC=0}else{
+      const t1=Q/ngayKD*AC+N-O*Z-S*AA, t2=AB*N;
+      r.slFC=Math.max(0,J*Math.round(Math.max(0,Math.min(t1,t2))/J));
+    }
+    r.gtFC=r.slFC*r.cogs; r.slFCRound=r.slFC; r.gtFCRound=r.gtFC;
+  });
+
+  computeMinstock(fc);
+  optimizeMOV(fc);
+  renderFCTable(); renderRecapTable(); renderPivot();
+  $('statPivot').textContent=fmt(fc.fcTable.length)+' dòng';
+  setStatus('✅ Hoàn tất');
+  switchStep(4);
+  toast('✅ CHẠY FC '+FC_TYPES[STATE.currentFC].name+' HOÀN TẤT!','success');
+}
+
+function computeMinstock(fc){
+  fc.recapTable.forEach(rcap=>{
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{
+      const vals=fc.fcTable.filter(r=>r.maSP===rcap.maSP&&r.nhomN===n).map(r=>r.slFC);
+      rcap[n]=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+    });
+  });
+}
+
+function optimizeMOV(fc){
+  const movLookup={}; fc.movTable.forEach(m=>{movLookup[m.ncc]=m});
+  const groups={};
+  fc.fcTable.forEach((r,idx)=>{
+    const key=r.maCH+'||'+r.nccCTKM+'||'+r.tinh;
+    if(!groups[key]) groups[key]=[];
+    groups[key].push({idx,...r});
+  });
+  for(const [key,items] of Object.entries(groups)){
+    const ncc=items[0].nccCTKM, tinh=items[0].tinh, mcfg=movLookup[ncc];
+    if(!mcfg) continue;
+    const totalGT=items.reduce((s,it)=>s+it.gtFC,0);
+    const MOV=mcfg.tinhMOV?.[tinh]||mcfg.allTinh||0;
+    const minMOV=MOV*(mcfg.pctMinMOV||0.7);
+    if(totalGT>=MOV){
+      items.forEach(it=>{fc.fcTable[it.idx].movStatus='✅ Đủ MOV';fc.fcTable[it.idx].movNCCtinh=MOV});
+    }else if(totalGT>=minMOV){
+      const scale=MOV/totalGT;
+      items.forEach(it=>{
+        const ns=Math.ceil(it.slFC*scale/it.qc)*it.qc;
+        fc.fcTable[it.idx].slFCRound=ns;fc.fcTable[it.idx].gtFCRound=ns*it.cogs;
+        fc.fcTable[it.idx].movStatus='⚠️ Thiếu MOV (×'+scale.toFixed(1)+')';fc.fcTable[it.idx].movNCCtinh=MOV;
+      });
+    }else{
+      items.forEach(it=>{fc.fcTable[it.idx].slFCRound=0;fc.fcTable[it.idx].gtFCRound=0;fc.fcTable[it.idx].movStatus='❌ Loại FC';fc.fcTable[it.idx].movNCCtinh=MOV});
+    }
+  }
+}
+
+// ============ PIVOT ============
+function renderPivot(){
+  const fc=currentFC();
+  if(!fc.fcTable.length){$('pivotWrap').innerHTML='<p style="padding:30px;color:#999;text-align:center">Chạy FC để xem RECAP →</p>';return}
+  const level=$('pivotLevel').value, subLevel=$('pivotSub').value;
+  const search=($('pivotSearch').value||'').toLowerCase();
+
+  let data=fc.fcTable;
+  if(search) data=data.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(search)>=0);
+
+  const groups={};
+  data.forEach(r=>{
+    let k1=r.tinh||'(Trống)';
+    if(level==='gdv') k1=r.gdv||'(Trống)';
+    else if(level==='qlkv') k1=r.qlkv||'(Trống)';
+    else if(level==='mch3') k1=r.mch3||'(Trống)';
+    else if(level==='ncc') k1=r.nccCTKM||'(Trống)';
+    else if(level==='sku') k1=r.maSP+' - '+r.tenSP;
+    if(!groups[k1]) groups[k1]={items:[],ch:new Set(),slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slFCR:0,gtFCR:0};
+    const g=groups[k1]; g.items.push(r); g.ch.add(r.maCH);
+    g.slB+=r.slBan; g.gtB+=r.gtBan; g.slT+=r.slTon; g.gtT+=r.gtTon;
+    g.slCG+=r.slCG; g.gtCG+=r.gtCG; g.slFC+=r.slFC; g.gtFC+=r.gtFC;
+    g.slFCR+=r.slFCRound; g.gtFCR+=r.gtFCRound;
+  });
+
+  const sortedKeys=Object.keys(groups).sort();
+  let h='<table><thead><tr>';
+  h+='<th>'+(level==='tinh'?'Tỉnh':level==='gdv'?'GĐV':level==='qlkv'?'QLKV':level==='mch3'?'MCH3':level==='ncc'?'NCC':level==='sku'?'SKU':'')+'</th>';
+  h+='<th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL FC Final</th><th>GT FC Final</th>';
+  if(subLevel) h+='<th></th>';
+  h+='</tr></thead><tbody>';
+
+  let grand={ch:0,slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slFCR:0,gtFCR:0};
+
+  for(const k of sortedKeys){
+    const g=groups[k];
+    h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'">';
+    h+='<td>▶ '+k+'</td><td>'+g.ch.size+'</td>';
+    h+='<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td>';
+    h+='<td>'+fmt(Math.round(g.slT))+'</td><td>'+fmt(Math.round(g.gtT))+'</td>';
+    h+='<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>';
+    h+='<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>';
+    h+='<td><b>'+fmt(Math.round(g.slFCR))+'</b></td><td><b>'+fmt(Math.round(g.gtFCR))+'</b></td>';
+    if(subLevel) h+='<td>'+g.items.length+' dòng</td>';
+    h+='</tr>';
+
+    if(subLevel){
+      const sg={};
+      g.items.forEach(r=>{
+        let sk=r.gdv||'(Trống)';
+        if(subLevel==='tinh') sk=r.tinh||'(Trống)';
+        else if(subLevel==='qlkv') sk=r.qlkv||'(Trống)';
+        else if(subLevel==='mch3') sk=r.mch3||'(Trống)';
+        if(!sg[sk]) sg[sk]=[];
+        sg[sk].push(r);
+      });
+      for(const [sk,items] of Object.entries(sg)){
+        const sFC=items.reduce((s,r)=>s+r.slFCRound,0), gFC=items.reduce((s,r)=>s+r.gtFCRound,0);
+        h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'">';
+        h+='<td style="padding-left:20px">↳ '+sk+'</td><td>'+new Set(items.map(r=>r.maCH)).size+'</td><td colspan="8"></td>';
+        h+='<td>'+fmt(Math.round(sFC))+'</td><td>'+fmt(Math.round(gFC))+'</td><td>'+items.length+' dòng</td></tr>';
+      }
+    }
+    grand.ch+=g.ch.size;grand.slB+=g.slB;grand.gtB+=g.gtB;grand.slT+=g.slT;grand.gtT+=g.gtT;
+    grand.slCG+=g.slCG;grand.gtCG+=g.gtCG;grand.slFC+=g.slFC;grand.gtFC+=g.gtFC;grand.slFCR+=g.slFCR;grand.gtFCR+=g.gtFCR;
+  }
+
+  h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+grand.ch+'</td>';
+  h+='<td>'+fmt(Math.round(grand.slB))+'</td><td>'+fmt(Math.round(grand.gtB))+'</td>';
+  h+='<td>'+fmt(Math.round(grand.slT))+'</td><td>'+fmt(Math.round(grand.gtT))+'</td>';
+  h+='<td>'+fmt(Math.round(grand.slCG))+'</td><td>'+fmt(Math.round(grand.gtCG))+'</td>';
+  h+='<td><b>'+fmt(Math.round(grand.slFC))+'</b></td><td><b>'+fmt(Math.round(grand.gtFC))+'</b></td>';
+  h+='<td><b>'+fmt(Math.round(grand.slFCR))+'</b></td><td><b>'+fmt(Math.round(grand.gtFCR))+'</b></td>';
+  if(subLevel) h+='<td></td>';
+  h+='</tr></tbody></table>';
+
+  $('pivotWrap').innerHTML=h;
+  $('pivotSummary').textContent=sortedKeys.length+' nhóm · '+data.length+' dòng';
+  $('statPivot').textContent=sortedKeys.length+' nhóm';
+  $('pivotBadge').textContent=fc.fcTable.length+' dòng FC';
+}
+
+function togglePivot(row){
+  const k=row.getAttribute('data-k');
+  const icon=row.querySelector('td');
+  const open=icon.textContent.startsWith('▼');
+  icon.textContent=(open?'▶ ':'▼ ')+k;
+  document.querySelectorAll('.sub-row[data-p="'+CSS.escape(k)+'"]').forEach(el=>{el.style.display=open?'none':''});
+}
+
+// ============ PARSE NHOM N ============
+function parseNhomN(){
+  const lines=$('nhomPaste').value.trim().split('\n');
+  STATE.nhomN={};
+  lines.forEach(l=>{const c=l.split('\t');if(c.length>=3) STATE.nhomN[c[0].trim()+'|'+c[1].trim()]=c[2].trim()});
+  $('nhomCount').textContent=Object.keys(STATE.nhomN).length+' mapping';
+  toast('✅ '+Object.keys(STATE.nhomN).length+' phân nhóm','success');
+}
+
+// ============ EXPORT ============
+function exportFC(){
+  const fc=currentFC();
+  if(!fc.fcTable.length) return toast('Chưa có dữ liệu!','error');
+  const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC/CTKM','Min','SL tồn','GT tồn','SL bán','GT bán','SL CG','GT CG','SL FC','GT FC','Check DR','Block','Trừ Tồn','Trừ CG','Lock Max','Cover day','SL FC Round','GT FC Round','MOV Status','MOV NCC Tỉnh'];
+  const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','checkDR','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus','movNCCtinh'];
+  let tsv='\ufeff'+cols.join('\t')+'\n'+fc.fcTable.map(r=>keys.map(k=>r[k]!==undefined?r[k]:'').join('\t')).join('\n');
+  const b=new Blob([tsv],{type:'text/tab-separated-values'});
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=URL.createObjectURL(b);
+  a.download='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.tsv';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('✅ Đã xuất!','success');
+}
+
+// ============ SETTINGS ============
+function saveSettings(){/* For future use if switching sheets */}
+
+// ============ RESET ============
+function resetAll(){
+  if(!confirm('Reset toàn bộ dữ liệu của loại FC hiện tại?')) return;
+  const fc=currentFC();
+  fc.saleData={}; fc.fcTable=[]; fc.recapTable=[]; fc.movTable=[];
+  ['salePaste','fcInput'].forEach(id=>$(id).value='');
+  $('fcTableWrap').innerHTML='<p style="padding:30px;color:#999;text-align:center">Tạo bảng FC ở Bước 3 →</p>';
+  $('pivotWrap').innerHTML='<p style="padding:30px;color:#999;text-align:center">Chạy FC để xem RECAP →</p>';
+  $('fcTableBadge').textContent='0 dòng'; $('fcRowStat').textContent='0 dòng FC';
+  $('saleStat').textContent='0 dòng';
+  document.querySelector('#recapTable tbody').innerHTML='';
+  document.querySelector('#movTable tbody').innerHTML='';
+  renderMOVTable();
+  updateStatusBar(); switchStep(1);
+  toast('🔄 Đã reset!','info');
+}
+
+// ============ STATUS BAR ============
+function updateStatusBar(){
+  $('statCH').textContent=fmt(Object.keys(STATE.storelist).length);
+  $('statSKU').textContent=fmt(Object.keys(STATE.skuList).length);
+  const fc=currentFC();
+  $('statFC').textContent=fmt(fc.fcTable.length);
+}
+
+// ============ INIT ============
+async function init(){
+  buildFCTabs();
+
+  // Restore last FC type
+  try{const saved=localStorage.getItem('fc-currentFC');if(saved&&FC_TYPES[saved]) STATE.currentFC=saved;buildFCTabs()}catch(e){}
+
+  // Auto-load shared data from Google Sheets
+  setStatus('Đang load dữ liệu từ Google Sheets...');
+  await loadSharedData(true);
+
+  // If loaded successfully, show ready
+  if(Object.keys(STATE.storelist).length>0){
+    setStatus('✅ Sẵn sàng — ' + Object.keys(STATE.storelist).length + ' CH');
+  } else {
+    setStatus('⚠️ Chưa load được dữ liệu — bấm [🔄 Load lại]');
+  }
+
+  renderMOVTable();
+  updateStatusBar();
+}
+
+init();
+</script>
+</body>
+</html>
