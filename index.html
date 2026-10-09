@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v3.3</title>
+<title>FC Hàng Hóa — v3.4</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.3</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.4</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v3.3 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v3.4 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v3.3">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v3.4">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -190,6 +190,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <div class="flex-row" style="margin-top:4px;gap:4px">
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
+              <button class="btn btn-xs btn-outline" onclick="exportTemplate()" style="font-size:9px;padding:3px 8px">📥 Tải Template</button>
               <button class="btn btn-xs btn-outline" onclick="verifyTemplate()" style="font-size:9px;padding:3px 8px">🔍 Verify</button>
               <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px;padding:3px 8px">✅ Import</button>
               <span class="info-text" id="tmplVerifyResult"></span>
@@ -510,6 +511,18 @@ function clearGDV(){
 
 
 // ============ TEMPLATE UPLOAD & VERIFY ============
+function exportTemplate(){
+  const header='Mã SP\tTên SP\tĐVT\tQC\tGiá mua\tGiá thường\tGiá KM\tDiễn giải CTKM\tThời gian KM\tNCC\t\t\tNCC\tTỉnh\tMOV';
+  const sample='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\t\tdd/mm - dd/mm\tChia hàng\t\t\tChia hàng\tTP. Hà Nội\t1000000';
+  const tsv='\ufeff'+header+'\n'+sample;
+  const b=new Blob([tsv],{type:'text/tab-separated-values;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='FC_Template_SKU_MOV.tsv';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('📥 Đã tải Template mẫu!','success');
+}
+
 function verifyTemplate(){
   const lines=$('tmplPaste').value.trim().split('\n');
   if(!lines[0]) return toast('Chưa có dữ liệu!','error');
