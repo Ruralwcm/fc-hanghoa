@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v3.1</title>
+<title>FC Hàng Hóa — v3.2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.1</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.2</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v3.1 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v3.2 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v3.1">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v3.2">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -195,16 +195,16 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <span class="info-text" id="tmplVerifyResult"></span>
             </div>
           </div>
-          <!-- MOV NCC (middle column, grouped by NCC) -->
+          <!-- MOV NCC (middle column, simple list) -->
           <div class="import-col mov">
-            <div class="import-title">🚚 MOV NCC × Tỉnh <span style="font-weight:400;color:#999;font-size:9px">(Min đơn, =0 nếu trống)</span></div>
+            <div class="import-title">🚚 MOV NCC <span style="font-weight:400;color:#999;font-size:9px">(NCC · Tỉnh · MOV · %Min)</span></div>
             <div class="table-wrap" style="max-height:160px;overflow:auto">
               <table id="movTableInline" style="font-size:9px">
-                <thead id="movTheadInline"></thead>
+                <thead><tr><th>NCC</th><th>Tỉnh</th><th>MOV</th><th>%Min</th></tr></thead>
                 <tbody></tbody>
               </table>
             </div>
-            <div style="font-size:8px;color:#999;margin-top:2px">Từ Template (cột NCC, Tỉnh, MOV)</div>
+            <div style="font-size:8px;color:#999;margin-top:2px">Từ Template — để trống = 0</div>
           </div>
           <!-- Sale -->
           <div class="import-col sale">
