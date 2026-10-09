@@ -331,24 +331,22 @@ function buildVungTree(){
   for(const mien of mienOrder){
     if(!tree[mien]) continue;
     const gdvs=tree[mien];
-    let mienTotal=0, mienOpen=true;
+    let mienTotal=0;
     for(const gdv of Object.keys(gdvs).sort()){
       for(const tinh of Object.keys(gdvs[gdv])){
-        const k=gdv+'||'+tinh;
         mienTotal+=gdvs[gdv][tinh];
-        if(STATE.selectedTinh.has(k)) mienOpen=true;
       }
     }
-    h+='<div class="tree-mien open" onclick="toggleTreeNode(this,\\'mien\\')"><span class="tree-arrow">▼</span>📍 '+mien+' ('+mienTotal+' CH)</div>';
+    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span>📍 '+mien+' ('+mienTotal+' CH)</div>';
     h+='<div class="tree-mien-children">';
     for(const [gdv,tinhs] of Object.entries(gdvs).sort()){
       let gdvTotal=0;for(const c of Object.values(tinhs)) gdvTotal+=c;
-      h+='<div class="tree-gdv" onclick="toggleTreeNode(this,\\'gdv\\')"><span class="tree-arrow">▶</span>👤 '+gdv+' ('+gdvTotal+')</div>';
+      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span>👤 '+gdv+' ('+gdvTotal+')</div>';
       h+='<div class="tree-gdv-children" style="display:none">';
       for(const [tinh,count] of Object.entries(tinhs).sort()){
         const key=gdv+'||'+tinh, checked=STATE.selectedTinh.has(key);
         if(checked) totalSelected++;
-        h+='<label class="tree-tinh'+(checked?' selected':'')+'"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleTinh(\\''+gdv.replace(/'/g,"\\\\'")+'\\',\\''+tinh.replace(/'/g,"\\\\'")+'\\',this.checked)">'+tinh+' <span style="color:#aaa;font-size:8px">('+count+')</span></label>';
+        h+='<label class="tree-tinh'+(checked?' selected':'')+'"><input type="checkbox" '+(checked?'checked':'')+' data-gdv="'+gdv+'" data-tinh="'+tinh+'">'+tinh+' <span style="color:#aaa;font-size:8px">('+count+')</span></label>';
       }
       h+='</div>';
     }
@@ -356,9 +354,26 @@ function buildVungTree(){
   }
   $('vungTree').innerHTML=h;
   $('vungCount').textContent=totalSelected>0?totalSelected+' tỉnh đã chọn':'';
-}
 
-function toggleTreeNode(el,level){
+  // Attach event listeners after DOM is built
+  $('vungTree').querySelectorAll('.tree-mien, .tree-gdv').forEach(el=>{
+    el.addEventListener('click',function(e){
+      e.stopPropagation();
+      this.classList.toggle('open');
+      const children=this.nextElementSibling;
+      if(children) children.style.display=this.classList.contains('open')?'':'none';
+    });
+  });
+  $('vungTree').querySelectorAll('.tree-tinh input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(){
+      const gdv=this.getAttribute('data-gdv'), tinh=this.getAttribute('data-tinh');
+      const key=gdv+'||'+tinh;
+      if(this.checked) STATE.selectedTinh.add(key); else STATE.selectedTinh.delete(key);
+      buildVungTree();
+      fillFCInputFromTinh();
+    });
+  });
+}function toggleTreeNode(el,level){
   el.classList.toggle('open');
   const children=el.nextElementSibling;
   if(children) children.style.display=el.classList.contains('open')?'':'none';
@@ -415,13 +430,7 @@ function importTemplate(){
   toast('✅ Import '+count+' SKU từ Template vào RECAP!','success');
 }
 
-// Show/hide template button when tmplPaste visibility changes
-document.addEventListener('DOMContentLoaded',()=>{
-  const obs=new MutationObserver(()=>{
-    $('tmplBtn').classList.toggle('hidden',$('tmplPaste').classList.contains('hidden'));
-  });
-  obs.observe($('tmplPaste'),{attributes:true,attributeFilter:['class']});
-});
+// Template button visibility handled in toggle via onclick
 
 // ============ GOOGLE SHEETS ============
 async function fetchCSV(sid,gid){
