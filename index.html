@@ -841,13 +841,25 @@ function renderMOVTable(){
       +(edit?'<td><input value="'+m.pctMinMOV+'" size="5" onchange="current().movTable['+i+'].pctMinMOV=parseFloat(this.value)||0.7"></td>':'<td style="text-align:center">'+m.pctMinMOV+'</td>')
       +(edit?'<td><input value="'+m.allTinh+'" size="10" onchange="current().movTable['+i+'].allTinh=parseFloat(this.value)||0"></td>':'<td style="text-align:center">'+fmt(m.allTinh)+'</td>');
     tinhList.forEach(t=>{
-      if(edit) tb.innerHTML+='<td><input value="'+(m.tinhMOV?.[t]||'')+'" size="9" onchange="if(!current().movTable['+i+'].tinhMOV)current().movTable['+i+'].tinhMOV={};current().movTable['+i+'].tinhMOV[''+t.replace(/'/g,"\\'")+'']=parseFloat(this.value)||0"></td>';
+      if(edit) tb.innerHTML+='<td><input value="'+(m.tinhMOV?.[t]||'')+'" size="9" data-idx="'+i+'" data-tinh="'+t.replace(/\"/g,'&quot;')+'"></td>';
       else tb.innerHTML+='<td style="text-align:center;font-size:10px">'+(m.tinhMOV?.[t]?fmt(m.tinhMOV[t]):'-')+'</td>';
     });
     if(edit) tb.innerHTML+='<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="current().movTable.splice('+i+',1);renderMOVTable()">×</button></td>';
     else tb.innerHTML+='<td></td>';
     tb.innerHTML+='</tr>';
   });
+  // Attach event listeners for MOV tinh inputs
+  if(edit){
+    tb.querySelectorAll('input[data-tinh]').forEach(inp=>{
+      inp.addEventListener('change',function(){
+        const idx=parseInt(this.getAttribute('data-idx'));
+        const tinh=this.getAttribute('data-tinh');
+        const fc=current();
+        if(!fc.movTable[idx].tinhMOV) fc.movTable[idx].tinhMOV={};
+        fc.movTable[idx].tinhMOV[tinh]=parseFloat(this.value)||0;
+      });
+    });
+  }
 }
 
 // ============ PIVOT ============
