@@ -121,9 +121,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 <div class="sidebar">
   <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.0</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
-  <div class="sidebar-actions">
-    <button class="btn btn-success btn-sm" style="width:100%;margin-bottom:4px" onclick="loadData()">📥 Load data</button>
-    <button class="btn btn-outline btn-sm" style="width:100%;background:rgba(255,255,255,.08);color:#ccc;border-color:rgba(255,255,255,.15)" onclick="exportFC()">📥 Xuất Excel</button>
+  <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
+    <small>Chọn loại FC bên trên</small>
   </div>
   <div class="sidebar-footer">FC Hàng Hóa v2.0 · MsT ✨</div>
 </div>
@@ -139,6 +138,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
       <label style="font-size:10px">Ngày KD:</label>
       <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
+      <button class="btn btn-success btn-sm" onclick="loadData()" style="padding:4px 10px;font-size:10px">📥 Load data</button>
+      <button class="btn btn-outline btn-sm" onclick="exportFC()" style="padding:4px 10px;font-size:10px">📥 Xuất</button>
     </div>
   </div>
 
@@ -403,7 +404,7 @@ function buildVungTree(){
           Object.keys(tinhs).forEach(tinh=>STATE.selectedTinh.delete(gdv+'||'+tinh));
         });
       }
-      buildVungTree(); fillFCInputFromTinh();
+      buildVungTree();
     });
   });
 
@@ -420,7 +421,7 @@ function buildVungTree(){
           else Object.keys(tinhs).forEach(t=>STATE.selectedTinh.delete(gdv+'||'+t));
         }
       });
-      buildVungTree(); fillFCInputFromTinh();
+      buildVungTree();
     });
   });
 
@@ -430,7 +431,7 @@ function buildVungTree(){
       const gdv=this.getAttribute('data-gdv'), tinh=this.getAttribute('data-tinh');
       const key=gdv+'||'+tinh;
       if(this.checked) STATE.selectedTinh.add(key); else STATE.selectedTinh.delete(key);
-      buildVungTree(); fillFCInputFromTinh();
+      buildVungTree();
     });
   });
 }function toggleTreeNode(el,level){
@@ -452,7 +453,7 @@ function selectAllGDV(){
       Object.keys(tinhs).forEach(tinh=>STATE.selectedTinh.add(gdv+'||'+tinh));
     });
   });
-  buildVungTree();fillFCInputFromTinh();
+  buildVungTree();
 }
 
 function clearGDV(){
