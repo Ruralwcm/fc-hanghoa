@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v2.8</title>
+<title>FC Hàng Hóa — v2.9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -90,10 +90,10 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 /* Import 3-col */
 .import-row{display:flex;gap:10px;align-items:stretch}
 .import-col{display:flex;flex-direction:column;gap:4px}
-.import-col.vung{width:240px;flex-shrink:0}
-.import-col.dm{flex:1;min-width:0;max-width:280px}
-.import-col.sale{flex:1;min-width:0;max-width:280px}
-.import-col.mov{width:260px;flex-shrink:0}
+.import-col.vung{width:220px;flex-shrink:0}
+.import-col.dm{flex:1;min-width:0}
+.import-col.sale{flex:1;min-width:0}
+.import-col.mov{width:300px;flex-shrink:0}
 .import-col .import-title{font-size:10px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;justify-content:space-between}
 .import-col textarea{height:110px}
 .vung-tree{max-height:160px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;background:#fafbfc;padding:2px 0;font-size:10px;user-select:none}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.8</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v2.9</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v2.8 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v2.9 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v2.8">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v2.9">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -209,14 +209,14 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           </div>
           <!-- MOV theo tỉnh (4th column) -->
           <div class="import-col mov">
-            <div class="import-title">🚚 MOV NCC Theo Tỉnh</div>
-            <div class="table-wrap" style="max-height:160px;font-size:9px">
-              <table id="movTableInline">
-                <thead id="movTheadInline"><tr><th>NCC</th><th>%Min</th><th>All</th><th>Tỉnh</th></tr></thead>
+            <div class="import-title">🚚 MOV NCC × Tỉnh <span style="font-weight:400;color:#999;font-size:9px">(Min đơn)</span></div>
+            <div class="table-wrap" style="max-height:160px;overflow:auto">
+              <table id="movTableInline" style="font-size:9px">
+                <thead id="movTheadInline"></thead>
                 <tbody></tbody>
               </table>
             </div>
-            <div style="font-size:8px;color:#999;margin-top:2px">Tự động từ Template + Vùng</div>
+            <div style="font-size:8px;color:#999;margin-top:2px">NCC từ Template · Tỉnh từ Vùng đã chọn</div>
           </div>
         </div>
         
@@ -849,8 +849,6 @@ function renderMOVTable(){
       if(edit) tb.innerHTML+='<td><input value="'+(m.tinhMOV?.[t]||'')+'" size="9" data-idx="'+i+'" data-tinh="'+t.replace(/\"/g,'&quot;')+'"></td>';
       else tb.innerHTML+='<td style="text-align:center;font-size:10px">'+(m.tinhMOV?.[t]?fmt(m.tinhMOV[t]):'-')+'</td>';
     });
-    if(edit) tb.innerHTML+='<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="current().movTable.splice('+i+',1);renderMOVTable()">×</button></td>';
-    else tb.innerHTML+='<td></td>';
     tb.innerHTML+='</tr>';
   });
   // Attach event listeners for MOV tinh inputs
