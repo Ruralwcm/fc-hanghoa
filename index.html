@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v4.8</title>
+<title>FC Hàng Hóa — v4.9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.8</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.9</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v4.8 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v4.9 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v4.8">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v4.9">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -965,14 +965,14 @@ function renderPivot(){
   });
 
   const labels={tinh:'Miền/Tỉnh',gdv:'GĐV',store:'🎯 Top Stores theo PN',ncc:'🏷 NCC/CTKM',mch3:'MCH3'};
-  let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th>'+(sub?'<th></th>':'')+'</tr></thead><tbody>';
+  let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th>'+(sub?'<th>#CH</th>':'')+'</tr></thead><tbody>';
   let gd={ch:0,slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
   for(const k of Object.keys(grps).sort()){const g=grps[k];
-    h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td><td>'+g.ch.size+'</td>'
+    h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td>'
       +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+fmt(Math.round(g.gtT))+'</td>'
       +'<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>'
       +'<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>'
-      +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'+(sub?'<td>'+g.items.length+'</td>':'')+'</tr>';
+      +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'+'<td>'+g.ch.size+'</td>'+(sub?'<td>'+g.items.length+'</td>':'')+'</tr>';
     if(sub){const sg={};g.items.forEach(r=>{
       let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else if(sub==='nhomN'){
         // Top 10 stores by GT FC for this N-group
@@ -988,15 +988,15 @@ function renderPivot(){
       if(!sg[sk])sg[sk]=[];sg[sk].push(r);
     });
     for(const[sk,its]of Object.entries(sg)){const sF=its.reduce((s,r)=>s+r.slFCRound,0),gF=its.reduce((s,r)=>s+r.gtFCRound,0);
-    h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td>'
-      +'<td>'+new Set(its.map(r=>r.maCH)).size+'</td><td colspan="8"></td><td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+its.length+'</td></tr>'}}
+    h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td><td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td colspan="6"></td><td>'+its.length+'</td></tr>'
+      }}
     gd.ch+=g.ch.size;gd.slB+=g.slB;gd.gtB+=g.gtB;gd.slT+=g.slT;gd.gtT+=g.gtT;gd.slCG+=g.slCG;gd.gtCG+=g.gtCG;gd.slFC+=g.slFC;gd.gtFC+=g.gtFC;gd.slR+=g.slR;gd.gtR+=g.gtR;
   }
-  h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+gd.ch+'</td>'
+  h+='<tr class="row-subtotal"><td><b>TỔNG</b></td>'
     +'<td>'+fmt(Math.round(gd.slB))+'</td><td>'+fmt(Math.round(gd.gtB))+'</td><td>'+fmt(Math.round(gd.slT))+'</td><td>'+fmt(Math.round(gd.gtT))+'</td>'
     +'<td>'+fmt(Math.round(gd.slCG))+'</td><td>'+fmt(Math.round(gd.gtCG))+'</td>'
     +'<td><b>'+fmt(Math.round(gd.slFC))+'</b></td><td><b>'+fmt(Math.round(gd.gtFC))+'</b></td>'
-    +'<td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td>'+(sub?'<td></td>':'')+'</tr></tbody></table>';
+    +'<td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td>'+'<td>'+gd.ch+'</td>'+(sub?'<td></td>':'')+'</tr></tbody></table>';
   $('pivotWrap').innerHTML=h;
   $('pivotSummary').textContent=Object.keys(grps).length+' nhóm · '+data.length+' dòng';
   $('fcTableBadge').textContent=fc.fcTable.length+' dòng';
