@@ -240,7 +240,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           </div>
         </div>
         <div class="card-body" style="padding:6px 12px">
-          <p class="section-label">📐 RECAP — Thông số đặt hàng theo SKU <span style="font-weight:400;color:#e65100;font-size:9px;margin-left:8px">💡 Set N1 + N8 → bấm 🧮 Tính Min → N2–N7 tự nội suy (làm tròn theo QC)</span></p>
+          <p class="section-label">📐 RECAP — Thông số đặt hàng theo SKU <span style="font-weight:400;color:#e65100;font-size:9px;margin-left:8px">💡 Set N1 + N8 → bấm 🧮 Tính Min → N2–N7 tự nội suy (bội/ước số QC)</span></p>
           <div class="table-wrap" style="max-height:220px">
             <table id="recapTable">
               <thead><tr>
@@ -876,13 +876,14 @@ function autoCalcMin(){
     const n1=rc.N1||0, n8=rc.N8||0, qc=rc.qc||1;
     if(n1===0&&n8===0) return;
     const step=(n8-n1)/7;
-    // Round each N to nearest QC multiple for ordering efficiency
-    rc.N2=qc*Math.round((n1+1*step)/qc);
-    rc.N3=qc*Math.round((n1+2*step)/qc);
-    rc.N4=qc*Math.round((n1+3*step)/qc);
-    rc.N5=qc*Math.round((n1+4*step)/qc);
-    rc.N6=qc*Math.round((n1+5*step)/qc);
-    rc.N7=qc*Math.round((n1+6*step)/qc);
+    // Adaptive rounding unit: bội số QC if step ≥ QC, else ước số lớn nhất ≤ step
+    const roundUnit=Math.abs(step)>=qc?qc:(()=>{let u=1;for(let d=1;d<=qc&&d<=Math.abs(step);d++){if(qc%d===0)u=d;}return u;})();
+    rc.N2=roundUnit*Math.round((n1+1*step)/roundUnit);
+    rc.N3=roundUnit*Math.round((n1+2*step)/roundUnit);
+    rc.N4=roundUnit*Math.round((n1+3*step)/roundUnit);
+    rc.N5=roundUnit*Math.round((n1+4*step)/roundUnit);
+    rc.N6=roundUnit*Math.round((n1+5*step)/roundUnit);
+    rc.N7=roundUnit*Math.round((n1+6*step)/roundUnit);
     count++;
   });
   if(!count) return toast('⚠️ Vui lòng set N1 và N8 trước khi Tính Min!','error');
