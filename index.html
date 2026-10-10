@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v3.9</title>
+<title>FC Hàng Hóa — v4.0</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.9</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.0</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v3.9 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v4.0 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v3.9">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v4.0">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -264,7 +264,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <div class="pivot-tabs" id="pivotTabs">
               <button class="pivot-tab active" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
               <button class="pivot-tab" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
-              <button class="pivot-tab" onclick="switchPivotView('store',this)">🏪 Store</button>
+              <button class="pivot-tab" onclick="switchPivotView('store',this)">🏪 Top Stores PN</button>
               <button class="pivot-tab" onclick="switchPivotView('mch3-sku',this)">📦 MCH3/SKU</button>
               <button class="pivot-tab" onclick="switchPivotView('ncc',this)">🏷 NCC/CTKM</button>
             </div>
@@ -952,18 +952,18 @@ function renderPivot(){
   let level,sub;
   if(view==='mien-tinh'){level='tinh';sub=null}
   else if(view==='gdv-qlkv'){level='gdv';sub='qlkv'}
-  else if(view==='store'){level='store';sub=null}
+  else if(view==='store'){level='store';sub='nhomN'}
   else if(view==='ncc'){level='ncc';sub=null}
   else if(view==='mch3-sku'){level='mch3';sub='sku'}
 
   const grps={};
   data.forEach(r=>{
-    let k;if(level==='tinh')k=r.tinh||'(Trống)';else if(level==='gdv')k=r.gdv||'(Trống)';else if(level==='store')k=r.maCH+' - '+r.tenCH;else if(level==='ncc')k=r.nccCTKM||'(Trống)';else if(level==='mch3')k=r.mch3||'(Trống)';else k='';
+    let k;if(level==='tinh')k=r.tinh||'(Trống)';else if(level==='gdv')k=r.gdv||'(Trống)';else if(level==='store')k=r.nhomN||'N6';else if(level==='ncc')k=r.nccCTKM||'(Trống)';else if(level==='mch3')k=r.mch3||'(Trống)';else k='';
     if(!grps[k])grps[k]={items:[],ch:new Set(),slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
     const g=grps[k];g.items.push(r);g.ch.add(r.maCH);g.slB+=r.slBan;g.gtB+=r.gtBan;g.slT+=r.slTon;g.gtT+=r.gtTon;g.slCG+=r.slCG;g.gtCG+=r.gtCG;g.slFC+=r.slFC;g.gtFC+=r.gtFC;g.slR+=r.slFCRound;g.gtR+=r.gtFCRound;
   });
 
-  const labels={tinh:'Miền/Tỉnh',gdv:'GĐV',store:'🏪 Cửa hàng',ncc:'🏷 NCC/CTKM',mch3:'MCH3'};
+  const labels={tinh:'Miền/Tỉnh',gdv:'GĐV',store:'🎯 Top Stores theo PN',ncc:'🏷 NCC/CTKM',mch3:'MCH3'};
   let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th>'+(sub?'<th></th>':'')+'</tr></thead><tbody>';
   let gd={ch:0,slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0};
   for(const k of Object.keys(grps).sort()){const g=grps[k];
@@ -972,7 +972,20 @@ function renderPivot(){
       +'<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>'
       +'<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>'
       +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'+(sub?'<td>'+g.items.length+'</td>':'')+'</tr>';
-    if(sub){const sg={};g.items.forEach(r=>{let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;if(!sg[sk])sg[sk]=[];sg[sk].push(r)});
+    if(sub){const sg={};g.items.forEach(r=>{
+      let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else if(sub==='nhomN'){
+        // Top 10 stores by GT FC for this N-group
+        const stores=[...new Map(g.items.map(r=>[r.maCH,r])).values()];
+        stores.sort((a,b)=>b.gtFCRound-a.gtFCRound);
+        const top10=stores.slice(0,10);
+        top10.forEach(s=>{
+          if(!sg[s.maCH+' - '+s.tenCH]) sg[s.maCH+' - '+s.tenCH]=[];
+          sg[s.maCH+' - '+s.tenCH].push(s);
+        });
+        return; // skip rest of forEach
+      }
+      if(!sg[sk])sg[sk]=[];sg[sk].push(r);
+    });
     for(const[sk,its]of Object.entries(sg)){const sF=its.reduce((s,r)=>s+r.slFCRound,0),gF=its.reduce((s,r)=>s+r.gtFCRound,0);
     h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td>'
       +'<td>'+new Set(its.map(r=>r.maCH)).size+'</td><td colspan="8"></td><td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+its.length+'</td></tr>'}}
