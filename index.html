@@ -234,6 +234,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <button class="btn btn-primary btn-xs" id="btnEdit" onclick="toggleEditMode()">✏️ Sửa</button>
             <button class="btn btn-outline btn-xs hidden" id="btnAddSKU" onclick="addRecapRow()">+ SKU</button>
             <button class="btn btn-outline btn-xs hidden" id="btnSyncSKU" onclick="syncRecapFromFC()">🔄 Đồng bộ</button>
+            <button class="btn btn-outline btn-xs" id="btnCalcMin" onclick="autoCalcMin()" style="background:#0277bd;color:#fff">🧮 Tính Min</button>
             <button class="btn btn-warning btn-xs hidden" id="btnSave" onclick="saveAndRun()">💾 Lưu & Chạy FC</button>
             <span class="badge green" id="configSaved">✅ Đã lưu</span>
           </div>
@@ -244,7 +245,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <table id="recapTable">
               <thead><tr>
                 <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>Diễn giải</th><th>NCC</th>
-                <th colspan="8" id="recapRefCols">📊 Sale Ref (N1–N8) <button class="btn btn-xs btn-outline" onclick="toggleSaleRef()" style="font-size:8px;padding:1px 4px;margin-left:4px" id="saleRefBtn">Hiện</button></th>
+                <th colspan="8" id="recapRefCols">📊 Sale BQ/CH (N1–N8)</th>
                 <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
                 <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th><th></th>
               </tr></thead>
@@ -778,10 +779,11 @@ function runConfigSilent(){
   fc.recapTable.forEach(rc=>{
     rc._saleRef={};
     ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{
-      const vals=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slBan);
-      rc._saleRef[n]=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
-      const vfc=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n).map(r=>r.slFC);
-      rc[n]=vfc.length?Math.round(vfc.reduce((a,b)=>a+b,0)/vfc.length):0;
+      const rowsN=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n);
+      const vals=rowsN.map(r=>r.slBan);
+      const chSet=new Set(rowsN.map(r=>r.maCH));const nCH=chSet.size;
+      rc._saleRef[n]=nCH>0?Math.round(vals.reduce((a,b)=>a+b,0)/nCH):0;
+      // Do NOT overwrite N1-N8 — user-set or auto-calc via Tính Min
     });
   });
   const ml={};fc.movTable.forEach(m=>{ml[m.ncc]=m});const gs={};
@@ -797,7 +799,7 @@ function runConfig(){runConfigSilent();renderRecapTable();toast('⚡ Đã chạy
 
 function renderRecapTable(){
   const fc=current(),tb=document.querySelector('#recapTable tbody');tb.innerHTML='';
-  const showRef=STATE.showSaleRef||false, edit=STATE.editMode;
+  const edit=STATE.editMode;
   fc.recapTable.forEach((r,i)=>{
     const refVals=r._saleRef||{};
     let h='<tr>';
@@ -805,18 +807,16 @@ function renderRecapTable(){
     h+='<td style="font-weight:600">'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td>';
     if(edit){
       h+='<td><input value="'+r.qc+'" size="3" onchange="current().recapTable['+i+'].qc=parseInt(this.value)||1"></td>';
-      h+='<td><input value="'+r.giaMua+'" size="8" onchange="current().recapTable['+i+'].giaMua=parseFloat(this.value)||0"></td>';
+      h+='<td><input value="'+Math.round(r.giaMua)+'" size="8" type="number" step="1" onchange="current().recapTable['+i+'].giaMua=parseInt(this.value)||0"></td>';
       h+='<td><input value="'+(r.giaThuong||0)+'" size="8" onchange="current().recapTable['+i+'].giaThuong=parseFloat(this.value)||0"></td>';
       h+='<td><input value="'+(r.giaKM||0)+'" size="8" onchange="current().recapTable['+i+'].giaKM=parseFloat(this.value)||0"></td>';
     } else {
-      h+='<td>'+r.qc+'</td><td>'+fmt(r.giaMua)+'</td><td>'+fmt(r.giaThuong||0)+'</td><td>'+fmt(r.giaKM||0)+'</td>';
+      h+='<td>'+r.qc+'</td><td>'+fmt(Math.round(r.giaMua))+'</td><td>'+fmt(r.giaThuong||0)+'</td><td>'+fmt(r.giaKM||0)+'</td>';
     }
     h+='<td style="font-size:9px;color:#888;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.dienGiai||'')+'">'+(r.dienGiai||'')+'</td>';
     h+='<td style="color:#555;font-size:10px">'+r.ncc+'</td>';
-    // Sale Ref columns (toggle)
-    if(showRef){
-      ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td style="font-size:9px;color:#999;text-align:center">'+(refVals[n]||'-')+'</td>');
-    }
+    // Sale BQ/CH — always visible
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td style="font-size:9px;color:#1565c0;text-align:center;font-weight:500">'+(refVals[n]||'-')+'</td>');
     // N1-N8
     if(edit){
       ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>h+='<td><input value="'+(r[n]||0)+'" size="4" onchange="current().recapTable['+i+'].'+n+'=parseInt(this.value)||0"></td>');
@@ -843,10 +843,8 @@ function renderRecapTable(){
     }
     tb.innerHTML+=h;
   });
-  // Update Sale Ref button text
-  $('saleRefBtn').textContent=showRef?'Ẩn':'Hiện';
-  // Hide/show ref columns
-  $('recapRefCols').style.display=showRef?'':'none';
+  // Sale BQ columns always visible
+  $('recapRefCols').style.display='';
 }
 function toggleEditMode(){
   STATE.editMode=!STATE.editMode;
@@ -867,6 +865,27 @@ function saveAndRun(){
   // Save to localStorage
   try{const sv={};Object.keys(FC_TYPES).forEach(k=>{const f=STATE.fcTypes[k];sv[k]={recapTable:f.recapTable,movTable:f.movTable}});localStorage.setItem('fc-config',JSON.stringify(sv))}catch(e){}
   toast('💾 Đã lưu & chạy FC!','success');
+}
+
+
+// ============ TÍNH MIN TỰ ĐỘNG ============
+function autoCalcMin(){
+  const fc=current();if(!fc.fcTable.length)return toast('Chưa có dữ liệu! Load data trước.','error');
+  const nd=STATE.ngayKD||30;
+  fc.recapTable.forEach(rc=>{
+    const cover=rc.coverDay||14;
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n=>{
+      const rows=fc.fcTable.filter(r=>r.maSP===rc.maSP&&r.nhomN===n);
+      if(!rows.length){rc[n]=0;rc._saleRef[n]=0;return}
+      const totalSlBan=rows.reduce((s,r)=>s+r.slBan,0);
+      const chSet=new Set(rows.map(r=>r.maCH));const nCH=chSet.size;
+      const avgDailySalePerCH=nCH>0?totalSlBan/nd/nCH:0;
+      rc[n]=Math.round(avgDailySalePerCH*cover);
+      rc._saleRef[n]=nCH>0?Math.round(totalSlBan/nCH):0;
+    });
+  });
+  renderRecapTable();
+  toast('✅ Đã tính Min = Sale BQ/CH/ngày × Cover ('+(STATE.ngayKD||30)+' ngày)','success');
 }
 
 function toggleSaleRef(){
@@ -1130,7 +1149,7 @@ async function init(){
   await loadSharedData();
   $('currentFCLabel').textContent=FC_TYPES[STATE.currentFC].name;
   renderMOVTable();renderRecapTable();updateMetaBar();
-  $('recapRefCols').style.display='none';
+  $('recapRefCols').style.display='';
   $('btnEdit').textContent='✏️ Sửa';
   $('btnAddSKU').classList.add('hidden');
   $('btnSyncSKU').classList.add('hidden');
