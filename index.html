@@ -656,19 +656,22 @@ function loadData(){
     const c=l.split('\t');if(c.length<5)return;
     fc.saleData[c[0].trim()+c[1].trim()]={salesQty:parseFloat(c[2])||0,closingQty:parseFloat(c[3])||0,choGiao:parseFloat(c[4])||0};
   });
+  let saleMatched=0;
   fc.fcTable.forEach(r=>{
     const sd=fc.saleData[r.maCHSP];
-    if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs}
+    if(sd){r.slBan=sd.salesQty;r.slTon=sd.closingQty;r.slCG=sd.choGiao;r.gtBan=sd.salesQty*r.cogs;r.gtTon=sd.closingQty*r.cogs;r.gtCG=sd.choGiao*r.cogs;saleMatched++;}
   });
 
   runConfigSilent();
 
   const chSet=new Set(fc.fcTable.map(r=>r.maCH));
-  $('importBadge').textContent=chSet.size+' CH × '+fc.recapTable.length+' SKU · '+Object.keys(fc.saleData).length+' dòng Sale';
+  const saleTotal=Object.keys(fc.saleData).length;
+  const unmatched=saleTotal-saleMatched;
+  $('importBadge').innerHTML=chSet.size+' CH × '+fc.recapTable.length+' SKU · <b>'+saleTotal+'</b> dòng Sale ('+saleMatched+' khớp'+(unmatched>0?' · <span style="color:#c62828">'+unmatched+' lệch</span>':'')+')';
   $('importBadge').className='badge green';
   $('resultsSection').classList.remove('hidden');
   renderAll();updateMetaBar();
-  toast('✅ '+fc.fcTable.length+' dòng FC, '+chSet.size+' CH','success');
+  toast('✅ '+fc.fcTable.length+' dòng FC, '+chSet.size+' CH · Sale khớp '+saleMatched+'/'+saleTotal,'success');
 }
 
 // ============ FILE UPLOAD ============
