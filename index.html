@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v4.7</title>
+<title>FC Hàng Hóa — v4.8</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.7</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.8</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v4.7 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v4.8 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v4.7">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v4.8">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -1017,13 +1017,19 @@ function updateKPIs(){
 // EXPORT
 function exportFC(){
   const fc=current();if(!fc.fcTable.length)return toast('Chưa có dữ liệu!','error');
-  const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC','Min','SL Tồn','GT Tồn','SL Bán','GT Bán','SL CG','GT CG','SL FC','GT FC','Block','+Stock','+CG','Lock','Cover','SL Final','GT Final','MOV'];
-  const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus'];
-  let tsv='\ufeff'+cols.join('\t')+'\n'+fc.fcTable.map(r=>keys.map(k=>r[k]!=null?r[k]:'').join('\t')).join('\n');
-  const d=new Date(),a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([tsv],{type:'text/tab-separated-values'}));
-  a.download='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.tsv';
-  a.click();URL.revokeObjectURL(a.href);toast('✅ Đã xuất!','success');
+  try{
+    const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC','Min','SL Tồn','GT Tồn','SL Bán','GT Bán','SL CG','GT CG','SL FC','GT FC','Block','+Stock','+CG','Lock','Cover','SL Final','GT Final','MOV'];
+    const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus'];
+    const data=[cols].concat(fc.fcTable.map(r=>keys.map(k=>r[k]!=null?r[k]:'')));
+    const ws=XLSX.utils.aoa_to_sheet(data);
+    ws['!cols']=cols.map(c=>({wch:Math.min(Math.max(String(c).length+2,8),20)}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'FC_Data');
+    const d=new Date();
+    const fn='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.xlsb';
+    XLSX.writeFile(wb,fn,{bookType:'xlsb',type:'binary'});
+    toast('✅ Đã xuất .xlsb!','success');
+  }catch(e){toast('❌ Lỗi xuất: '+e.message,'error')}
 }
 
 // ============ SAVE / LOAD ============
