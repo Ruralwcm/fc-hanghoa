@@ -232,8 +232,6 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <h3>⚙️ 2. Khai Báo Cấu Hình</h3>
           <div class="flex-row">
             <button class="btn btn-primary btn-xs" id="btnEdit" onclick="toggleEditMode()">✏️ Sửa</button>
-            <button class="btn btn-outline btn-xs hidden" id="btnAddSKU" onclick="addRecapRow()">+ SKU</button>
-            <button class="btn btn-outline btn-xs hidden" id="btnSyncSKU" onclick="syncRecapFromFC()">🔄 Đồng bộ</button>
             <button class="btn btn-outline btn-xs" id="btnCalcMin" onclick="autoCalcMin()" style="background:#0277bd;color:#fff">🧮 Tính Min</button>
             <button class="btn btn-warning btn-xs hidden" id="btnSave" onclick="saveAndRun()">💾 Lưu & Chạy FC</button>
             <span class="badge green" id="configSaved">✅ Đã lưu</span>
@@ -849,8 +847,6 @@ function renderRecapTable(){
 function toggleEditMode(){
   STATE.editMode=!STATE.editMode;
   $('btnEdit').textContent=STATE.editMode?'🔒 Khóa':'✏️ Sửa';
-  $('btnAddSKU').classList.toggle('hidden',!STATE.editMode);
-  $('btnSyncSKU').classList.toggle('hidden',!STATE.editMode);
   $('btnSave').classList.toggle('hidden',!STATE.editMode);
   $('configSaved').style.display=STATE.editMode?'none':'inline';
   renderRecapTable();
@@ -898,12 +894,6 @@ function toggleSaleRef(){
   renderRecapTable();
 }
 
-function addRecapRow(){current().recapTable.push({maSP:'',tenSP:'',dvt:'',qc:1,giaMua:0,giaThuong:0,giaKM:0,ncc:'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1});renderRecapTable()}
-function syncRecapFromFC(){
-  const fc=current(),s=new Set();
-  fc.fcTable.forEach(r=>{if(!s.has(r.maSP)){s.add(r.maSP);if(!fc.recapTable.find(x=>x.maSP===r.maSP))fc.recapTable.push({maSP:r.maSP,tenSP:r.tenSP,dvt:r.dvt,qc:r.qc,giaMua:r.cogs,giaThuong:0,giaKM:0,ncc:r.nccCTKM||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1})}});
-  renderRecapTable();toast('✅ Đồng bộ','success');
-}
 function saveConfig(){
   current().configSaved=true;$('configSaved').style.display='inline';
   try{const sv={};Object.keys(FC_TYPES).forEach(k=>{const f=STATE.fcTypes[k];sv[k]={recapTable:f.recapTable,movTable:f.movTable}});localStorage.setItem('fc-config',JSON.stringify(sv))}catch(e){}
@@ -1156,8 +1146,6 @@ async function init(){
   renderMOVTable();renderRecapTable();updateMetaBar();
   $('recapRefCols').style.display='';
   $('btnEdit').textContent='✏️ Sửa';
-  $('btnAddSKU').classList.add('hidden');
-  $('btnSyncSKU').classList.add('hidden');
   $('btnSave').classList.add('hidden');
   $('configSaved').style.display='inline';
   // Default RECAP from template (Temp_SKUs_FC)
