@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v3.8</title>
+<title>FC Hàng Hóa — v3.9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.8</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.9</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v3.8 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v3.9 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v3.8">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v3.9">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -550,8 +550,6 @@ function importTemplateSilent(){
   const fc=current();
   const lines=$('tmplPaste').value.trim().split('\n');
   let count=0;
-  // Clear old MOV data before re-importing
-  fc.movTable=[];
   lines.forEach(l=>{
     const c=l.split('\t');if(c.length<5)return;
     const maSP=c[0].trim();
@@ -724,21 +722,7 @@ function handleDMFileUpload(inp){
 
 // Combined verify + import for auto-flow
 function verifyAndImportTemplate(){
-  // Parse MOV import if present
-  if(STATE._movImport&&STATE._movImport.length){
-    const fc=current();fc.movTable=[];
-    STATE._movImport.forEach(l=>{
-      const c=l.split('\t');
-      if(c.length>=2&&c[0]&&c[1]){
-        const ncc=c[0].trim(), tinh=c[1].trim(), mov=parseFloat(c[2])||0, pct=parseFloat(c[3])||0.7;
-        let mr=fc.movTable.find(m=>m.ncc===ncc);
-        if(!mr){mr={ncc,pctMinMOV:pct,allTinh:500000,tinhMOV:{}};fc.movTable.push(mr);}
-        mr.tinhMOV[tinh]=mov; mr.pctMinMOV=pct;
-      }
-    });
-    STATE._movImport=null;
-  }
-  // Verify SKU template
+  // Verify SKU template first
   const lines=$('tmplPaste').value.trim().split('\n');
   if(!lines[0]) return;
   let ok=0, errs=[];
@@ -750,11 +734,29 @@ function verifyAndImportTemplate(){
   });
   if(errs.length){
     $('tmplVerifyResult').innerHTML='<span style="color:#c62828">❌ '+errs.length+' lỗi: '+errs.slice(0,2).join('; ')+'</span>';
-  } else {
-    $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ '+ok+' SKU hợp lệ · '+(current().movTable.length||0)+' MOV</span>';
-    // Auto-import
-    importTemplate();
+    return;
   }
+  // Import SKUs first
+  importTemplateSilent();
+  // Then import MOV data from Excel separately (don't let importTemplateSilent overwrite)
+  if(STATE._movImport&&STATE._movImport.length){
+    const fc=current();
+    STATE._movImport.forEach(l=>{
+      const c=l.split('\t');
+      if(c.length>=2&&c[0]&&c[1]){
+        const ncc=c[0].trim(), tinh=c[1].trim(), mov=parseFloat(c[2])||0, pct=parseFloat(c[3])||0.7;
+        let mr=fc.movTable.find(m=>m.ncc===ncc);
+        if(!mr){mr={ncc,pctMinMOV:pct,allTinh:500000,tinhMOV:{}};fc.movTable.push(mr);}
+        mr.tinhMOV[tinh]=mov; mr.pctMinMOV=pct;
+      }
+    });
+    STATE._movImport=null;
+  }
+  renderRecapTable();renderMOVTable();
+  $('resultsSection').classList.remove('hidden');
+  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ '+ok+' SKU hợp lệ · '+(current().movTable.length||0)+' nhóm MOV</span>';
+  $('tmplImportBtn').classList.add('hidden');
+  toast('✅ '+ok+' SKU + MOV đã import!','success');
 }
 
 function handleFileUpload(inp){
