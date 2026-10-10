@@ -512,15 +512,14 @@ function clearGDV(){
 
 // ============ TEMPLATE UPLOAD & VERIFY ============
 function exportTemplate(){
-  const header='Mã SP\tTên SP\tĐVT\tQC\tGiá mua\tGiá thường\tGiá KM\tDiễn giải CTKM\tThời gian KM\tNCC\t\t\tNCC\tTỉnh\tMOV';
-  const sample='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\t\tdd/mm - dd/mm\tChia hàng\t\t\tChia hàng\tTP. Hà Nội\t1000000';
-  const tsv='\ufeff'+header+'\n'+sample;
-  const b=new Blob([tsv],{type:'text/tab-separated-values;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b);
-  a.download='FC_Template_SKU_MOV.tsv';
-  a.click();URL.revokeObjectURL(a.href);
-  toast('📥 Đã tải Template mẫu!','success');
+  const header=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải CTKM','Thời gian KM','NCC','','','NCC','Tỉnh','MOV'];
+  const sample=['10007893','HẢO HẢO Mì tôm chua cay 75g','G1',30,3580,43000,64900,'','dd/mm - dd/mm','Chia hàng','','','Chia hàng','TP. Hà Nội',1000000];
+  const ws=XLSX.utils.aoa_to_sheet([header,sample]);
+  ws['!cols']=header.map(c=>({wch:Math.min(Math.max(String(c).length+2,8),22)}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Template');
+  XLSX.writeFile(wb,'FC_Template_SKU_MOV.xlsx',{bookType:'xlsx',type:'binary'});
+  toast('📥 Đã tải Template mẫu (.xlsx)!','success');
 }
 
 function verifyTemplate(){
@@ -1058,9 +1057,9 @@ function exportFC(){
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'FC_Data');
     const d=new Date();
-    const fn='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.xlsb';
-    XLSX.writeFile(wb,fn,{bookType:'xlsb',type:'binary'});
-    toast('✅ Đã xuất .xlsb!','success');
+    const fn='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.xlsx';
+    XLSX.writeFile(wb,fn,{bookType:'xlsx',type:'binary'});
+    toast('✅ Đã xuất .xlsx!','success');
   }catch(e){toast('❌ Lỗi xuất: '+e.message,'error')}
 }
 
