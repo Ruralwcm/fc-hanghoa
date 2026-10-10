@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v4.1</title>
+<title>FC Hàng Hóa — v4.2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.1</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v4.2</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v4.1 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v4.2 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v4.1">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v4.2">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -191,7 +191,6 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
               <button class="btn btn-xs btn-outline" onclick="exportTemplate()" style="font-size:9px;padding:3px 8px">📥 Tải Template</button>
-              <button class="btn btn-xs btn-outline" onclick="verifyAndImportTemplate()" style="font-size:9px;padding:3px 8px">🔍 Verify</button>
               <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px;padding:3px 8px">✅ Import</button>
               <span class="info-text" id="tmplVerifyResult"></span>
             </div>
@@ -722,9 +721,10 @@ function handleDMFileUpload(inp){
 
 // Combined verify + import for auto-flow
 function verifyAndImportTemplate(){
-  // Parse MOV data from Excel first (before anything clears it)
+  const fc=current();
+  // Parse MOV data from Excel first
   if(STATE._movImport&&STATE._movImport.length){
-    const fc=current();
+    fc.movTable=[]; // fresh start
     STATE._movImport.forEach(l=>{
       const c=l.split('\t');
       if(c.length>=2&&c[0]&&c[1]){
@@ -736,30 +736,27 @@ function verifyAndImportTemplate(){
     });
     STATE._movImport=null;
   }
-  // Verify SKU template
+  // Verify + Import SKU
   const lines=$('tmplPaste').value.trim().split('\n');
-  if(!lines[0]) return;
+  if(!lines[0]){ renderMOVTable(); return; }
   let ok=0, errs=[];
   lines.forEach((l,i)=>{
     const c=l.split('\t');
-    if(c.length<5) {errs.push('Dòng '+(i+1)+': thiếu cột'); return;}
-    if(!c[0].trim()) {errs.push('Dòng '+(i+1)+': thiếu Mã SP'); return;}
+    if(c.length<5){ errs.push('Dòng '+(i+1)+': thiếu cột'); return; }
+    if(!c[0].trim()){ errs.push('Dòng '+(i+1)+': thiếu Mã SP'); return; }
     ok++;
   });
   if(errs.length){
-    $('tmplVerifyResult').innerHTML='<span style="color:#c62828">❌ '+errs.length+' lỗi: '+errs.slice(0,2).join('; ')+'</span>';
-    renderMOVTable();
-    return;
+    $('tmplVerifyResult').innerHTML='<span style="color:#c62828">❌ '+errs.length+' lỗi</span>';
+    renderMOVTable(); return;
   }
-  // Import SKUs
   const count=importTemplateSilent();
-  // Render both boxes
   renderRecapTable();renderMOVTable();
   $('resultsSection').classList.remove('hidden');
-  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ '+count+' SKU · '+(current().movTable.length||0)+' MOV</span>';
+  const movRows=fc.movTable.reduce((s,m)=>s+Object.keys(m.tinhMOV||{}).length,0);
+  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ '+count+' SKU · '+movRows+' MOV</span>';
   $('tmplImportBtn').classList.add('hidden');
-  // Keep data visible in template box (don't clear)
-  toast('✅ '+count+' SKU + '+(current().movTable.length||0)+' MOV đã import!','success');
+  toast('✅ '+count+' SKU + '+movRows+' MOV đã import!','success');
 }
 
 function handleFileUpload(inp){
