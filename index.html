@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v3.6</title>
+<title>FC Hàng Hóa — v3.7</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -136,18 +136,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.6</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v3.7</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v3.6 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v3.7 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v3.6">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v3.7">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -244,7 +244,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <div class="table-wrap" style="max-height:220px">
             <table id="recapTable">
               <thead><tr>
-                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>NCC</th>
+                <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>Diễn giải</th><th>NCC</th>
                 <th colspan="8" id="recapRefCols">📊 Sale Ref (N1–N8) <button class="btn btn-xs btn-outline" onclick="toggleSaleRef()" style="font-size:8px;padding:1px 4px;margin-left:4px" id="saleRefBtn">Hiện</button></th>
                 <th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th>
                 <th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th><th></th>
@@ -556,20 +556,22 @@ function importTemplateSilent(){
     const maSP=c[0].trim();
     // RECAP columns: 0=Mã SP, 1=Tên SP, 2=ĐVT, 3=QC, 4=Giá mua, 5=Giá thường, 6=Giá KM, 7=NCC
     const existing=fc.recapTable.findIndex(r=>r.maSP===maSP);
-    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,ncc:c[9]||c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1};
+    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,dienGiai:c[7]||'',ncc:c[9]||c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1};
     if(existing>=0) fc.recapTable[existing]=row;
     else fc.recapTable.push(row);
     count++;
 
     // Parse MOV columns if present (col 13=NCC, 14=Tỉnh, 15=MOV)
     if(c.length>=14){
-      const movNCC=c[12]?c[12].trim():c[9]?c[9].trim():c[7]?c[7].trim():null;
+      const movNCC=c[12]?c[12].trim():null;
       const movTinh=c[13]?c[13].trim():null;
       const movVal=c[14]?parseFloat(c[14])||0:0;
+      const movPct=c[15]?parseFloat(c[15])||0.7:0.7;
       if(movNCC&&movTinh){
         let movRow=fc.movTable.find(m=>m.ncc===movNCC);
-        if(!movRow){movRow={ncc:movNCC,pctMinMOV:0.7,allTinh:500000,tinhMOV:{}};fc.movTable.push(movRow);}
+        if(!movRow){movRow={ncc:movNCC,pctMinMOV:movPct,allTinh:500000,tinhMOV:{}};fc.movTable.push(movRow);}
         movRow.tinhMOV[movTinh]=movVal;
+        movRow.pctMinMOV=movPct; // per-row %Min
       }
     }
   });
@@ -701,9 +703,9 @@ function handleDMFileUpload(inp){
           // SKU data: cols 0-9 (Mã SP through NCC)
           const skuRow=r.slice(0,10).map(c=>c!=null?String(c).trim():'').join('\t');
           if(r[0]){ skuLines.push(skuRow); skuCount++; }
-          // MOV data: cols 12-14 (NCC, Tỉnh, MOV)
+          // MOV data: cols 12-15 (NCC, Tỉnh, MOV, %Min)
           if(r.length>=14&&r[12]&&r[13]){
-            const movRow=r.slice(12,15).map(c=>c!=null?String(c).trim():'').join('\t');
+            const movRow=r.slice(12,16).map(c=>c!=null?String(c).trim():'').join('\t');
             movLines.push(movRow); movCount++;
           }
         }
@@ -727,10 +729,10 @@ function verifyAndImportTemplate(){
     STATE._movImport.forEach(l=>{
       const c=l.split('\t');
       if(c.length>=2&&c[0]&&c[1]){
-        const ncc=c[0].trim(), tinh=c[1].trim(), mov=parseFloat(c[2])||0;
+        const ncc=c[0].trim(), tinh=c[1].trim(), mov=parseFloat(c[2])||0, pct=parseFloat(c[3])||0.7;
         let mr=fc.movTable.find(m=>m.ncc===ncc);
-        if(!mr){mr={ncc,pctMinMOV:0.7,allTinh:500000,tinhMOV:{}};fc.movTable.push(mr);}
-        mr.tinhMOV[tinh]=mov;
+        if(!mr){mr={ncc,pctMinMOV:pct,allTinh:500000,tinhMOV:{}};fc.movTable.push(mr);}
+        mr.tinhMOV[tinh]=mov; mr.pctMinMOV=pct;
       }
     });
     STATE._movImport=null;
@@ -805,6 +807,7 @@ function renderRecapTable(){
     } else {
       h+='<td>'+r.qc+'</td><td>'+fmt(r.giaMua)+'</td><td>'+fmt(r.giaThuong||0)+'</td><td>'+fmt(r.giaKM||0)+'</td>';
     }
+    h+='<td style="font-size:9px;color:#888;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.dienGiai||'')+'">'+(r.dienGiai||'')+'</td>';
     h+='<td style="color:#555;font-size:10px">'+r.ncc+'</td>';
     // Sale Ref columns (toggle)
     if(showRef){
