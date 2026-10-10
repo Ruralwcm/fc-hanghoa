@@ -240,7 +240,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           </div>
         </div>
         <div class="card-body" style="padding:6px 12px">
-          <p class="section-label">📐 RECAP — Thông số đặt hàng theo SKU <span style="font-weight:400;color:#e65100;font-size:9px;margin-left:8px">💡 Set N1 + N8 → bấm 🧮 Tính Min → N2–N7 tự nội suy</span></p>
+          <p class="section-label">📐 RECAP — Thông số đặt hàng theo SKU <span style="font-weight:400;color:#e65100;font-size:9px;margin-left:8px">💡 Set N1 + N8 → bấm 🧮 Tính Min → N2–N7 tự nội suy (làm tròn theo QC)</span></p>
           <div class="table-wrap" style="max-height:220px">
             <table id="recapTable">
               <thead><tr>
@@ -873,20 +873,22 @@ function autoCalcMin(){
   const fc=current();if(!fc.fcTable.length)return toast('Chưa có dữ liệu! Load data trước.','error');
   let count=0;
   fc.recapTable.forEach(rc=>{
-    const n1=rc.N1||0, n8=rc.N8||0;
-    if(n1===0&&n8===0) return; // skip if both are 0
+    const n1=rc.N1||0, n8=rc.N8||0, qc=rc.qc||1;
+    if(n1===0&&n8===0) return;
     const step=(n8-n1)/7;
-    rc.N2=Math.round(n1+step);
-    rc.N3=Math.round(n1+2*step);
-    rc.N4=Math.round(n1+3*step);
-    rc.N5=Math.round(n1+4*step);
-    rc.N6=Math.round(n1+5*step);
-    rc.N7=Math.round(n1+6*step);
+    // Round each N to nearest QC multiple for ordering efficiency
+    rc.N2=qc*Math.round((n1+1*step)/qc);
+    rc.N3=qc*Math.round((n1+2*step)/qc);
+    rc.N4=qc*Math.round((n1+3*step)/qc);
+    rc.N5=qc*Math.round((n1+4*step)/qc);
+    rc.N6=qc*Math.round((n1+5*step)/qc);
+    rc.N7=qc*Math.round((n1+6*step)/qc);
     count++;
   });
   if(!count) return toast('⚠️ Vui lòng set N1 và N8 trước khi Tính Min!','error');
   renderRecapTable();
-  toast('✅ Đã tính Min: '+count+' SKU — N1='+fmt(current().recapTable[0]?.N1||0)+' → N8='+fmt(current().recapTable[0]?.N8||0)+' (bước nhảy '+fmt(Math.round((current().recapTable[0]?.N8||0)-(current().recapTable[0]?.N1||0))/7)+'/N)','success');
+  const r0=current().recapTable[0];
+  toast('✅ Đã tính Min: '+count+' SKU — N1='+fmt(r0?.N1||0)+' → N8='+fmt(r0?.N8||0)+' (QC='+(r0?.qc||1)+', bước ~'+fmt(Math.round(((r0?.N8||0)-(r0?.N1||0))/7))+'/'+r0?.qc+')','success');
 }
 
 function toggleSaleRef(){
