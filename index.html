@@ -772,7 +772,7 @@ function runConfigSilent(){
   const nd=STATE.ngayKD||30,rm={};fc.recapTable.forEach(r=>{rm[r.maSP]=r});
   fc.fcTable.forEach(r=>{const c=rm[r.maSP]||{};
     r.block=c.block||1;r.plusStock=c.plusStock||1;r.plusCG=c.plusCG||1;r.lockMax=c.lockMax||2;r.coverDay=c.coverDay||14;r.nccCTKM=c.ncc||'Chia hàng';r.checkDR=1;
-    const J=r.qc||1,Q=r.slTon,AC=r.coverDay,N=c[r.nhomN]||0,O=r.slTon,Z=r.plusCG,S=r.slCG,AA=r.plusStock,AB=r.lockMax;r.min=N;
+    const J=r.qc||1,Q=r.slBan,AC=r.coverDay,N=c[r.nhomN]||0,O=r.slTon,Z=r.plusCG,S=r.slCG,AA=r.plusStock,AB=r.lockMax;r.min=N;
     r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Q/nd*AC+N-O*Z-S*AA,AB*N))/J));
     r.gtFC=r.slFC*r.cogs;r.slFCRound=r.slFC;r.gtFCRound=r.gtFC;
   });
@@ -985,16 +985,16 @@ function renderPivot(){
   });
 
   const labels={tinh:'Miền/Tỉnh',gdv:'GĐV',store:'🎯 Top Stores theo PN',ncc:'🏷 NCC/CTKM',mch3:'MCH3'};
-  let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th><th>FC BQ/CH</th><th>DR</th>'+(sub?'<th></th>':'')+'</tr></thead><tbody>';
+  let h='<table><thead><tr><th>'+(labels[level]||'')+'</th><th>#CH</th><th>SL Bán</th><th>GT Bán</th><th>SL Tồn</th><th>DR</th><th>GT Tồn</th><th>SL CG</th><th>GT CG</th><th>SL FC</th><th>GT FC</th><th>SL Final</th><th>GT Final</th><th>FC BQ/CH</th>'+(sub?'<th></th>':'')+'</tr></thead><tbody>';
   let gd={ch:0,slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slR:0,gtR:0,drOk:0};
   for(const k of Object.keys(grps).sort()){const g=grps[k];
     const gBQ=g.ch.size>0?Math.round(g.gtR/g.ch.size):0;const gDR=g.items.length>0?Math.round(g.drOk/g.items.length*100):0;
     h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td><td>'+g.ch.size+'</td>'
-      +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+fmt(Math.round(g.gtT))+'</td>'
+      +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+(gDR>=80?'<span style="color:#2e7d32;font-weight:600">':gDR>=50?'<span style="color:#ef6c00;font-weight:600">':'<span style="color:#c62828;font-weight:600">')+gDR+'%</span></td><td>'+fmt(Math.round(g.gtT))+'</td>'
       +'<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>'
       +'<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>'
       +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'
-      +'<td>'+fmt(gBQ)+'</td><td>'+(gDR>=80?'<span style="color:#2e7d32;font-weight:600">':gDR>=50?'<span style="color:#ef6c00;font-weight:600">':'<span style="color:#c62828;font-weight:600">')+gDR+'%</span></td>'
+      +'<td>'+fmt(gBQ)+'</td>'
       +(sub?'<td>'+g.items.length+'</td>':'')+'</tr>';
     if(sub){const sg={};g.items.forEach(r=>{
       let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else if(sub==='nhomN'){
@@ -1020,18 +1020,18 @@ function renderPivot(){
       const sBQ=sCH>0?Math.round(gF/sCH):0;
       const sDR=sCH>0?Math.round(its.filter(r=>r.checkDR).length/sCH*100):0;
       h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row" data-p="'+k.replace(/"/g,'&quot;')+'"><td style="padding-left:20px">↳ '+sk+'</td><td>'+sCH+'</td>'
-      +'<td>'+fmt(Math.round(sB))+'</td><td>'+fmt(Math.round(gB))+'</td><td>'+fmt(Math.round(sT))+'</td><td>'+fmt(Math.round(gT))+'</td>'
+      +'<td>'+fmt(Math.round(sB))+'</td><td>'+fmt(Math.round(gB))+'</td><td>'+fmt(Math.round(sT))+'</td><td>'+(sDR>=80?'<span style="color:#2e7d32">':sDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+sDR+'%</span></td><td>'+fmt(Math.round(gT))+'</td>'
       +'<td>'+fmt(Math.round(sCG))+'</td><td>'+fmt(Math.round(gCG))+'</td><td>'+fmt(Math.round(sFC))+'</td><td>'+fmt(Math.round(gFC))+'</td>'
-      +'<td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+fmt(sBQ)+'</td><td>'+(sDR>=80?'<span style="color:#2e7d32">':sDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+sDR+'%</span></td>'
+      +'<td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+fmt(sBQ)+'</td>'
       +'<td>'+its.length+'</td></tr>'
       }}
     gd.ch+=g.ch.size;gd.slB+=g.slB;gd.gtB+=g.gtB;gd.slT+=g.slT;gd.gtT+=g.gtT;gd.slCG+=g.slCG;gd.gtCG+=g.gtCG;gd.slFC+=g.slFC;gd.gtFC+=g.gtFC;gd.slR+=g.slR;gd.gtR+=g.gtR;gd.drOk+=g.drOk;
   }
   const gdBQ=gd.ch>0?Math.round(gd.gtR/gd.ch):0;const gdDR=gd.ch>0?Math.round(gd.drOk/gd.ch*100):0;h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+gd.ch+'</td>'
-    +'<td>'+fmt(Math.round(gd.slB))+'</td><td>'+fmt(Math.round(gd.gtB))+'</td><td>'+fmt(Math.round(gd.slT))+'</td><td>'+fmt(Math.round(gd.gtT))+'</td>'
+    +'<td>'+fmt(Math.round(gd.slB))+'</td><td>'+fmt(Math.round(gd.gtB))+'</td><td>'+fmt(Math.round(gd.slT))+'</td><td><b>'+gdDR+'%</b></td><td>'+fmt(Math.round(gd.gtT))+'</td>'
     +'<td>'+fmt(Math.round(gd.slCG))+'</td><td>'+fmt(Math.round(gd.gtCG))+'</td>'
     +'<td><b>'+fmt(Math.round(gd.slFC))+'</b></td><td><b>'+fmt(Math.round(gd.gtFC))+'</b></td>'
-    +'<td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td><td><b>'+fmt(gdBQ)+'</b></td><td><b>'+gdDR+'%</b></td>'+(sub?'<td></td>':'')+'</tr></tbody></table>';
+    +'<td><b>'+fmt(Math.round(gd.slR))+'</b></td><td><b>'+fmt(Math.round(gd.gtR))+'</b></td><td><b>'+fmt(gdBQ)+'</b></td>'+(sub?'<td></td>':'')+'</tr></tbody></table>';
   $('pivotWrap').innerHTML=h;
   $('pivotSummary').textContent=Object.keys(grps).length+' nhóm · '+data.length+' dòng';
   $('fcTableBadge').textContent=fc.fcTable.length+' dòng';
