@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v6.9</title>
+<title>FC Hàng Hóa — v6.10</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.9</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.10</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v6.9 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v6.10 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v6.9">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v6.10">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -925,6 +925,29 @@ function renderRecapTable(){
     h+='</tr>';
     tb.innerHTML+=h;
   });
+
+  // Keyboard navigation: Arrow Up/Down to navigate rows
+  if(edit){
+    tb.onkeydown=function(e){
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+        const inp=e.target;
+        if(!inp||inp.tagName!=='INPUT')return;
+        const td=inp.closest('td'),tr=td.closest('tr');
+        if(!td||!tr)return;
+        const cells=tr.querySelectorAll('td');
+        const colIdx=Array.from(cells).indexOf(td);
+        const nextRow=e.key==='ArrowDown'?tr.nextElementSibling:tr.previousElementSibling;
+        if(nextRow){
+          const nextCells=nextRow.querySelectorAll('td');
+          if(nextCells[colIdx]){
+            const nextInput=nextCells[colIdx].querySelector('input');
+            if(nextInput){nextInput.focus();nextInput.select();}
+          }
+        }
+        e.preventDefault();
+      }
+    };
+  }
 }
 function updateRecapUI(){
   $('btnEdit').textContent=STATE.editMode?'💾 Lưu':'✏️ Sửa';
