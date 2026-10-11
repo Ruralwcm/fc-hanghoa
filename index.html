@@ -194,6 +194,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
               <button class="btn btn-xs btn-outline" onclick="exportTemplate()" style="font-size:9px;padding:3px 8px">📥 Tải Template</button>
+              <button class="btn btn-xs btn-outline" onclick="clearAll()" style="font-size:9px;padding:3px 8px;color:#c62828">🧹 Clear</button>
               <button class="btn btn-xs btn-success" onclick="loadData()" style="font-size:9px;padding:3px 8px;font-weight:700">📥 Load data</button>
               <button class="btn btn-xs btn-outline" onclick="exportFC()" style="font-size:9px;padding:3px 8px">📥 Xuất</button>
               <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px;padding:3px 8px">✅ Import</button>
@@ -894,6 +895,16 @@ function toggleCollapse(){
   STATE.collapse=!STATE.collapse;
   $('btnCollapse').textContent=STATE.collapse?'📖 Full':'📌 Rút gọn';
   renderRecapTable();
+}
+
+function clearAll(){
+  $('tmplPaste').value='';$('salePaste').value='';
+  $('tmplVerifyResult').innerHTML='';
+  const fc=current();fc.fcTable=[];fc.recapTable=[];fc.movTable=[];
+  $('resultsSection').classList.add('hidden');
+  renderRecapTable();renderMOVTable();renderPivot();
+  updateMetaBar();updateKPIs();
+  toast('🧹 Đã clear!','info');
 }
 
 function saveAndRun(){
