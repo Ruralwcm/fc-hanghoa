@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v6.2</title>
+<title>FC Hàng Hóa — v6.3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.2</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.3</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v6.2 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v6.3 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v6.2">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v6.3">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -1018,15 +1018,6 @@ function renderPivot(){
   const view=STATE.currentPivot,sr=($('pivotSearch').value||'').toLowerCase();
   const fMch3=($('pivotMCH3')?.value||'');
   const fNcc=($('pivotNCC')?.value||'');
-  // Populate MCH3 & NCC dropdowns
-  const selM=$('pivotMCH3'),selN=$('pivotNCC');
-  if(selM&&selN){
-    const curM=selM.value,curN=selN.value;
-    const mch3Set=new Set(fc.fcTable.map(r=>r.mch3).filter(Boolean));
-    const nccSet=new Set(fc.fcTable.map(r=>r.nccCTKM).filter(Boolean));
-    selM.innerHTML='<option value="">Tất cả MCH3</option>'+[...mch3Set].sort().map(v=>'<option value="'+v+'"'+(v===curM?' selected':'')+'>'+v+'</option>').join('');
-    selN.innerHTML='<option value="">Tất cả NCC</option>'+[...nccSet].sort().map(v=>'<option value="'+v+'"'+(v===curN?' selected':'')+'>'+v+'</option>').join('');
-  }
   let data=fc.fcTable;
   if(sr)data=data.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(sr)>=0);
   if(fMch3)data=data.filter(r=>r.mch3===fMch3);
@@ -1102,7 +1093,19 @@ function renderPivot(){
 
 function togglePivot(row){const k=row.getAttribute('data-k'),ic=row.querySelector('td'),op=ic.textContent.startsWith('▼');ic.textContent=(op?'▶ ':'▼ ')+k;document.querySelectorAll('.sub-row[data-p="'+CSS.escape(k)+'"]').forEach(el=>el.style.display=op?'none':'')}
 
-function renderAll(){renderRecapTable();renderMOVTable();renderPivot()}
+function renderAll(){renderRecapTable();renderMOVTable();populatePivotDropdowns();renderPivot()}
+
+// Populate dropdowns once (not on every render)
+function populatePivotDropdowns(){
+  const fc=current();if(!fc.fcTable.length)return;
+  const selM=$('pivotMCH3'),selN=$('pivotNCC');
+  if(!selM||!selN)return;
+  const curM=selM.value,curN=selN.value;
+  const mch3Set=new Set(fc.fcTable.map(r=>r.mch3).filter(Boolean));
+  const nccSet=new Set(fc.fcTable.map(r=>r.nccCTKM).filter(Boolean));
+  selM.innerHTML='<option value="">Tất cả MCH3</option>'+[...mch3Set].sort().map(v=>'<option value="'+v+'"'+(v===curM?' selected':'')+'>'+v+'</option>').join('');
+  selN.innerHTML='<option value="">Tất cả NCC</option>'+[...nccSet].sort().map(v=>'<option value="'+v+'"'+(v===curN?' selected':'')+'>'+v+'</option>').join('');
+}
 
 function updateKPIs(){
   const fc=current();let sl=0,gt=0,du=0,th=0,lo=0;
