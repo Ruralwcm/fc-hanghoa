@@ -188,8 +188,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <!-- Template SKU -->
           <div class="import-col dm">
             <div class="import-title">📋 Template SKU <span style="font-weight:400;color:#999">(Danh mục + MOV)</span></div>
-            <textarea id="tmplPaste" rows="3" placeholder="Mã SP · Tên SP · ĐVT · QC · Giá mua · Giá thường · Giá KM · NCC ... NCC · Tỉnh · MOV
-10007893	HẢO HẢO Mì tôm chua cay 75g	G1	30	3580	43000	64900	Chia hàng		Chia hàng	TP. Hà Nội	1000000" style="height:90px;font-size:9px"></textarea>
+            <textarea id="tmplPaste" rows="3" placeholder="Mã SP	Tên SP	ĐVT	QC	Giá mua	Giá thường	Giá KM	Diễn giải	Thời gian	NCC			NCC	Tỉnh	Mov	%Min
+10007893	HẢO HẢO Mì tôm chua cay 75g	G1	30	3580	43000	64900	Mua 2 tặng 1	dd/mm-dd	Chia hàng			Chia hàng	TP. Hà Nội	500000	0.8" style="height:90px;font-size:9px"></textarea>
             <div class="flex-row" style="margin-top:4px;gap:4px">
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
@@ -517,8 +517,8 @@ function clearGDV(){
 
 // ============ TEMPLATE UPLOAD & VERIFY ============
 function exportTemplate(){
-  const header=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải CTKM','Thời gian KM','NCC','','','NCC','Tỉnh','MOV'];
-  const sample=['10007893','HẢO HẢO Mì tôm chua cay 75g','G1',30,3580,43000,64900,'','dd/mm - dd/mm','Chia hàng','','','Chia hàng','TP. Hà Nội',1000000];
+  const header=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải CTKM','Thời gian KM','NCC','','','NCC','Tỉnh','Mov','%Min'];
+  const sample=['10007893','HẢO HẢO Mì tôm chua cay 75g','G1',30,3580,43000,64900,'Mua 2 tặng 1','dd/mm-dd','Chia hàng','','','Chia hàng','TP. Hà Nội',500000,0.8];
   const ws=XLSX.utils.aoa_to_sheet([header,sample]);
   ws['!cols']=header.map(c=>({wch:Math.min(Math.max(String(c).length+2,8),22)}));
   const wb=XLSX.utils.book_new();
@@ -1194,7 +1194,7 @@ async function init(){
   // Default FC input placeholder
   if(Object.keys(STATE.skuList).length>0){
     const sku=Object.keys(STATE.skuList)[0];
-    $('tmplPaste').value='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\t\t\tChia hàng\t\t\tChia hàng\tTP. Hà Nội\t1000000';
+    $('tmplPaste').value='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\tMua 2 tặng 1\tdd/mm-dd\tChia hàng\t\t\tChia hàng\tTP. Hà Nội\t500000\t0.8';
     $('salePaste').placeholder='2797\t'+sku+'\t87\t444\t0\n2924\t'+sku+'\t163\t360\t0\n3088\t'+sku+'\t494\t0\t90';
   }
 }
