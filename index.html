@@ -694,18 +694,18 @@ function handleDMFileUpload(inp){
     reader.onload=function(e){
       try{
         const wb=XLSX.read(e.target.result,{type:'array'});
-        const ws=wb.Sheets[wb.SheetNames[0]];
+        const skuName=wb.SheetNames.find(n=>/sku/i.test(n))||wb.SheetNames[0];
+        const ws=wb.Sheets[skuName];
         const data=XLSX.utils.sheet_to_json(ws,{header:1});
-        // Detect ranges: SKU columns (0-9), MOV columns (12-14)
         let skuLines=[], movLines=[], skuCount=0, movCount=0;
         for(let i=0;i<data.length;i++){
           const r=data[i];
-          if(!r||!r[0]) continue;
-          // Skip header row
-          if(i===0&&(String(r[0]).includes('Mã')||String(r[0]).includes('SP')||String(r[0]).includes('Article'))) continue;
-          // SKU data: cols 0-9 (Mã SP through NCC)
+          if(!r) continue;
+          if(i===0) continue; // skip header row
+          if(!r[0]) continue;
+          // SKU data: cols 0-9 (Mã SP → NCC)
           const skuRow=r.slice(0,10).map(c=>c!=null?String(c).trim():'').join('\t');
-          if(r[0]){ skuLines.push(skuRow); skuCount++; }
+          skuLines.push(skuRow); skuCount++;
           // MOV data: cols 12-15 (NCC, Tỉnh, MOV, %Min)
           if(r.length>=14&&r[12]&&r[13]){
             const movRow=r.slice(12,16).map(c=>c!=null?String(c).trim():'').join('\t');
@@ -713,10 +713,28 @@ function handleDMFileUpload(inp){
           }
         }
         $('tmplPaste').value=skuLines.join('\n');
-        // Also store MOV lines separately
         STATE._movImport=movLines;
-        toast('✅ Import '+skuCount+' SKU + '+movCount+' MOV từ Excel','success');
-        // Auto-verify after load
+
+        // Parse Sale sheet → Store · Article · Sales Qty · Closing Qty · Chờ giao
+        let saleCount=0;
+        const saleName=wb.SheetNames.find(n=>/sale/i.test(n));
+        if(saleName){
+          const wsSale=wb.Sheets[saleName];
+          const saleData=XLSX.utils.sheet_to_json(wsSale,{header:1});
+          const sl=[];
+          for(let i=1;i<saleData.length;i++){
+            const r=saleData[i];
+            if(!r) continue;
+            const store=String(r[0]!=null?r[0]:'').trim();
+            const article=String(r[1]!=null?r[1]:'').trim();
+            if(!store||!article) continue;
+            sl.push([store,article,r[2]!=null?r[2]:0,r[3]!=null?r[3]:0,r[4]!=null?r[4]:0].join('\t'));
+            saleCount++;
+          }
+          if(sl.length) $('salePaste').value=sl.join('\n');
+        }
+
+        toast('✅ Import '+skuCount+' SKU + '+movCount+' MOV + '+saleCount+' Sale dòng','success');
         setTimeout(()=>verifyAndImportTemplate(),200);
       }catch(err){toast('❌ Lỗi đọc Excel: '+err.message,'error')}
     };
