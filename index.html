@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v5.7</title>
+<title>FC Hàng Hóa — v5.8</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v5.7</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v5.8</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v5.7 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v5.8 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v5.7">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v5.8">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -267,14 +267,14 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <h3>📊 3. Pivot Dữ Liệu</h3>
           <div class="flex-row">
             <div class="pivot-tabs" id="pivotTabs">
-              <button class="pivot-tab active" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
-              <button class="pivot-tab" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
+              <button class="pivot-tab active" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
+              <button class="pivot-tab" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
               <button class="pivot-tab" onclick="switchPivotView('store',this)">🏪 Top Stores PN</button>
-              <button class="pivot-tab" onclick="switchPivotView('mch3-sku',this)">📦 MCH3/SKU</button>
-              <button class="pivot-tab" onclick="switchPivotView('ncc',this)">🏷 NCC/CTKM</button>
             </div>
-            <input type="text" id="pivotSearch" placeholder="Tìm..." oninput="renderPivot()" style="font-size:10px;width:100px;padding:3px 6px;border:1px solid #ddd;border-radius:4px;margin-left:auto">
-            <span class="badge green" id="fcTableBadge">0 dòng</span>
+            <input type="text" id="pivotSearch" placeholder="Tìm..." oninput="renderPivot()" style="font-size:10px;width:100px;padding:3px 6px;border:1px solid #ddd;border-radius:4px">
+            <input type="text" id="pivotMCH3" placeholder="MCH3..." oninput="renderPivot()" style="font-size:10px;width:80px;padding:3px 6px;border:1px solid #ddd;border-radius:4px">
+            <input type="text" id="pivotNCC" placeholder="NCC..." oninput="renderPivot()" style="font-size:10px;width:90px;padding:3px 6px;border:1px solid #ddd;border-radius:4px">
+            <span class="badge green" id="fcTableBadge" style="margin-left:auto">0 dòng</span>
             <span class="info-text" id="pivotSummary"></span>
           </div>
         </div>
@@ -348,7 +348,7 @@ const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'16
 
 // STATE
 let STATE={
-  currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,tinhList:[],
+  currentFC:'ambient',currentPivot:'gdv-qlkv',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,tinhList:[],
   storelist:{},skuList:{},nhomN:{},
   selectedTinh:new Set(), // selected "gdv|tinh" keys
   treeData:{}, // {mien: {gdv: {tinh: count}}}
@@ -1011,7 +1011,12 @@ function switchPivotView(view,btn){
 function renderPivot(){
   const fc=current();if(!fc.fcTable.length)return;
   const view=STATE.currentPivot,sr=($('pivotSearch').value||'').toLowerCase();
-  let data=fc.fcTable;if(sr)data=data.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(sr)>=0);
+  const fMch3=($('pivotMCH3')?.value||'').toLowerCase();
+  const fNcc=($('pivotNCC')?.value||'').toLowerCase();
+  let data=fc.fcTable;
+  if(sr)data=data.filter(r=>String(r.maCH+r.tenCH+r.tenSP+r.gdv+r.tinh+r.mch3).toLowerCase().indexOf(sr)>=0);
+  if(fMch3)data=data.filter(r=>(r.mch3||'').toLowerCase().indexOf(fMch3)>=0);
+  if(fNcc)data=data.filter(r=>(r.nccCTKM||'').toLowerCase().indexOf(fNcc)>=0);
 
   let level,sub;
   if(view==='mien-tinh'){level='tinh';sub=null}
