@@ -155,8 +155,6 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
       <label style="font-size:10px">Ngày KD:</label>
       <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
-      <button class="btn btn-success btn-sm" onclick="loadData()" style="padding:4px 10px;font-size:10px">📥 Load data</button>
-      <button class="btn btn-outline btn-sm" onclick="exportFC()" style="padding:4px 10px;font-size:10px">📥 Xuất</button>
       <button class="btn btn-outline btn-sm" onclick="showSaveModal()" style="padding:4px 10px;font-size:10px">💾 Lưu</button>
       <button class="btn btn-outline btn-sm" onclick="showLoadModal()" style="padding:4px 10px;font-size:10px">📂 Mở</button>
     </div>
@@ -191,6 +189,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <button class="btn btn-xs btn-primary" onclick="document.getElementById('dmFileUpload').click()" style="font-size:9px;padding:3px 8px">📎 Import Excel</button>
               <input type="file" id="dmFileUpload" accept=".xlsx,.xlsb,.csv,.tsv" onchange="handleDMFileUpload(this)" style="display:none">
               <button class="btn btn-xs btn-outline" onclick="exportTemplate()" style="font-size:9px;padding:3px 8px">📥 Tải Template</button>
+              <button class="btn btn-xs btn-success" onclick="loadData()" style="font-size:9px;padding:3px 8px;font-weight:700">📥 Load data</button>
+              <button class="btn btn-xs btn-outline" onclick="exportFC()" style="font-size:9px;padding:3px 8px">📥 Xuất</button>
               <button class="btn btn-xs btn-success hidden" id="tmplImportBtn" onclick="importTemplate()" style="font-size:9px;padding:3px 8px">✅ Import</button>
               <span class="info-text" id="tmplVerifyResult"></span>
             </div>
