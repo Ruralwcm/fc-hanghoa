@@ -638,7 +638,7 @@ async function loadSharedData(){
 
     buildVungTree();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
   }catch(e){console.error(e);$('sheetDot').textContent='🔴 Offline';$('sheetDot').style.color='#ef6c00';
-    $('vungTree').textContent='⚠️ Chưa kết nối Storelist — dùng Excel import';
+    $('vungTree').innerHTML='<div style="padding:10px;color:#c62828;font-size:10px">Storelist chưa kết nối</div><button class="btn btn-xs btn-outline" onclick="loadSharedData()" style="margin:4px;font-size:9px">Thử lại</button><div style="padding:4px 10px;font-size:9px;color:#999">Import Excel vẫn dùng được</div>';}
 }
 
 function updateMetaBar(){
@@ -1265,7 +1265,6 @@ async function init(){
   }
 }
 init();
-}
 </script>
 </body>
 </html>
