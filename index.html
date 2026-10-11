@@ -238,8 +238,9 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
         <div class="card-header">
           <h3>⚙️ 2. Thông Số FC</h3>
           <div class="flex-row">
-            <button class="btn btn-primary btn-xs" id="btnEdit" onclick="onEditBtn()">✏️ Sửa</button>
+            <button class="btn btn-primary btn-xs" id="btnEdit" onclick="toggleEditMode()">✏️ Sửa</button>
             <button class="btn btn-outline btn-xs" id="btnCalcMin" onclick="autoCalcMin()" style="background:#0277bd;color:#fff">🧮 Tính Min</button>
+            <button class="btn btn-warning btn-xs" id="btnRunFC" onclick="saveAndRun()">▶ Chạy FC</button>
             <button class="btn btn-outline btn-xs" id="btnCollapse" onclick="toggleCollapse()" style="color:#555">📌 Rút gọn</button>
             <span class="badge green" id="configSaved">✅ Đã lưu</span>
           </div>
@@ -877,16 +878,16 @@ function renderRecapTable(){
   });
 }
 function updateRecapUI(){
-  $('btnEdit').textContent=STATE.editMode?'▶ Chạy FC':'✏️ Sửa';
+  $('btnEdit').textContent=STATE.editMode?'💾 Lưu':'✏️ Sửa';
   $('btnCalcMin').style.opacity=STATE.editMode?'1':'0.45';
   $('btnCalcMin').style.pointerEvents=STATE.editMode?'auto':'none';
   $('configSaved').style.display=STATE.editMode?'none':'inline';
   renderRecapTable();
 }
 
-function onEditBtn(){
-  if(STATE.editMode){ saveAndRun(); }
-  else { STATE.editMode=true; updateRecapUI(); }
+function toggleEditMode(){
+  STATE.editMode=!STATE.editMode;
+  updateRecapUI();
 }
 
 function toggleCollapse(){
@@ -896,11 +897,9 @@ function toggleCollapse(){
 }
 
 function saveAndRun(){
-  STATE.editMode=false;
   current().configSaved=true;
   runConfigSilent();
   renderPivot();updateKPIs();
-  updateRecapUI();
   try{const sv={};Object.keys(FC_TYPES).forEach(k=>{const f=STATE.fcTypes[k];sv[k]={recapTable:f.recapTable,movTable:f.movTable}});localStorage.setItem('fc-config',JSON.stringify(sv))}catch(e){}
   toast('▶ Đã chạy FC!','success');
 }
