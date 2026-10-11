@@ -882,6 +882,8 @@ function updateRecapUI(){
   $('btnEdit').textContent=STATE.editMode?'💾 Lưu':'✏️ Sửa';
   $('btnCalcMin').style.opacity=STATE.editMode?'1':'0.45';
   $('btnCalcMin').style.pointerEvents=STATE.editMode?'auto':'none';
+  $('btnRunFC').style.opacity=STATE.editMode?'0.45':'1';
+  $('btnRunFC').style.pointerEvents=STATE.editMode?'none':'auto';
   $('configSaved').style.display=STATE.editMode?'none':'inline';
   renderRecapTable();
 }
