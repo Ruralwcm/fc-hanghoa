@@ -30,6 +30,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .topbar h2{font-size:15px;font-weight:700;color:#1e3a5f}
 .topbar .meta{display:flex;gap:12px;align-items:center;font-size:11px;color:#888}
 .content{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:10px}
+.two-col{display:flex;gap:12px;align-items:flex-start}
+.col-left{width:400px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
 
 /* CARDS */
 .card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -88,12 +91,12 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 .kpi-box .kpi-label{font-size:9px;color:#999;margin-top:1px}
 
 /* Import 3-col */
-.import-row{display:flex;gap:10px;align-items:stretch}
+.import-row{display:flex;flex-direction:column;gap:10px;align-items:stretch}
 .import-col{display:flex;flex-direction:column;gap:4px}
-.import-col.vung{width:220px;flex-shrink:0}
+.import-col.vung{width:auto;flex-shrink:0}
 .import-col.dm{flex:1;min-width:0}
 .import-col.sale{flex:1;min-width:0}
-.import-col.mov{width:300px;flex-shrink:0}
+.import-col.mov{width:auto;flex-shrink:0}
 .import-col .import-title{font-size:10px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;justify-content:space-between}
 .import-col textarea{height:110px}
 .vung-tree{max-height:160px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;background:#fafbfc;padding:2px 0;font-size:10px;user-select:none}
@@ -161,6 +164,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
   </div>
 
   <div class="content" id="mainContent">
+    <div class="two-col">
+    <div class="col-left">
 
     <!-- ===== SECTION 1: Chọn Vùng + Import ===== -->
     <div class="card">
@@ -223,6 +228,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       </div>
     </div>
 
+    </div>
+    <div class="col-right">
     <!-- ===== SECTION 2+3: Results (shown after Load) ===== -->
     <div id="resultsSection" class="hidden" style="display:flex;flex-direction:column;gap:10px">
 
@@ -282,6 +289,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       </div>
 
     </div>
+    </div>
+  </div>
   </div>
 </div>
 
