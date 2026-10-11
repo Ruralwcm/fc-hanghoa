@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v7.2</title>
+<title>FC Hàng Hóa — v7.3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v7.2</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v7.3</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v7.2 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v7.3 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v7.2">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v7.3">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -1168,17 +1168,17 @@ function exportFC(){
     const wb=XLSX.utils.book_new();
 
     // Sheet 1: Bảng FC chi tiết
-    const cols=['Mã CH&SP','Tỉnh','QLKV','GĐV','Mã CH','Tên CH','Mã SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','Nhóm N','NCC','Min','SL Tồn','GT Tồn','SL Bán','GT Bán','SL CG','GT CG','SL FC','GT FC','Block','+Stock','+CG','Lock','Cover','SL Final','GT Final','MOV'];
+    const cols=['CH&SP','Tỉnh','QLKV','GĐV','CH','Tên CH','SP','Tên SP','ĐVT','QC','COGS','MCH2','MCH3','N','NCC','Min','SLT','GTT','SLB','GTB','SLCG','GTCG','SLFC','GTFC','Blk','+STK','+CG','Lock','Cov','SLF','GTF','MOV'];
     const keys=['maCHSP','tinh','qlkv','gdv','maCH','tenCH','maSP','tenSP','dvt','qc','cogs','mch2','mch3','nhomN','nccCTKM','min','slTon','gtTon','slBan','gtBan','slCG','gtCG','slFC','gtFC','block','plusStock','plusCG','lockMax','coverDay','slFCRound','gtFCRound','movStatus'];
     const ws1=XLSX.utils.aoa_to_sheet([cols].concat(fc.fcTable.map(r=>keys.map(k=>r[k]!=null?r[k]:''))));
-    ws1['!cols']=cols.map(c=>({wch:Math.min(Math.max(String(c).length+2,8),20)}));
-    XLSX.utils.book_append_sheet(wb,ws1,'Bảng FC chi tiết');
+    ws1['!cols']=cols.map(c=>({wch:Math.min(Math.max(String(c).length+2,5),14)}));
+    XLSX.utils.book_append_sheet(wb,ws1,'FC chi tiết');
 
     // Sheet 2: Thông số FC (RECAP)
-    const rcols=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải','NCC','N1','N2','N3','N4','N5','N6','N7','N8','Block','+Stock','+CG','Lock','Cover','Rank'];
+    const rcols=['SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải','NCC','N1','N2','N3','N4','N5','N6','N7','N8','Blk','+STK','+CG','Lock','Cov','Rank'];
     const rkeys=['maSP','tenSP','dvt','qc','giaMua','giaThuong','giaKM','dienGiai','ncc','N1','N2','N3','N4','N5','N6','N7','N8','block','plusStock','plusCG','lockMax','coverDay','rank'];
     const ws2=XLSX.utils.aoa_to_sheet([rcols].concat(fc.recapTable.map(r=>rkeys.map(k=>r[k]!=null?r[k]:''))));
-    ws2['!cols']=rcols.map(c=>({wch:Math.min(Math.max(String(c).length+2,8),16)}));
+    ws2['!cols']=rcols.map(c=>({wch:Math.min(Math.max(String(c).length+2,5),12)}));
     XLSX.utils.book_append_sheet(wb,ws2,'Thông số FC');
 
     // Sheet 3: MOV giao hàng
@@ -1189,8 +1189,8 @@ function exportFC(){
       else mrows.push([m.ncc,'',m.allTinh||'',m.pctMinMOV]);
     });
     const ws3=XLSX.utils.aoa_to_sheet(mrows);
-    ws3['!cols']=[{wch:16},{wch:18},{wch:12},{wch:8}];
-    XLSX.utils.book_append_sheet(wb,ws3,'MOV giao hàng');
+    ws3['!cols']=[{wch:10},{wch:12},{wch:8},{wch:6}];
+    XLSX.utils.book_append_sheet(wb,ws3,'MOV');
 
     const d=new Date();
     const fn='FC_'+FC_TYPES[STATE.currentFC].id+'_'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.xlsx';
