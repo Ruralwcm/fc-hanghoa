@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v8.0</title>
+<title>FC Hàng Hóa — v8.1</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v8.0</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v8.1</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v8.0 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v8.1 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v8.0">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v8.1">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -362,7 +362,13 @@ function switchFC(id){
   STATE.currentFC=id;buildFCSidebar();
   $('currentFCLabel').textContent=FC_TYPES[id].name;
   const c=current();$('configSaved').style.display=c.configSaved?'inline':'none';
-  if(c.fcTable.length){$('resultsSection').classList.remove('hidden');renderAll()}else{$('resultsSection').classList.add('hidden')}
+  $('resultsSection').classList.add('hidden');
+  if(id==='ambient'){
+    if(c.fcTable.length){$('resultsSection').classList.remove('hidden');renderAll();}
+  }else{
+    $('resultsSection').classList.remove('hidden');
+    document.querySelector('#pivotWrap').innerHTML='<div style="padding:60px;text-align:center;color:#999"><div style="font-size:48px;margin-bottom:12px">🚧</div><div style="font-size:16px;font-weight:600;color:#666">Đang phát triển</div><div style="font-size:11px;margin-top:4px">Tính năng này sẽ sớm ra mắt</div></div>';
+  }
   updateMetaBar();updateKPIs();
   try{localStorage.setItem('fc-current',id)}catch(e){}
 }
