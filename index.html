@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v7.8</title>
+<title>FC Hàng Hóa — v7.9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v7.8</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v7.9</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v7.8 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v7.9 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v7.8">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v7.9">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -1073,8 +1073,8 @@ function renderPivot(){
   if(fNcc)data=data.filter(r=>r.nccCTKM===fNcc);
 
   let level,sub;
-  if(view==='mien-tinh'){level='tinh';sub=null}
-  else if(view==='gdv-qlkv'){level='gdv';sub='qlkv'}
+  if(view==='mien-tinh'){level='tinh';sub='store'}
+  else if(view==='gdv-qlkv'){level='gdv';sub='store'}
   else if(view==='store'){level='store';sub='nhomN'}
   else if(view==='ncc'){level='ncc';sub=null}
   else if(view==='mch3-sku'){level='mch3';sub='sku'}
@@ -1099,7 +1099,7 @@ function renderPivot(){
       +'<td>'+fmt(gBQ)+'</td>'
       +'</tr>';
     if(sub){const sg={};g.items.forEach(r=>{
-      let sk;if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else if(sub==='nhomN'){
+      let sk;if(sub==='store')sk=r.maCH+' - '+r.tenCH;else if(sub==='qlkv')sk=r.qlkv||'(Trống)';else if(sub==='sku')sk=r.maSP+' - '+r.tenSP;else if(sub==='nhomN'){
         // Top 10 stores by GT FC for this N-group
         const stores=[...new Map(g.items.map(r=>[r.maCH,r])).values()];
         stores.sort((a,b)=>b.gtFCRound-a.gtFCRound);
