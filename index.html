@@ -200,17 +200,6 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               <span class="info-text" id="tmplVerifyResult"></span>
             </div>
           </div>
-          <!-- MOV NCC (middle column, simple list) -->
-          <div class="import-col mov">
-            <div class="import-title">🚚 MOV NCC <span style="font-weight:400;color:#999;font-size:9px">(NCC · Tỉnh · MOV · %Min)</span></div>
-            <div class="table-wrap" style="max-height:160px;overflow:auto">
-              <table id="movTableInline" style="font-size:9px">
-                <thead><tr><th>NCC</th><th>Tỉnh</th><th>MOV</th><th>%Min</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-            <div style="font-size:8px;color:#999;margin-top:2px">Từ Template — để trống = 0</div>
-          </div>
           <!-- Sale -->
           <div class="import-col sale">
             <div class="import-title">
@@ -222,6 +211,17 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
               </div>
             </div>
             <textarea id="salePaste" style="height:90px;font-size:9px"></textarea>
+          </div>
+          <!-- MOV NCC (middle column, simple list) -->
+          <div class="import-col mov">
+            <div class="import-title">🚚 MOV NCC <span style="font-weight:400;color:#999;font-size:9px">(NCC · Tỉnh · MOV · %Min)</span></div>
+            <div class="table-wrap" style="max-height:160px;overflow:auto">
+              <table id="movTableInline" style="font-size:9px">
+                <thead id="movTheadInline"><tr><th>NCC</th><th>Tỉnh</th><th>MOV</th><th>%Min</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div style="font-size:8px;color:#999;margin-top:2px">Từ Template — để trống = 0</div>
           </div>
         </div>
         
@@ -952,45 +952,22 @@ function renderMOVTable(){
     const existingNCCs=new Set(fc.movTable.map(m=>m.ncc));
     nccSet.forEach(ncc=>{if(!existingNCCs.has(ncc)) fc.movTable.push({ncc,pctMinMOV:0.7,allTinh:500000,tinhMOV:{}})});
   }
-  // Auto-sync Tỉnh columns from Vùng selection
-  const tinhSet=new Set();
-  if(STATE.selectedTinh.size>0){
-    Object.values(STATE.storelist).forEach(s=>{if(STATE.selectedTinh.has(s.gdv+'||'+s.tinh)) tinhSet.add(s.tinh)});
-  }
-  if(tinhSet.size===0) Object.values(STATE.storelist).forEach(s=>tinhSet.add(s.tinh));
-  const tinhList=[...tinhSet].sort().slice(0,10);
-
   if(!fc.movTable.length)fc.movTable.push({ncc:'Chia hàng',pctMinMOV:0.7,allTinh:500000,tinhMOV:{}});
-  // Update MOV header with dynamic Tỉnh columns
-  const edit=STATE.editMode;
-  let thHTML='<tr><th style="min-width:65px">NCC</th>';
-  tinhList.forEach(t=>thHTML+='<th style="min-width:55px;font-size:9px">'+t.replace('T. ','').replace('TP. ','')+'</th>');
-  if(edit) thHTML+='<th></th>';
-  thHTML+='</tr>';
-  const theadEl=document.querySelector('#movTheadInline')||document.querySelector('#movThead');theadEl.innerHTML=thHTML;
 
-  const tb=(document.querySelector('#movTableInline tbody')||document.querySelector('#movTable tbody'));tb.innerHTML='';
+  const tb=document.querySelector('#movTableInline tbody')||document.querySelector('#movTable tbody');tb.innerHTML='';
+  const edit=STATE.editMode;
   fc.movTable.forEach((m,i)=>{
-    tb.innerHTML+='<tr>'
-      +'<td style="font-weight:600;font-size:9px;white-space:nowrap">'+m.ncc+'</td>';
-    tinhList.forEach(t=>{
-      if(edit) tb.innerHTML+='<td><input value="'+(m.tinhMOV?.[t]||'')+'" size="9" data-idx="'+i+'" data-tinh="'+t.replace(/\"/g,'&quot;')+'"></td>';
-      else tb.innerHTML+='<td style="text-align:center;font-size:10px">'+(m.tinhMOV?.[t]?fmt(m.tinhMOV[t]):'-')+'</td>';
-    });
-    tb.innerHTML+='</tr>';
-  });
-  // Attach event listeners for MOV tinh inputs
-  if(edit){
-    tb.querySelectorAll('input[data-tinh]').forEach(inp=>{
-      inp.addEventListener('change',function(){
-        const idx=parseInt(this.getAttribute('data-idx'));
-        const tinh=this.getAttribute('data-tinh');
-        const fc=current();
-        if(!fc.movTable[idx].tinhMOV) fc.movTable[idx].tinhMOV={};
-        fc.movTable[idx].tinhMOV[tinh]=parseFloat(this.value)||0;
+    const entries=Object.entries(m.tinhMOV||{});
+    if(entries.length){
+      entries.forEach(([tinh,mov])=>{
+        tb.innerHTML+='<tr><td style="font-weight:600;font-size:9px">'+m.ncc+'</td><td style="font-size:9px">'+tinh+'</td>'
+          +'<td style="text-align:center;font-size:10px">'+fmt(mov)+'</td><td style="text-align:center;font-size:10px">'+(m.pctMinMOV*100).toFixed(0)+'%</td></tr>';
       });
-    });
-  }
+    } else {
+      tb.innerHTML+='<tr><td style="font-weight:600;font-size:9px">'+m.ncc+'</td><td style="font-size:9px;color:#999">Tất cả</td>'
+        +'<td style="text-align:center;font-size:10px">'+fmt(m.allTinh)+'</td><td style="text-align:center;font-size:10px">'+(m.pctMinMOV*100).toFixed(0)+'%</td></tr>';
+    }
+  });
 }
 
 // ============ PIVOT ============
