@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa — v6.8</title>
+<title>FC Hàng Hóa — v6.9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
@@ -139,18 +139,18 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.8</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> v6.9</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa v6.8 · MsT ✨</div>
+  <div class="sidebar-footer">FC Hàng Hóa v6.9 · MsT ✨</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v6.8">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v6.9">🌡 FC Ambient</h2>
     <div class="meta">
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
@@ -180,6 +180,12 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <div class="import-title">📍 Chọn Vùng / GĐV</div>
             <div class="vung-tree" id="vungTree"></div>
             <div style="display:flex;gap:4px;margin-top:4px">
+              <select id="storeTypeFilter" onchange="STATE.storeType=this.value;buildVungTree()" style="font-size:9px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
+                <option value="all">🏪 All Active</option>
+                <option value="LFL">📊 LFL</option>
+                <option value="STU">🆕 STU</option>
+                <option value="NSO">🏗 NSO</option>
+              </select>
               <button class="btn btn-xs btn-outline" onclick="selectAllGDV()" style="font-size:9px">Tất cả</button>
               <button class="btn btn-xs btn-outline" onclick="clearGDV()" style="font-size:9px">Clear</button>
               <span class="info-text" id="vungCount" style="margin-left:4px"></span>
@@ -348,7 +354,7 @@ const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'16
 
 // STATE
 let STATE={
-  currentFC:'ambient',currentPivot:'gdv-qlkv',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,tinhList:[],
+  currentFC:'ambient',currentPivot:'gdv-qlkv',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,storeType:'all',tinhList:[],
   storelist:{},skuList:{},nhomN:{},
   selectedTinh:new Set(), // selected "gdv|tinh" keys
   treeData:{}, // {mien: {gdv: {tinh: count}}}
@@ -390,8 +396,14 @@ const MIEN_MAP = (()=>{
 function getMien(tinh){return MIEN_MAP[tinh]||'KHÁC'}
 
 function buildVungTree(){
-  const tree={};
-  Object.values(STATE.storelist).forEach(s=>{
+  const tree={}, st=STATE.storeType||'all';
+  let storeList=Object.values(STATE.storelist);
+  // Filter by store type
+  if(st==='LFL') storeList=storeList.filter(s=>s.tinhTrang==='Đang hoạt động');
+  else if(st==='STU') storeList=storeList.filter(s=>s.tinhTrang==='Sắp khai trương');
+  else if(st==='NSO') storeList=storeList.filter(s=>s.tinhTrang==='Sắp khai trương'||s.tinhTrang==='Đang hoạt động');
+  else storeList=storeList.filter(s=>s.tinhTrang==='Đang hoạt động'||s.tinhTrang==='Sắp khai trương');
+  storeList.forEach(s=>{
     const mien=getMien(s.tinh), gdv=s.gdv||'(Không GĐV)', tinh=s.tinh||'(Khác)';
     if(!tree[mien]) tree[mien]={};
     if(!tree[mien][gdv]) tree[mien][gdv]={};
@@ -628,7 +640,7 @@ function parseCSV(csv){
 async function loadSharedData(){
   try{
     const cs=await fetchCSV(PROD.sheetGoc,PROD.gidStore);const rs=parseCSV(cs);STATE.storelist={};
-    for(let i=1;i<rs.length;i++){const r=rs[i];if(r.length<9)continue;STATE.storelist[r[0].trim()]={tenCH:r[1]||'',tinh:r[5]||'',huyen:r[6]||'',qlkv:r[7]||'',gdv:r[8]||''}}
+    for(let i=1;i<rs.length;i++){const r=rs[i];if(r.length<9)continue;STATE.storelist[r[0].trim()]={tenCH:r[1]||'',tinhTrang:r[2]||'',khaiTruong:r[3]||'',tinh:r[5]||'',huyen:r[6]||'',qlkv:r[7]||'',gdv:r[8]||''}}
 
     const ck=await fetchCSV(PROD.sheetGoc,PROD.gidSKU);const rk=parseCSV(ck);STATE.skuList={};
     for(let i=1;i<rk.length;i++){const r=rk[i];if(r.length<7)continue;STATE.skuList[r[0].trim()]={tenSP:r[1]||'',dvt:r[2]||'G1',qc:1,mch2:r[3]||'',mch3:r[4]||'',cogs:parseFloat(r[6])||0}}
