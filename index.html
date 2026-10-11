@@ -732,7 +732,7 @@ function handleDMFileUpload(inp){
             sl.push([store,article,r[2]!=null?r[2]:0,r[3]!=null?r[3]:0,r[4]!=null?r[4]:0].join('\t'));
             saleCount++;
           }
-          if(sl.length) $('salePaste').value=sl.join('\n');
+          if(sl.length){ $('salePaste').value=sl.join('\n'); STATE._saleCount=saleCount; }
         }
 
         toast('✅ Import '+skuCount+' SKU + '+movCount+' MOV + '+saleCount+' Sale dòng','success');
@@ -778,10 +778,10 @@ function verifyAndImportTemplate(){
   renderRecapTable();renderMOVTable();
   $('resultsSection').classList.remove('hidden');
   const movRows=fc.movTable.reduce((s,m)=>s+Object.keys(m.tinhMOV||{}).length,0);
-  // Show import summary below template textarea
-  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32;font-weight:600">✅ Đã import: <b>'+count+' SKU</b> vào Danh mục · <b>'+movRows+' MOV</b> vào NCC×Tỉnh</span>';
+  const saleN=(STATE._saleCount||0); STATE._saleCount=0;
+  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32;font-weight:600">✅ Đã import: <b>'+count+' SKU</b> vào Danh mục · <b>'+movRows+' MOV</b> vào NCC×Tỉnh'+(saleN?' · <b>'+saleN+' line</b> Sale':'')+'</span>';
   $('tmplImportBtn').classList.add('hidden');
-  toast('✅ '+count+' SKU + '+movRows+' MOV đã import!','success');
+  toast('✅ '+count+' SKU + '+movRows+' MOV'+(saleN?' + '+saleN+' Sale':'')+' đã import!','success');
 }
 
 function handleFileUpload(inp){
