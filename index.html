@@ -243,6 +243,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <button class="btn btn-outline btn-xs" id="btnCalcMin" onclick="autoCalcMin()" style="background:#0277bd;color:#fff">🧮 Tính Min</button>
             <button class="btn btn-warning btn-xs" id="btnRunFC" onclick="saveAndRun()">▶ Chạy FC</button>
             <button class="btn btn-outline btn-xs" id="btnCollapse" onclick="toggleCollapse()" style="color:#555">📌 Rút gọn</button>
+            <input type="text" id="recapSearch" placeholder="Lọc SKU..." oninput="renderRecapTable()" style="font-size:10px;width:100px;padding:3px 6px;border:1px solid #ddd;border-radius:4px;margin-left:auto">
+            <label style="font-size:9px;display:flex;align-items:center;gap:3px;white-space:nowrap"><input type="checkbox" id="recapMinOnly" onchange="renderRecapTable()" style="width:12px;height:12px;accent-color:#4fc3f7">Có Min</label>
             <span class="badge green" id="configSaved">✅ Đã lưu</span>
           </div>
         </div>
@@ -824,6 +826,9 @@ function runConfig(){runConfigSilent();renderRecapTable();toast('⚡ Đã chạy
 function renderRecapTable(){
   const fc=current(),coll=STATE.collapse,edit=STATE.editMode;
   const Ncols=coll?['N1','N8']:['N1','N2','N3','N4','N5','N6','N7','N8'];
+  // Filter
+  const sr=($('recapSearch')?.value||'').toLowerCase();
+  const minOnly=$('recapMinOnly')?.checked||false;
   // Header
   const head=document.querySelector('#recapHead');
   let th='<tr>';
@@ -837,6 +842,9 @@ function renderRecapTable(){
   // Body
   const tb=document.querySelector('#recapTable tbody');tb.innerHTML='';
   fc.recapTable.forEach((r,i)=>{
+    // Apply filter
+    if(sr&&(r.maSP+r.tenSP).toLowerCase().indexOf(sr)<0) return;
+    if(minOnly&&!['N1','N2','N3','N4','N5','N6','N7','N8'].some(n=>r[n])) return;
     const refVals=r._saleRef||{};
     let h='<tr>';
     h+='<td style="font-weight:600">'+r.maSP+'</td><td>'+r.tenSP+'</td><td>'+r.dvt+'</td>';
