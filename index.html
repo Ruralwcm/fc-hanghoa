@@ -300,15 +300,16 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
         <label style="font-size:10px;font-weight:600">Tên lưu:</label>
         <input id="saveName" placeholder="VD: FC Ambient T10.2026" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-top:3px">
       </div>
-      <div style="font-size:10px;color:#999">
-        <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><input type="checkbox" id="saveStores" checked> Danh sách CH đã chọn (<span id="saveStoreCount">0</span>)</label>
-        <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><input type="checkbox" id="saveTemplate" checked> Danh mục FC (Template SKU)</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="saveConfig" checked> Cấu hình FC (RECAP + MOV)</label>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn btn-sm" style="flex:1;background:#1565c0;color:#fff" onclick="doSave()">☁️ Lưu Cloud + Local</button>
+        <button class="btn btn-sm" style="flex:1;background:#2e7d32;color:#fff" onclick="downloadSave()">📥 Tải File (Offline)</button>
+      </div>
+      <div style="font-size:9px;color:#999;text-align:center;border-top:1px solid #eee;padding-top:6px">
+        ☁️ Cloud: lưu Google Sheets — share được cả team &nbsp;|&nbsp; 📥 File: tải JSON — gửi qua Telegram, dùng offline
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
-      <button class="btn btn-success btn-sm" onclick="doSave()">💾 Lưu</button>
     </div>
   </div>
 </div>
@@ -316,8 +317,15 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 <!-- LOAD MODAL -->
 <div class="modal-overlay hidden" id="loadModal">
   <div class="modal-box">
-    <div class="modal-header"><h3>📂 Danh sách đã lưu</h3><button class="btn btn-xs" onclick="$('loadModal').classList.add('hidden')" style="background:#eee">✕</button></div>
-    <div class="modal-body" id="savedList"><p style="color:#999;font-size:11px">Chưa có dữ liệu lưu</p></div>
+    <div class="modal-header"><h3>📂 Mở cấu hình</h3><button class="btn btn-xs" onclick="$('loadModal').classList.add('hidden')" style="background:#eee">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <button class="btn btn-sm" style="flex:1;background:#6a1b9a;color:#fff" onclick="document.getElementById('fcFileUpload').click()">📤 Upload File (Offline)</button>
+        <input type="file" id="fcFileUpload" accept=".json" onchange="importFromFile(this)" style="display:none">
+      </div>
+      <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px">📋 Danh sách đã lưu:</div>
+      <div id="savedList"><p style="color:#999;font-size:11px">Chưa có dữ liệu lưu</p></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" onclick="$('loadModal').classList.add('hidden')">Đóng</button>
     </div>
@@ -1234,7 +1242,6 @@ function exportFC(){
 
 // ============ SAVE / LOAD ============
 function showSaveModal(){
-  $('saveStoreCount').textContent=STATE.selectedTinh.size||Object.keys(STATE.storelist).length;
   $('saveModal').classList.remove('hidden');
   $('saveName').value=FC_TYPES[STATE.currentFC].name+' - '+new Date().toLocaleDateString('vi-VN');
   $('saveName').focus();
@@ -1286,18 +1293,11 @@ function getSavedItemsLocal(){
 async function doSave(){
   const name=$('saveName').value.trim();
   if(!name) return toast('Nhập tên lưu!','error');
-  const fc=current();
-  const data={
-    stores:[...STATE.selectedTinh],
-    template:$('tmplPaste').value,
-    config:{recapTable:fc.recapTable||[],movTable:fc.movTable||[]},
-    ngayKD:STATE.ngayKD,
-    storeType:STATE.storeType,
-    fcType:STATE.currentFC
-  };
+  const saveData=getSaveData();
+  
   // Save to localStorage always (backup)
   const items=getSavedItemsLocal();
-  items.push({name,savedAt:Date.now(),fcType:FC_TYPES[STATE.currentFC].name,data,id:'local-'+Date.now()});
+  items.push({id:'local-'+Date.now(),name,savedAt:Date.now(),fcType:saveData.fcType,data:saveData.data});
   localStorage.setItem('fc-saved',JSON.stringify(items.slice(-50))); // keep last 50
   
   // Save to GAS cloud
@@ -1305,7 +1305,7 @@ async function doSave(){
   try{
     if(GAS_URL && !GAS_URL.startsWith('__DEPLOY')){
       const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({
-        action:'save',name,fcType:FC_TYPES[STATE.currentFC].name,data,createdBy:'HaoDT'
+        action:'save',name,fcType:saveData.fcType,data:saveData.data,createdBy:'HaoDT'
       })});
       const j=await r.json();
       if(j.success) cloudSaved=true;
@@ -1314,6 +1314,73 @@ async function doSave(){
   
   $('saveModal').classList.add('hidden');
   toast('💾 Đã lưu: '+name+(cloudSaved?' (☁️ Cloud)':' (💻 Local)'),'success');
+}
+
+function getSaveData(){
+  const fc=current();
+  return {
+    app:'FC-Hang-Hoa', version:'8.7',
+    name:$('saveName').value.trim()||FC_TYPES[STATE.currentFC].name,
+    savedAt:new Date().toISOString(),
+    fcType:FC_TYPES[STATE.currentFC].name,
+    fcTypeId:STATE.currentFC,
+    createdBy:'HaoDT',
+    data:{
+      stores:[...STATE.selectedTinh],
+      template:$('tmplPaste').value,
+      config:{recapTable:fc.recapTable||[],movTable:fc.movTable||[]},
+      ngayKD:STATE.ngayKD,
+      storeType:STATE.storeType,
+      fcType:STATE.currentFC
+    }
+  };
+}
+
+function downloadSave(){
+  const name=$('saveName').value.trim();
+  if(!name) return toast('Nhập tên lưu!','error');
+  const saveData=getSaveData();
+  const blob=new Blob([JSON.stringify(saveData,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=name.replace(/[^a-zA-Z0-9_\- ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯăẠ-ỹ]/g,'_')+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  $('saveModal').classList.add('hidden');
+  toast('📥 Đã tải file: '+name,'success');
+}
+
+async function importFromFile(input){
+  const file=input.files[0];
+  if(!file) return;
+  try{
+    const text=await file.text();
+    const json=JSON.parse(text);
+    if(json.app!=='FC-Hang-Hoa'){ toast('⚠️ File không đúng định dạng FC Hàng Hóa','error'); return; }
+    await restoreSaveData(json);
+    $('loadModal').classList.add('hidden');
+    toast('📤 Đã import offline: '+json.name,'success');
+  }catch(e){
+    toast('❌ Lỗi đọc file: '+e.message,'error');
+  }
+  input.value='';
+}
+
+async function restoreSaveData(item){
+  const d=item.data||item;
+  if(d.fcType&&FC_TYPES[d.fcType]){ STATE.currentFC=d.fcType; buildFCSidebar(); }
+  else if(item.fcTypeId&&FC_TYPES[item.fcTypeId]){ STATE.currentFC=item.fcTypeId; buildFCSidebar(); }
+  if(d.template) $('tmplPaste').value=d.template;
+  if(d.stores){ STATE.selectedTinh=new Set(d.stores); buildVungTree(); }
+  if(d.config){
+    const fc=current();
+    fc.recapTable=d.config.recapTable||[];
+    fc.movTable=d.config.movTable||[];
+    renderRecapTable();renderMOVTable();
+    $('resultsSection').classList.remove('hidden');
+    fc.configSaved=true;$('configSaved').style.display='inline';
+  }
+  if(d.ngayKD){ STATE.ngayKD=d.ngayKD; $('ngayKD').value=d.ngayKD; }
+  if(d.storeType){ STATE.storeType=d.storeType; $('storeTypeFilter').value=d.storeType; buildVungTree(); }
 }
 
 async function doLoad(id){
@@ -1335,21 +1402,7 @@ async function doLoad(id){
   }
   if(!item) return toast('Không tìm thấy bản lưu!','error');
   
-  const d=item.data;
-  if(d.fcType&&FC_TYPES[d.fcType]){ STATE.currentFC=d.fcType; buildFCSidebar(); }
-  if(d.template) $('tmplPaste').value=d.template;
-  if(d.stores){ STATE.selectedTinh=new Set(d.stores); buildVungTree(); }
-  if(d.config){
-    const fc=current();
-    fc.recapTable=d.config.recapTable||[];
-    fc.movTable=d.config.movTable||[];
-    renderRecapTable();renderMOVTable();
-    $('resultsSection').classList.remove('hidden');
-    fc.configSaved=true;$('configSaved').style.display='inline';
-  }
-  if(d.ngayKD) $('ngayKD').value=d.ngayKD;
-  if(d.storeType){ STATE.storeType=d.storeType; $('storeTypeFilter').value=d.storeType; }
-  
+  await restoreSaveData(item);
   $('loadModal').classList.add('hidden');
   toast('📂 Đã load: '+item.name,'success');
 }
