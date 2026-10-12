@@ -177,7 +177,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
         <!-- Sub-section 1: Chọn Vùng -->
         <div style="display:flex;gap:4px;margin-bottom:4px;align-items:center;flex-wrap:wrap">
           <select id="storeTypeFilter" onchange="STATE.storeType=this.value;buildVungTree()" style="font-size:9px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
-            <option value="all">🏪 All Active</option>
+            <option value="all-stores">🏪 All Stores</option>
+            <option value="all" selected>✅ All Active</option>
             <option value="LFL">📊 LFL</option>
             <option value="STU">🆕 STU</option>
             <option value="NSO">🏗 NSO</option>
@@ -256,8 +257,8 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
           <h3>📊 3. Pivot Dữ Liệu</h3>
           <div class="flex-row">
             <div class="pivot-tabs" id="pivotTabs">
-              <button class="pivot-tab active" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
-              <button class="pivot-tab" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
+              <button class="pivot-tab" onclick="switchPivotView('gdv-qlkv',this)">👤 GĐV/QLKV</button>
+              <button class="pivot-tab active" onclick="switchPivotView('mien-tinh',this)">🗺 Miền/Tỉnh</button>
               <button class="pivot-tab" onclick="switchPivotView('store',this)">🏪 Top Stores PN</button>
             </div>
             <select id="pivotMCH3" onchange="renderPivot()" style="font-size:10px;width:90px;padding:3px 6px;border:1px solid #ddd;border-radius:4px"><option value="">Tất cả MCH3</option></select>
@@ -337,7 +338,7 @@ const PROD={sheetGoc:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',gidStore:'16
 
 // STATE
 let STATE={
-  currentFC:'ambient',currentPivot:'gdv-qlkv',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,storeType:'all',tinhList:[],
+  currentFC:'ambient',currentPivot:'mien-tinh',ngayKD:30,showSaleRef:false,editMode:false,collapse:false,storeType:'all',tinhList:[],
   storelist:{},skuList:{},nhomN:{},
   selectedTinh:new Set(), // selected "gdv|tinh" keys
   treeData:{}, // {mien: {gdv: {tinh: count}}}
@@ -406,9 +407,11 @@ function buildVungTree(){
       const y=s.khaiTruong?new Date(s.khaiTruong).getFullYear():0;
       return y===cy;
     });
-  }else{
+  }else if(st==='all'){
     // All Active: Đang hoạt động + Sắp khai trương
     storeList=storeList.filter(s=>s.tinhTrang==='Đang hoạt động'||s.tinhTrang==='Sắp khai trương');
+  }else{
+    // All Stores: Tất cả stores trong Storelist (không filter)
   }
   storeList.forEach(s=>{
     const mien=getMien(s.tinh), gdv=s.gdv||'(Không GĐV)', tinh=s.tinh||'(Khác)';
