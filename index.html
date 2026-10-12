@@ -296,20 +296,15 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
   <div class="modal-box">
     <div class="modal-header"><h3>💾 Lưu cấu hình</h3><button class="btn btn-xs" onclick="$('saveModal').classList.add('hidden')" style="background:#eee">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:8px">
-        <label style="font-size:10px;font-weight:600">Tên lưu:</label>
-        <input id="saveName" placeholder="VD: FC Ambient T10.2026" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-top:3px">
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px">
-        <button class="btn btn-sm" style="flex:1;background:#1565c0;color:#fff" onclick="doSave()">☁️ Lưu Cloud + Local</button>
-        <button class="btn btn-sm" style="flex:1;background:#2e7d32;color:#fff" onclick="downloadSave()">📥 Tải File (Offline)</button>
-      </div>
-      <div style="font-size:9px;color:#999;text-align:center;border-top:1px solid #eee;padding-top:6px">
-        ☁️ Cloud: lưu Google Sheets — share được cả team &nbsp;|&nbsp; 📥 File: tải JSON — gửi qua Telegram, dùng offline
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:600;margin-bottom:3px;display:block">Tên lưu:</label>
+        <input id="saveName" placeholder="VD: FC Ambient T10.2026" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px">
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
+    <div class="modal-footer" style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="flex:1;background:#1565c0;color:#fff" onclick="doSave()">☁️ Lưu Cloud</button>
+      <button class="btn btn-sm" style="flex:1;background:#2e7d32;color:#fff" onclick="downloadSave()">📥 Lưu Offline</button>
+      <button class="btn btn-sm" style="flex:1;background:#eee;color:#333" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
     </div>
   </div>
 </div>
@@ -319,15 +314,15 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
   <div class="modal-box">
     <div class="modal-header"><h3>📂 Mở cấu hình</h3><button class="btn btn-xs" onclick="$('loadModal').classList.add('hidden')" style="background:#eee">✕</button></div>
     <div class="modal-body">
-      <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:10px">
         <button class="btn btn-sm" style="flex:1;background:#6a1b9a;color:#fff" onclick="document.getElementById('fcFileUpload').click()">📤 Upload File (Offline)</button>
         <input type="file" id="fcFileUpload" accept=".json" onchange="importFromFile(this)" style="display:none">
       </div>
-      <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px">📋 Danh sách đã lưu:</div>
-      <div id="savedList"><p style="color:#999;font-size:11px">Chưa có dữ liệu lưu</p></div>
+      <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px">📋 Đã lưu trên Cloud:</div>
+      <div id="savedList"><p style="color:#999;font-size:11px">⏳ Đang tải...</p></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="$('loadModal').classList.add('hidden')">Đóng</button>
+    <div class="modal-footer" style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="flex:1;background:#eee;color:#333" onclick="$('loadModal').classList.add('hidden')">Đóng</button>
     </div>
   </div>
 </div>
