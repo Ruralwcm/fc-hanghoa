@@ -8,27 +8,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FC Hàng Hóa by HaoDT v8.5</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;display:flex;height:100vh}
+body{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f6f8;color:#1a1a1a;display:flex;height:100vh}
 
 /* SIDEBAR — chỉ FC types */
 .sidebar{width:200px;background:#1e3a5f;color:#fff;padding:0;display:flex;flex-direction:column;flex-shrink:0}
 .sidebar .logo{padding:14px 14px 10px;font-size:14px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
-.sidebar .logo span{color:#4fc3f7}
+.sidebar .logo span{color:#148f7d}
 .sidebar .logo small{font-weight:400;color:#90a4ae;font-size:10px}
 .fc-type-list{list-style:none;padding:8px 0}
 .fc-type-list li{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;border-left:3px solid transparent;transition:all .12s}
 .fc-type-list li:hover{background:rgba(255,255,255,.06)}
-.fc-type-list li.active{background:rgba(255,255,255,.1);border-left-color:#4fc3f7;font-weight:700}
+.fc-type-list li.active{background:rgba(255,255,255,.1);border-left-color:#148f7d;font-weight:700}
 .fc-type-list li .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .sidebar-actions{padding:10px 14px;margin-top:auto;border-top:1px solid rgba(255,255,255,.1)}
 .sidebar-footer{padding:8px 14px;font-size:9px;color:rgba(255,255,255,.25);text-align:center}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.topbar{background:#fff;padding:8px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:6px}
+.topbar{background:#d71920;color:#fff;padding:8px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:6px}
 .topbar h2{font-size:15px;font-weight:700;color:#1e3a5f}
-.topbar .meta{display:flex;gap:12px;align-items:center;font-size:11px;color:#888}
+.topbar .meta{display:flex;gap:12px;align-items:center;font-size:11px;color:rgba(255,255,255,.85)}
 .content{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:10px}
 .two-col{display:flex;gap:12px;align-items:flex-start}
 .col-left{width:400px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
@@ -51,7 +52,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-lg{padding:10px 22px;font-size:13px}
 
 /* BADGES */
-.badge{font-size:10px;padding:2px 6px;border-radius:8px;background:#e3f2fd;color:#1565c0}
+.badge{font-size:10px;padding:2px 6px;border-radius:8px;background:#e3f2fd;color:#0f5f57}
 .badge.green{background:#e8f5e9;color:#2e7d32}
 .badge.orange{background:#fff3e0;color:#ef6c00}
 
@@ -61,7 +62,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
 thead th{background:#f5f7fa;padding:6px 5px;text-align:left;font-weight:600;position:sticky;top:0;z-index:1;border-bottom:2px solid #e0e0e0;white-space:nowrap;font-size:10px}
 td{padding:4px 5px;border-bottom:1px solid #f0f0f0}
 td input,td select{width:100%;border:1px solid #ddd;border-radius:3px;padding:3px 5px;font-size:10px;min-width:45px;font-family:inherit}
-td input:focus,td select:focus{border-color:#4fc3f7;outline:none}
+td input:focus,td select:focus{border-color:#148f7d;outline:none}
 tr:hover td{background:#fafbfc}
 tr.row-du td{background:#e8f5e9}
 tr.row-thieu td{background:#fff3e0}
@@ -71,13 +72,13 @@ tr.row-subtotal td{background:#f5f5f5;font-weight:700}
 
 /* FORMS */
 textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:8px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:10px;resize:vertical;line-height:1.5}
-textarea:focus{border-color:#4fc3f7;outline:none}
+textarea:focus{border-color:#148f7d;outline:none}
 select,input[type=text],input[type=number]{padding:5px 8px;border:1px solid #ddd;border-radius:5px;font-size:11px}
-select:focus,input:focus{border-color:#4fc3f7;outline:none}
+select:focus,input:focus{border-color:#148f7d;outline:none}
 
 /* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:6px;color:#fff;font-size:12px;font-weight:500;z-index:999;animation:slideUp .3s ease}
-.toast.success{background:#2e7d32}.toast.error{background:#c62828}.toast.info{background:#1565c0}
+.toast.success{background:#2e7d32}.toast.error{background:#c62828}.toast.info{background:#0f5f57}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* MISC */
@@ -111,7 +112,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 .tree-gdv.open .tree-arrow{transform:rotate(90deg)}
 .tree-tinh{padding:2px 8px 2px 34px;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:9px;color:#777}
 .tree-tinh:hover{background:#e8f0f8}
-.tree-tinh input[type=checkbox]{width:12px;height:12px;accent-color:#4fc3f7;cursor:pointer;flex-shrink:0}
+.tree-tinh input[type=checkbox]{width:12px;height:12px;accent-color:#148f7d;cursor:pointer;flex-shrink:0}
 .tree-tinh.selected{color:#1e3a5f;font-weight:600}
 
 /* Pivot tabs */
@@ -132,6 +133,16 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 .saved-item .name{font-weight:600;color:#1e3a5f}
 .saved-item .meta{font-size:9px;color:#999}
 .saved-item .actions{display:flex;gap:3px}
+
+@media (prefers-color-scheme: dark) {
+  body{background:#0f1724;color:#e8ecf1}
+  .card,.stat-card,.app-card,.modal,.confirm-box,.login-box{background:#1a2332;border-color:#2a3646}
+  thead th{background:#1a2332;color:#cbd5e1;border-bottom-color:#2a3646}
+  td{border-bottom-color:#2a3646}
+  .sidebar{background:#0a2a24}
+  .topbar{background:#b3121b}
+  input,select,textarea{background:#1a2332;color:#e8ecf1;border-color:#2a3646}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -233,7 +244,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
             <input type="text" id="recapSearch" placeholder="Lọc Mã SP/Tên SP..." oninput="renderRecapTable()" style="font-size:10px;width:120px;padding:3px 6px;border:1px solid #ddd;border-radius:4px">
             <select id="recapFilterNCC" onchange="renderRecapTable()" style="font-size:10px;width:100px;padding:3px 6px;border:1px solid #ddd;border-radius:4px"><option value="">Tất cả NCC</option></select>
             <button class="btn btn-outline btn-xs" id="btnCalcMin" onclick="autoCalcMin()" style="background:#0277bd;color:#fff">🧮 Tính Min</button>
-            <label style="font-size:9px;display:flex;align-items:center;gap:3px;white-space:nowrap"><input type="checkbox" id="recapMinOnly" onchange="renderRecapTable()" style="width:12px;height:12px;accent-color:#4fc3f7">Có Min</label>
+            <label style="font-size:9px;display:flex;align-items:center;gap:3px;white-space:nowrap"><input type="checkbox" id="recapMinOnly" onchange="renderRecapTable()" style="width:12px;height:12px;accent-color:#148f7d">Có Min</label>
             <button class="btn btn-primary btn-xs" id="btnEdit" onclick="toggleEditMode()">✏️ Sửa</button>
             <button class="btn btn-warning btn-xs" id="btnRunFC" onclick="saveAndRun()">▶ Chạy FC</button>
             <span class="badge green" id="configSaved">✅ Đã lưu</span>
@@ -302,7 +313,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
       </div>
     </div>
     <div class="modal-footer" style="display:flex;gap:6px">
-      <button class="btn btn-sm" style="flex:1;background:#1565c0;color:#fff" onclick="doSave()">☁️ Lưu Cloud</button>
+      <button class="btn btn-sm" style="flex:1;background:#0f5f57;color:#fff" onclick="doSave()">☁️ Lưu Cloud</button>
       <button class="btn btn-sm" style="flex:1;background:#2e7d32;color:#fff" onclick="downloadSave()">📥 Lưu Offline</button>
       <button class="btn btn-sm" style="flex:1;background:#eee;color:#333" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
     </div>
@@ -331,7 +342,7 @@ select:focus,input:focus{border-color:#4fc3f7;outline:none}
 // ============ FC TYPES ============
 const FC_TYPES={
   ambient:{id:'ambient',name:'🌡 FC Ambient',dot:'#ef6c00'},
-  dongmat:{id:'dongmat',name:'❄️ FC Đông/Mát',dot:'#1565c0'},
+  dongmat:{id:'dongmat',name:'❄️ FC Đông/Mát',dot:'#0f5f57'},
   traicay:{id:'traicay',name:'🍎 FC Trái Cây',dot:'#c62828'},
   rau:{id:'rau',name:'🥬 FC Rau',dot:'#2e7d32'},
   are:{id:'are',name:'🏗 FC Dự án ARE',dot:'#6a1b9a'}
@@ -438,7 +449,7 @@ function buildVungTree(){
         if(!STATE.selectedTinh.has(gdv+'||'+tinh)) mienAllChecked=false;
       }
     }
-    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span><input type="checkbox" '+(mienAllChecked&&mienTotal>0?'checked':'')+' data-mien="'+mien+'" style="width:12px;height:12px;accent-color:#4fc3f7;margin-right:2px">📍 '+mien+' ('+mienTotal+' CH)</div>';
+    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span><input type="checkbox" '+(mienAllChecked&&mienTotal>0?'checked':'')+' data-mien="'+mien+'" style="width:12px;height:12px;accent-color:#148f7d;margin-right:2px">📍 '+mien+' ('+mienTotal+' CH)</div>';
     h+='<div class="tree-mien-children">';
     for(const [gdv,tinhs] of Object.entries(gdvs).sort()){
       let gdvTotal=0, gdvAllChecked=true;
@@ -446,7 +457,7 @@ function buildVungTree(){
       for(const tinh of Object.keys(tinhs)){
         if(!STATE.selectedTinh.has(gdv+'||'+tinh)) gdvAllChecked=false;
       }
-      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span><input type="checkbox" '+(gdvAllChecked&&gdvTotal>0?'checked':'')+' data-gdv="'+gdv+'" style="width:12px;height:12px;accent-color:#4fc3f7;margin-right:2px">👤 '+gdv+' ('+gdvTotal+')</div>';
+      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span><input type="checkbox" '+(gdvAllChecked&&gdvTotal>0?'checked':'')+' data-gdv="'+gdv+'" style="width:12px;height:12px;accent-color:#148f7d;margin-right:2px">👤 '+gdv+' ('+gdvTotal+')</div>';
       h+='<div class="tree-gdv-children" style="display:none">';
       for(const [tinh,count] of Object.entries(tinhs).sort()){
         const key=gdv+'||'+tinh, checked=STATE.selectedTinh.has(key);
@@ -913,16 +924,16 @@ function renderRecapTable(){
     }
     h+='<td style="font-size:9px;color:#888;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.dienGiai||'')+'">'+(r.dienGiai||'')+'</td>';
     h+='<td style="color:#555;font-size:10px">'+r.ncc+'</td>';
-    Ncols.forEach(n=>h+='<td style="font-size:9px;color:#1565c0;text-align:center;font-weight:500">'+(refVals[n]||'-')+'</td>');
+    Ncols.forEach(n=>h+='<td style="font-size:9px;color:#0f5f57;text-align:center;font-weight:500">'+(refVals[n]||'-')+'</td>');
     Ncols.forEach(n=>{
       if(edit) h+='<td><input value="'+(r[n]||0)+'" size="4" onchange="current().recapTable['+i+'].'+n+'=parseInt(this.value)||0"></td>';
       else h+='<td style="text-align:center">'+(r[n]||0)+'</td>';
     });
     if(!coll){
       if(edit){
-        h+='<td style="text-align:center"><input type="checkbox" '+(r.block?'checked':'')+' onchange="current().recapTable['+i+'].block=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
-        h+='<td style="text-align:center"><input type="checkbox" '+(r.plusStock?'checked':'')+' onchange="current().recapTable['+i+'].plusStock=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
-        h+='<td style="text-align:center"><input type="checkbox" '+(r.plusCG?'checked':'')+' onchange="current().recapTable['+i+'].plusCG=this.checked?1:0" style="width:14px;height:14px;accent-color:#4fc3f7"></td>';
+        h+='<td style="text-align:center"><input type="checkbox" '+(r.block?'checked':'')+' onchange="current().recapTable['+i+'].block=this.checked?1:0" style="width:14px;height:14px;accent-color:#148f7d"></td>';
+        h+='<td style="text-align:center"><input type="checkbox" '+(r.plusStock?'checked':'')+' onchange="current().recapTable['+i+'].plusStock=this.checked?1:0" style="width:14px;height:14px;accent-color:#148f7d"></td>';
+        h+='<td style="text-align:center"><input type="checkbox" '+(r.plusCG?'checked':'')+' onchange="current().recapTable['+i+'].plusCG=this.checked?1:0" style="width:14px;height:14px;accent-color:#148f7d"></td>';
         h+='<td><input value="'+r.lockMax+'" size="3" onchange="current().recapTable['+i+'].lockMax=parseInt(this.value)||2"></td>';
         h+='<td><input value="'+r.coverDay+'" size="3" onchange="current().recapTable['+i+'].coverDay=parseInt(this.value)||14"></td>';
         h+='<td><input value="'+r.rank+'" size="3" onchange="current().recapTable['+i+'].rank=parseInt(this.value)||1"></td>';
