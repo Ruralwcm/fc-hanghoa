@@ -44,7 +44,7 @@ body{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 /* BUTTONS */
 .btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-primary{background:#1e3a5f;color:#fff}.btn-primary:hover{background:#2a4f7f}
-.btn-success{background:#2e7d32;color:#fff}.btn-success:hover{background:#388e3c}
+.btn-success{background:#1a3c6e;color:#fff}.btn-success:hover{background:#388e3c}
 .btn-outline{background:#fff;color:#1e3a5f;border:1px solid #1e3a5f}.btn-outline:hover{background:#f5f5f5}
 .btn-warning{background:#ef6c00;color:#fff}
 .btn-sm{padding:5px 10px;font-size:11px}
@@ -53,8 +53,8 @@ body{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 
 /* BADGES */
 .badge{font-size:10px;padding:2px 6px;border-radius:8px;background:#e3f2fd;color:#d71920}
-.badge.green{background:#e8f5e9;color:#2e7d32}
-.badge.orange{background:#fff3e0;color:#ef6c00}
+.badge.green{background:#e8f0fe;color:#1a3c6e}
+.badge.orange{background:#fef9c3;color:#ef6c00}
 
 /* TABLE */
 .table-wrap{overflow-x:auto;max-height:380px;border:1px solid #e0e0e0;border-radius:6px}
@@ -64,8 +64,8 @@ td{padding:4px 5px;border-bottom:1px solid #f0f0f0}
 td input,td select{width:100%;border:1px solid #ddd;border-radius:3px;padding:3px 5px;font-size:10px;min-width:45px;font-family:inherit}
 td input:focus,td select:focus{border-color:#1a3c6e;outline:none}
 tr:hover td{background:#fafbfc}
-tr.row-du td{background:#e8f5e9}
-tr.row-thieu td{background:#fff3e0}
+tr.row-du td{background:#e8f0fe}
+tr.row-thieu td{background:#fef9c3}
 tr.row-loai td{background:#ffebee}
 tr.row-section td{background:#e3f2fd!important;font-weight:700;cursor:pointer}
 tr.row-subtotal td{background:#f5f5f5;font-weight:700}
@@ -78,7 +78,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
 /* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:6px;color:#fff;font-size:12px;font-weight:500;z-index:999;animation:slideUp .3s ease}
-.toast.success{background:#2e7d32}.toast.error{background:#c62828}.toast.info{background:#d71920}
+.toast.success{background:#1a3c6e}.toast.error{background:#c62828}.toast.info{background:#d71920}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* MISC */
@@ -166,7 +166,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
       <span>🏪 <b id="metaCH">—</b></span>
       <span>📋 <b id="metaSKU">—</b></span>
       <span>📦 <b id="metaFC">—</b></span>
-      <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
+      <span style="color:#1a3c6e" id="sheetDot">🟢 Live</span>
       <label style="font-size:10px">Ngày KD:</label>
       <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
       <button class="btn btn-outline btn-sm" onclick="showSaveModal()" style="padding:4px 10px;font-size:10px">💾 Lưu</button>
@@ -284,8 +284,8 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
           <div class="kpi-row" style="margin-bottom:6px">
             <div class="kpi-box"><div class="kpi-val" id="kpiSLFC">—</div><div class="kpi-label">SL FC</div></div>
             <div class="kpi-box"><div class="kpi-val" id="kpiGTFC">—</div><div class="kpi-label">GT FC</div></div>
-            <div class="kpi-box" style="background:#e8f5e9"><div class="kpi-val" id="kpiDu" style="color:#2e7d32">—</div><div class="kpi-label">Đủ MOV</div></div>
-            <div class="kpi-box" style="background:#fff3e0"><div class="kpi-val" id="kpiThieu" style="color:#ef6c00">—</div><div class="kpi-label">Thiếu MOV</div></div>
+            <div class="kpi-box" style="background:#e8f0fe"><div class="kpi-val" id="kpiDu" style="color:#1a3c6e">—</div><div class="kpi-label">Đủ MOV</div></div>
+            <div class="kpi-box" style="background:#fef9c3"><div class="kpi-val" id="kpiThieu" style="color:#ef6c00">—</div><div class="kpi-label">Thiếu MOV</div></div>
             <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="kpiLoai" style="color:#c62828">—</div><div class="kpi-label">Loại FC</div></div>
           </div>
           <div class="table-wrap" id="pivotWrap">
@@ -314,7 +314,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     </div>
     <div class="modal-footer" style="display:flex;gap:6px">
       <button class="btn btn-sm" style="flex:1;background:#d71920;color:#fff" onclick="doSave()">☁️ Lưu Cloud</button>
-      <button class="btn btn-sm" style="flex:1;background:#2e7d32;color:#fff" onclick="downloadSave()">📥 Lưu Offline</button>
+      <button class="btn btn-sm" style="flex:1;background:#1a3c6e;color:#fff" onclick="downloadSave()">📥 Lưu Offline</button>
       <button class="btn btn-sm" style="flex:1;background:#eee;color:#333" onclick="$('saveModal').classList.add('hidden')">Hủy</button>
     </div>
   </div>
@@ -344,7 +344,7 @@ const FC_TYPES={
   ambient:{id:'ambient',name:'🌡 FC Ambient',dot:'#ef6c00'},
   dongmat:{id:'dongmat',name:'❄️ FC Đông/Mát',dot:'#d71920'},
   traicay:{id:'traicay',name:'🍎 FC Trái Cây',dot:'#c62828'},
-  rau:{id:'rau',name:'🥬 FC Rau',dot:'#2e7d32'},
+  rau:{id:'rau',name:'🥬 FC Rau',dot:'#1a3c6e'},
   are:{id:'are',name:'🏗 FC Dự án ARE',dot:'#6a1b9a'}
 };
 
@@ -590,7 +590,7 @@ function verifyTemplate(){
     $('tmplVerifyResult').innerHTML='<span style="color:#c62828">❌ '+errs.length+' lỗi: '+errs.slice(0,2).join('; ')+(errs.length>2?'...':'')+'</span>';
     $('tmplImportBtn').classList.add('hidden');
   } else {
-    $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ '+ok+' SKU hợp lệ</span>';
+    $('tmplVerifyResult').innerHTML='<span style="color:#1a3c6e">✅ '+ok+' SKU hợp lệ</span>';
     $('tmplImportBtn').classList.remove('hidden');
     toast('✅ Verify OK — '+ok+' SKU sẵn sàng import','success');
   }
@@ -631,7 +631,7 @@ function importTemplate(){
   const count=importTemplateSilent();
   renderRecapTable();renderMOVTable();
   $('resultsSection').classList.remove('hidden');
-  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32">✅ Đã import '+count+' SKU + MOV</span>';
+  $('tmplVerifyResult').innerHTML='<span style="color:#1a3c6e">✅ Đã import '+count+' SKU + MOV</span>';
   $('tmplImportBtn').classList.add('hidden');
   toast('✅ '+count+' SKU + MOV đã import!','success');
 }
@@ -673,7 +673,7 @@ async function loadSharedData(){
     const cn=await fetchCSV(PROD.sheetGoc,PROD.gidNhom);const rn=parseCSV(cn);STATE.nhomN={};
     for(let i=1;i<rn.length;i++){const r=rn[i];if(r.length<3)continue;STATE.nhomN[r[0].trim()+'|'+r[1].trim()]=r[2].trim()}
 
-    buildVungTree();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#2e7d32';
+    buildVungTree();updateMetaBar();$('sheetDot').textContent='🟢 Live';$('sheetDot').style.color='#1a3c6e';
   }catch(e){console.error(e);$('sheetDot').textContent='🔴 Offline';$('sheetDot').style.color='#ef6c00';
     $('vungTree').innerHTML='<div style="padding:10px;color:#c62828;font-size:10px">Storelist chưa kết nối</div><button class="btn btn-xs btn-outline" onclick="loadSharedData()" style="margin:4px;font-size:9px">Thử lại</button><div style="padding:4px 10px;font-size:9px;color:#999">Import Excel vẫn dùng được</div>';}
 }
@@ -840,7 +840,7 @@ function verifyAndImportTemplate(){
   $('resultsSection').classList.remove('hidden');
   const movRows=fc.movTable.reduce((s,m)=>s+Object.keys(m.tinhMOV||{}).length,0);
   const saleN=(STATE._saleCount||0); STATE._saleCount=0;
-  $('tmplVerifyResult').innerHTML='<span style="color:#2e7d32;font-weight:600">✅ Đã import: <b>'+count+' SKU</b> vào Danh mục · <b>'+movRows+' MOV</b> vào NCC×Tỉnh'+(saleN?' · <b>'+saleN+' line</b> Sale':'')+'</span>';
+  $('tmplVerifyResult').innerHTML='<span style="color:#1a3c6e;font-weight:600">✅ Đã import: <b>'+count+' SKU</b> vào Danh mục · <b>'+movRows+' MOV</b> vào NCC×Tỉnh'+(saleN?' · <b>'+saleN+' line</b> Sale':'')+'</span>';
   $('tmplImportBtn').classList.add('hidden');
   toast('✅ '+count+' SKU + '+movRows+' MOV'+(saleN?' + '+saleN+' Sale':'')+' đã import!','success');
 }
@@ -1118,7 +1118,7 @@ function renderPivot(){
   for(const k of Object.keys(grps).sort()){const g=grps[k];
     const gBQ=g.ch.size>0?Math.round(g.gtR/g.ch.size):0;const gDR=g.items.length>0?Math.round(g.drOk/g.items.length*100):0;
     h+='<tr class="row-section" onclick="togglePivot(this)" data-k="'+k.replace(/"/g,'&quot;')+'"><td>▶ '+k+'</td><td>'+g.ch.size+'</td>'
-      +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+(gDR>=80?'<span style="color:#2e7d32;font-weight:600">':gDR>=50?'<span style="color:#ef6c00;font-weight:600">':'<span style="color:#c62828;font-weight:600">')+gDR+'%</span></td><td>'+fmt(Math.round(g.gtT))+'</td>'
+      +'<td>'+fmt(Math.round(g.slB))+'</td><td>'+fmt(Math.round(g.gtB))+'</td><td>'+fmt(Math.round(g.slT))+'</td><td>'+(gDR>=80?'<span style="color:#1a3c6e;font-weight:600">':gDR>=50?'<span style="color:#ef6c00;font-weight:600">':'<span style="color:#c62828;font-weight:600">')+gDR+'%</span></td><td>'+fmt(Math.round(g.gtT))+'</td>'
       +'<td>'+fmt(Math.round(g.slCG))+'</td><td>'+fmt(Math.round(g.gtCG))+'</td>'
       +'<td><b>'+fmt(Math.round(g.slFC))+'</b></td><td><b>'+fmt(Math.round(g.gtFC))+'</b></td>'
       +'<td><b>'+fmt(Math.round(g.slR))+'</b></td><td><b>'+fmt(Math.round(g.gtR))+'</b></td>'
@@ -1150,7 +1150,7 @@ function renderPivot(){
       const subId=k.replace(/"/g,'&quot;')+'_'+sk.replace(/"/g,'&quot;');
       const hasSub=sub==='tinh'||sub==='qlkv';
       h+='<tr style="display:none;font-size:10px;color:#666" class="sub-row'+(hasSub?' row-section':'')+'" '+(hasSub?'onclick="togglePivot(this)" ':'')+'data-p="'+k.replace(/"/g,'&quot;')+'" data-sub-id="'+subId+'"><td style="padding-left:20px">'+(hasSub?'▶ ':'↳ ')+sk+'</td><td>'+sCH+'</td>'
-      +'<td>'+fmt(Math.round(sB))+'</td><td>'+fmt(Math.round(gB))+'</td><td>'+fmt(Math.round(sT))+'</td><td>'+(sDR>=80?'<span style="color:#2e7d32">':sDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+sDR+'%</span></td><td>'+fmt(Math.round(gT))+'</td>'
+      +'<td>'+fmt(Math.round(sB))+'</td><td>'+fmt(Math.round(gB))+'</td><td>'+fmt(Math.round(sT))+'</td><td>'+(sDR>=80?'<span style="color:#1a3c6e">':sDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+sDR+'%</span></td><td>'+fmt(Math.round(gT))+'</td>'
       +'<td>'+fmt(Math.round(sCG))+'</td><td>'+fmt(Math.round(gCG))+'</td><td>'+fmt(Math.round(sFC))+'</td><td>'+fmt(Math.round(gFC))+'</td>'
       +'<td>'+fmt(Math.round(sF))+'</td><td>'+fmt(Math.round(gF))+'</td><td>'+fmt(sBQ)+'</td>'
       +'</tr>';
@@ -1164,7 +1164,7 @@ function renderPivot(){
           const ssBQ=ssCH>0?Math.round(ggF/ssCH):0;
           const ssDR=ssCH>0?Math.round(its2.filter(r=>r.checkDR).length/ssCH*100):0;
           h+='<tr style="display:none;font-size:9px;color:#999" class="sub2-row" data-sub-id="'+subId+'"><td style="padding-left:40px">↳ '+sk2+'</td><td>'+ssCH+'</td>'
-          +'<td colspan="4"></td><td>'+(ssDR>=80?'<span style="color:#2e7d32">':ssDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+ssDR+'%</span></td><td colspan="4"></td>'
+          +'<td colspan="4"></td><td>'+(ssDR>=80?'<span style="color:#1a3c6e">':ssDR>=50?'<span style="color:#ef6c00">':'<span style="color:#c62828">')+ssDR+'%</span></td><td colspan="4"></td>'
           +'<td>'+fmt(Math.round(ssF))+'</td><td>'+fmt(Math.round(ggF))+'</td><td>'+fmt(ssBQ)+'</td>'
           +'</tr>';
         }
