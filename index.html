@@ -143,6 +143,51 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   .topbar{background:#b3121b}
   input,select,textarea{background:#1a2332;color:#e8ecf1;border-color:#2a3646}
 }
+/* ===== RESPONSIVE ===== */
+@media (max-width:900px){
+  .sidebar{width:160px}
+  .sidebar .logo{font-size:12px;padding:10px}
+  .sidebar .logo small{font-size:8px}
+  .fc-type{font-size:10px;padding:7px 8px}
+  .topbar{padding:6px 10px}
+  .topbar h2{font-size:13px}
+  .content{padding:6px 8px;gap:6px}
+  .kpi-box{padding:6px 8px}
+  .kpi-val{font-size:16px}
+  .kpi-label{font-size:9px}
+  #cahoiPanel{gap:6px}
+}
+@media (max-width:600px){
+  body{flex-direction:column}
+  .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:4px 8px;flex-shrink:0}
+  .sidebar .logo{display:none}
+  .sidebar .sidebar-footer{display:none}
+  .fc-type-list{display:flex;gap:4px;overflow-x:auto;padding:0}
+  .fc-type{white-space:nowrap;font-size:10px;padding:5px 8px;border-radius:4px}
+  .fc-type .dot{width:6px;height:6px;flex-shrink:0}
+  .main{flex:1;overflow-y:auto}
+  .topbar{padding:4px 8px}
+  .topbar h2{font-size:12px}
+  .meta{font-size:9px;gap:8px}
+  .content{padding:4px 6px;gap:5px}
+  .card{border-radius:6px}
+  .card-header{padding:6px 10px}
+  .card-header h3{font-size:11px}
+  .card-body{padding:4px 6px !important}
+  .kpi-row{flex-wrap:wrap;gap:4px}
+  .kpi-box{min-width:55px;padding:5px 6px}
+  .kpi-val{font-size:14px}
+  .kpi-label{font-size:8px}
+  .btn-xs{font-size:8px !important;padding:2px 4px !important}
+  .btn-sm{font-size:10px !important;padding:4px 8px !important}
+  /* Cá Hồi NCC cards stack */
+  #cahoiNCCList{flex-direction:column;gap:6px !important}
+  #cahoiNCCList>div{min-width:0 !important;max-width:100% !important}
+  /* FC table max-height */
+  .table-wrap{max-height:300px !important}
+  table{font-size:7px !important}
+  th,td{padding:2px 3px !important}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -318,29 +363,55 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
       </div>
     </div>
 
-    <!-- Upload Data -->
+    <!-- Chọn Vùng & Upload Data -->
     <div class="card">
       <div class="card-header">
-        <h3>📥 Upload Data (Sale · Hủy · Tồn)</h3>
+        <h3>📍 Chọn Vùng &amp; Import Dữ Liệu</h3>
         <span class="badge orange" id="cahoiBadge">Chưa có dữ liệu</span>
       </div>
       <div class="card-body" style="padding:8px 12px">
-        <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Store | Article | SL Bán | SL Hủy | SL Tồn</div>
-        <textarea id="cahoiSalePaste" rows="5" style="height:110px;font-size:9px" placeholder="2BII 10626483 15 2 8
+        <div class="import-col-headers" style="display:flex;gap:12px;flex-wrap:wrap">
+          <!-- Cột 1: Chọn Vùng -->
+          <div style="flex:1;min-width:180px;max-width:320px">
+            <div class="import-title" style="font-size:10px">🌍 Chọn Vùng / GĐV</div>
+            <div style="font-size:10px;margin-bottom:4px">
+              <select id="cahoiFilterGDV" onchange="cahoiFilterByGDV()" style="width:100%;font-size:10px;padding:3px;border-radius:3px;border:1px solid #ddd">
+                <option value="">Tất cả GĐV</option>
+              </select>
+            </div>
+            <div style="font-size:10px;margin-bottom:2px">
+              <select id="cahoiFilterQLKV" onchange="cahoiFilterByQLKV()" style="width:100%;font-size:10px;padding:3px;border-radius:3px;border:1px solid #ddd">
+                <option value="">Tất cả QLKV</option>
+              </select>
+            </div>
+            <div style="font-size:9px;color:#888;margin-top:4px">
+              🏪 <b id="cahoiStoreCount">1,221</b> CH active · Đã chọn: <b id="cahoiSelectedCount">—</b>
+            </div>
+            <label style="font-size:10px;display:flex;align-items:center;gap:3px;margin-top:4px">
+              <input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiReloadFC()">Show tất cả CH (kể cả CH ko sale)
+            </label>
+          </div>
+          <!-- Cột 2: Upload Data -->
+          <div style="flex:2;min-width:280px">
+            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Paste Data: Store | Article | SL Bán | SL Hủy | SL Tồn</div>
+            <textarea id="cahoiSalePaste" rows="5" style="height:110px;font-size:9px;width:100%" placeholder="2BII 10626483 15 2 8
 2BII 10053361 8 0 4
 6988 10626483 3 1 10"></textarea>
-        <div class="flex-row" style="margin-top:6px;gap:4px;flex-wrap:wrap;align-items:center">
-          <div style="display:flex;gap:3px;align-items:center">
-            <button class="btn btn-xs btn-primary" onclick="cahoiStep1LoadData()" style="font-size:9px;padding:3px 6px">1️⃣ Load data</button>
-            <button class="btn btn-xs" id="cahoiBtnLoadMin" onclick="cahoiStep2LoadMin()" style="font-size:9px;padding:3px 6px;background:#ef6c00;color:#fff" disabled>2️⃣ Load min</button>
-            <button class="btn btn-xs btn-success" id="cahoiBtnLoadFC" onclick="cahoiStep4LoadFC()" style="font-size:9px;padding:3px 6px" disabled>▶️ Load FC</button>
+            <div class="flex-row" style="margin-top:6px;gap:4px;flex-wrap:wrap;align-items:center">
+              <div style="display:flex;gap:3px;align-items:center">
+                <button class="btn btn-xs btn-primary" onclick="cahoiStep1LoadData()" style="font-size:9px;padding:3px 6px">1️⃣ Load data</button>
+                <button class="btn btn-xs" id="cahoiBtnLoadMin" onclick="cahoiStep2LoadMin()" style="font-size:9px;padding:3px 6px;background:#ef6c00;color:#fff" disabled>2️⃣ Load min</button>
+                <button class="btn btn-xs btn-success" id="cahoiBtnLoadFC" onclick="cahoiStep4LoadFC()" style="font-size:9px;padding:3px 6px" disabled>▶️ Load FC</button>
+              </div>
+              <span style="font-size:9px;color:#ccc">|</span>
+              <button class="btn btn-xs btn-outline" onclick="cahoiExport()" style="font-size:9px;padding:3px 6px">📥 Export</button>
+              <button class="btn btn-xs btn-outline" onclick="cahoiClear()" style="font-size:9px;padding:3px 6px;color:#c62828">🧹 Clear</button>
+              <button class="btn btn-xs btn-outline" onclick="cahoiImportExcel()" style="font-size:9px;padding:3px 6px">📎 Excel</button>
+              <input type="file" id="cahoiFileInput" accept=".xxlsx,.xlsb,.csv" onchange="cahoiHandleFile(event)" style="display:none">
+            </div>
+            <div id="cahoiStepStatus" style="margin-top:6px;font-size:9px;color:#888"></div>
           </div>
-          <span style="font-size:9px;color:#ccc">|</span>
-          <button class="btn btn-xs btn-outline" onclick="cahoiExport()" style="font-size:9px;padding:3px 6px">📥 Export</button>
-          <button class="btn btn-xs btn-outline" onclick="cahoiClear()" style="font-size:9px;padding:3px 6px;color:#c62828">🧹 Clear</button>
-          <label style="font-size:9px;display:flex;align-items:center;gap:2px;margin-left:auto;white-space:nowrap"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiReloadFC()">Show all CH</label>
         </div>
-        <div id="cahoiStepStatus" style="margin-top:6px;font-size:9px;color:#888"></div>
       </div>
     </div>
 
@@ -516,6 +587,7 @@ function switchFC(id){
     if(c.fcTable.length){$('resultsSection').classList.remove('hidden');renderAll();}
   }else if(id==='cahoi'){
     $('cahoiPanel').classList.remove('hidden');
+    cahoiInitFilters();
     renderCahoiNCCConfig();
     renderCahoiHubReview();
     updateCahoiKPIs();
@@ -1628,6 +1700,65 @@ function tonRisk(ton,sale){
   return 'ok';
 }
 
+// ============ Chọn Vùng filter helpers ============
+function cahoiInitFilters(){
+  const gdvSet=new Set(), qlkvSet=new Set();
+  CAHOI_STORES.forEach(s=>{ if(s.g)gdvSet.add(s.g); if(s.q)qlkvSet.add(s.q); });
+  const gdvSel=$('cahoiFilterGDV'), qlkvSel=$('cahoiFilterQLKV');
+  const savedGdv=gdvSel.value, savedQlkv=qlkvSel.value;
+  gdvSel.innerHTML='<option value="">Tất cả GĐV</option>'+[...gdvSet].sort().map(g=>'<option value="'+g+'">'+g+'</option>').join('');
+  qlkvSel.innerHTML='<option value="">Tất cả QLKV</option>'+[...qlkvSet].sort().map(q=>'<option value="'+q+'">'+q+'</option>').join('');
+  if(savedGdv) gdvSel.value=savedGdv;
+  if(savedQlkv) qlkvSel.value=savedQlkv;
+  $('cahoiStoreCount').textContent=CAHOI_STORES.length.toLocaleString();
+}
+
+function cahoiGetFilteredStores(){
+  const gdv=$('cahoiFilterGDV').value, qlkv=$('cahoiFilterQLKV').value;
+  let stores=CAHOI_STORES;
+  if(gdv) stores=stores.filter(s=>s.g===gdv);
+  if(qlkv) stores=stores.filter(s=>s.q===qlkv);
+  return stores;
+}
+function cahoiFilterByGDV(){
+  $('cahoiFilterQLKV').value='';
+  $('cahoiSelectedCount').textContent=cahoiGetFilteredStores().length.toLocaleString();
+}
+function cahoiFilterByQLKV(){
+  $('cahoiFilterGDV').value='';
+  $('cahoiSelectedCount').textContent=cahoiGetFilteredStores().length.toLocaleString();
+}
+
+// ============ Excel import ============
+function cahoiImportExcel(){$('cahoiFileInput').click();}
+function cahoiHandleFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      const lines=[];
+      for(let i=0;i<data.length;i++){
+        const row=data[i];
+        if(!row||row.length<3) continue;
+        const ch=String(row[0]||'').trim();
+        const sku=String(row[1]||'').trim();
+        if(!ch||!sku) continue;
+        const sale=parseFloat(row[2])||0;
+        const huy=row.length>3?(parseFloat(row[3])||0):0;
+        const ton=row.length>4?(parseFloat(row[4])||0):0;
+        lines.push([ch,sku,sale,huy,ton].join('\t'));
+      }
+      if(lines.length>0){$('cahoiSalePaste').value=lines.join('\n');toast('✅ Import '+lines.length+' dòng','success')}
+      else toast('⚠️ Không tìm thấy dữ liệu','warn');
+    }catch(ex){toast('❌ Lỗi đọc file: '+ex.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value='';
+}
+
 // ============ Render NCC MOV config ============
 function renderCahoiNCCConfig(){
   if(!CAHOI.nccMov||Object.keys(CAHOI.nccMov).length===0){
@@ -1700,8 +1831,8 @@ function cahoiStep2LoadMin(){
   const chWithSale=new Set();
   Object.keys(CAHOI.saleData).forEach(k=>chWithSale.add(k.split('||')[0]));
 
-  let activeStores=CAHOI_STORES.filter(s=>chWithSale.has(s.c));
-  if(activeStores.length===0) activeStores=CAHOI_STORES;
+  let activeStores=cahoiGetFilteredStores().filter(s=>chWithSale.has(s.c));
+  if(activeStores.length===0) activeStores=cahoiGetFilteredStores();
 
   const assigned={}, noNCC=[];
   activeStores.forEach(s=>{
