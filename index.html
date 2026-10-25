@@ -1595,6 +1595,8 @@ async function init(){
     $('tmplPaste').value='10007893\tHẢO HẢO Mì tôm chua cay 75g\tG1\t30\t3580\t43000\t64900\tMua 2 tặng 1\tdd/mm-dd\tChia hàng';
     $('salePaste').placeholder='2797\t'+sku+'\t87\t444\t0\n2924\t'+sku+'\t163\t360\t0\n3088\t'+sku+'\t494\t0\t90';
   }
+  // Sync panel display with current FC selection
+  switchFC(STATE.currentFC);
 }
 init();
 
