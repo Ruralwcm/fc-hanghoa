@@ -175,7 +175,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   </div>
 
   <div class="content" id="mainContent">
-    <div class="two-col">
+    <div class="two-col" id="ambientPanel">
     <div class="col-left">
 
     <!-- ===== SECTION 1: Chọn Vùng + Import ===== -->
@@ -508,20 +508,21 @@ function switchFC(id){
   STATE.currentFC=id;buildFCSidebar();
   $('currentFCLabel').textContent=FC_TYPES[id].name;
   const c=current();$('configSaved').style.display=c.configSaved?'inline':'none';
+  $('ambientPanel').classList.add('hidden');
   $('resultsSection').classList.add('hidden');
+  $('cahoiPanel').classList.add('hidden');
   if(id==='ambient'){
-    if(c.fcTable.length){$('resultsSection').classList.remove('hidden');$('cahoiPanel').classList.add('hidden');renderAll();}
-    else{$('resultsSection').classList.add('hidden');$('cahoiPanel').classList.add('hidden');}
+    $('ambientPanel').classList.remove('hidden');
+    if(c.fcTable.length){$('resultsSection').classList.remove('hidden');renderAll();}
   }else if(id==='cahoi'){
-    $('resultsSection').classList.add('hidden');
     $('cahoiPanel').classList.remove('hidden');
     renderCahoiNCCConfig();
     renderCahoiHubReview();
     updateCahoiKPIs();
     if(CAHOI.fcTable.length){renderCahoiFCTable();renderCahoiRecap();}
   }else{
+    $('ambientPanel').classList.remove('hidden');
     $('resultsSection').classList.remove('hidden');
-    $('cahoiPanel').classList.add('hidden');
     document.querySelector('#pivotWrap').innerHTML='<div style="padding:60px;text-align:center;color:#999"><div style="font-size:48px;margin-bottom:12px">🚧</div><div style="font-size:16px;font-weight:600;color:#666">Đang phát triển</div><div style="font-size:11px;margin-top:4px">Tính năng này sẽ sớm ra mắt</div></div>';
   }
   updateMetaBar();updateKPIs();
