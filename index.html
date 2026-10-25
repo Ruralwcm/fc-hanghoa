@@ -329,12 +329,25 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
         <textarea id="cahoiSalePaste" rows="5" style="height:110px;font-size:9px" placeholder="2BII 10626483 15 2 8
 2BII 10053361 8 0 4
 6988 10626483 3 1 10"></textarea>
-        <div class="flex-row" style="margin-top:6px">
-          <button class="btn btn-sm btn-primary" onclick="cahoiLoadData()">📥 Load &amp; Tính FC</button>
+        <div class="flex-row" style="margin-top:6px;gap:6px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:4px;align-items:center;border-right:1px solid #ddd;padding-right:8px">
+            <span style="font-size:9px;font-weight:700;color:#1e3a5f">1️⃣</span>
+            <button class="btn btn-sm btn-primary" onclick="cahoiStep1LoadData()">📥 Load data</button>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;border-right:1px solid #ddd;padding-right:8px">
+            <span style="font-size:9px;font-weight:700;color:#1e3a5f">2️⃣</span>
+            <button class="btn btn-sm" id="cahoiBtnLoadMin" onclick="cahoiStep2LoadMin()" style="background:#ef6c00;color:#fff" disabled>📊 Load min</button>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;padding-right:8px">
+            <span style="font-size:9px;font-weight:700;color:#1e3a5f">4️⃣</span>
+            <button class="btn btn-sm btn-success" id="cahoiBtnLoadFC" onclick="cahoiStep4LoadFC()" disabled>▶️ Load FC</button>
+          </div>
+          <span style="font-size:9px;color:#888">|</span>
           <button class="btn btn-sm btn-outline" onclick="cahoiExport()">📥 Xuất Excel</button>
           <button class="btn btn-sm btn-outline" onclick="cahoiClear()" style="color:#c62828">🧹 Clear</button>
-          <label style="font-size:9px;display:flex;align-items:center;gap:3px"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiLoadData()">Show all CH</label>
+          <label style="font-size:9px;display:flex;align-items:center;gap:3px;margin-left:auto"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiReloadFC()">Show all CH</label>
         </div>
+        <div id="cahoiStepStatus" style="margin-top:6px;font-size:9px;color:#888"></div>
       </div>
     </div>
 
@@ -354,7 +367,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
           <div style="display:flex;align-items:center;gap:4px"><label>Chu kỳ lock (ngày):</label><input type="number" id="cfgHubLock" value="30" style="width:58px;padding:3px;font-size:11px"></div>
           <div style="display:flex;align-items:center;gap:4px"><label>KC cảnh báo (km):</label><input type="number" id="cfgHubKC" value="10" style="width:58px;padding:3px;font-size:11px"></div>
           <div style="display:flex;align-items:center;gap:4px"><label>Hệ số tách HUB (×MOV):</label><input type="number" id="cfgHubSplit" value="2" style="width:58px;padding:3px;font-size:11px"></div>
-          <button class="btn btn-xs btn-outline" onclick="cahoiLoadData()" style="font-size:9px">🔄 Áp dụng</button>
+          <button class="btn btn-xs btn-outline" onclick="cahoiStep4LoadFC()" style="font-size:9px">🔄 Áp dụng &amp; Load FC</button>
         </div>
       </div>
     </div>
@@ -510,7 +523,9 @@ function switchFC(id){
     $('resultsSection').classList.add('hidden');
     $('cahoiPanel').classList.remove('hidden');
     renderCahoiNCCConfig();
-    if(CAHOI.fcTable.length){renderCahoiFCTable();renderCahoiRecap();renderCahoiHubReview();updateCahoiKPIs();}
+    renderCahoiHubReview();
+    updateCahoiKPIs();
+    if(CAHOI.fcTable.length){renderCahoiFCTable();renderCahoiRecap();}
   }else{
     $('resultsSection').classList.remove('hidden');
     $('cahoiPanel').classList.add('hidden');
@@ -1642,11 +1657,11 @@ function updateNCCMov(ncc,key,val){
   CAHOI.nccMov[ncc][key]=v;
 }
 
-// ============ Load & Calculate FC Cá Hồi ============
-function cahoiLoadData(){
-  // Parse sale data: Store | Article | SL Bán | SL Hủy | SL Tồn
+// ============ Step 1: Load Data (parse sale/hủy/tồn) ============
+function cahoiStep1LoadData(){
   const lines=$('cahoiSalePaste').value.trim().split('\n');
   CAHOI.saleData={};
+  let lineCount=0;
   lines.forEach(l=>{
     const parts=l.trim().split(/\s+|\t/);
     if(parts.length<3) return;
@@ -1655,18 +1670,54 @@ function cahoiLoadData(){
     const huy=parts.length>3?(parseFloat(parts[3])||0):0;
     const ton=parts.length>4?(parseFloat(parts[4])||0):0;
     CAHOI.saleData[ch+'||'+sku]={sale,huy,ton};
+    lineCount++;
   });
 
-  const showAll=$('cahoiShowAllCH')?.checked!==false;
+  if(lineCount===0) return toast('❌ Chưa có dữ liệu hoặc sai format! Paste: Store | Article | SL Bán | SL Hủy | SL Tồn','error');
+
+  const chSet=new Set();
+  Object.keys(CAHOI.saleData).forEach(k=>chSet.add(k.split('||')[0]));
+  const totalSale=Object.values(CAHOI.saleData).reduce((s,d)=>s+d.sale,0);
+
+  $('cahoiBadge').innerHTML='✅ '+chSet.size+' CH · '+lineCount+' dòng · Sale: '+totalSale+' SL';
+  $('cahoiBadge').className='badge orange';
+  $('cahoiStepStatus').innerHTML='<span style="color:#ef6c00">✅ Step 1 done — '+chSet.size+' CH có data, '+lineCount+' dòng sale →</span> <b>Bấm 2️⃣ Load min</b>';
+
+  // Enable Step 2
+  $('cahoiBtnLoadMin').disabled=false;
+  $('cahoiBtnLoadFC').disabled=true;
+
+  // Clear old FC
+  CAHOI.fcTable=[];
+  renderCahoiFCTable();
+  renderCahoiRecap();
+  renderCahoiHubReview();
+  updateCahoiKPIs();
+
+  toast('✅ Đã load: '+chSet.size+' CH · '+lineCount+' dòng','success');
+}
+
+// ============ Step 2: Load Min (auto-calculate from NCC MOV × N-group) ============
+function cahoiStep2LoadMin(){
+  if(Object.keys(CAHOI.saleData).length===0) return toast('❌ Chưa Load data! Làm Step 1 trước.','error');
+
   const chWithSale=new Set();
   Object.keys(CAHOI.saleData).forEach(k=>chWithSale.add(k.split('||')[0]));
 
   let activeStores=CAHOI_STORES.filter(s=>chWithSale.has(s.c));
   if(activeStores.length===0) activeStores=CAHOI_STORES;
 
-  // Build FC table
+  const assigned={}, noNCC=[];
+  activeStores.forEach(s=>{
+    const ncc=getNCCForCH(s);
+    if(!ncc) noNCC.push(s.c+' ('+s.n+')');
+    else assigned[s.c]=ncc;
+  });
+
+  // Build skeleton FC with min
   CAHOI.fcTable=[];
   let stt=0;
+  const showAll=$('cahoiShowAllCH')?.checked!==false;
   activeStores.forEach(s=>{
     CAHOI_ASSORT.forEach(sku=>{
       stt++;
@@ -1678,7 +1729,7 @@ function cahoiLoadData(){
       const cap=Math.round(sd.sale*(1-pctHuy)*0.85);
       const dh=Math.max(0,Math.round(sd.sale+min-sd.huy));
       const kg=Math.round(dh*sku.q*100)/100;
-      const ncc=getNCCForCH(s)||'';
+      const ncc=assigned[s.c]||'';
       const block=pctHuy>0.3;
       const tRisk=tonRisk(sd.ton,sd.sale);
       CAHOI.fcTable.push({
@@ -1694,9 +1745,49 @@ function cahoiLoadData(){
   renderCahoiRecap();
   renderCahoiHubReview();
   updateCahoiKPIs();
+
   $('cahoiBadge').innerHTML=activeStores.length+' CH × '+CAHOI_ASSORT.length+' SKU · <b>'+CAHOI.fcTable.length+'</b> dòng';
   $('cahoiBadge').className='badge green';
-  toast('🐟 Đã tính FC Cá Hồi: '+CAHOI.fcTable.length+' dòng','success');
+
+  let statusMsg='<span style="color:green">✅ Step 2 done — Min loaded, NCC assigned →</span> ';
+  if(noNCC.length>0) statusMsg+='<span style="color:#c62828">⚠️ '+noNCC.length+' CH chưa map NCC: '+noNCC.slice(0,5).join(', ')+(noNCC.length>5?'...':'')+'</span><br>';
+  statusMsg+='<b>Sửa MOV/NCC → 4️⃣ Load FC</b>';
+  $('cahoiStepStatus').innerHTML=statusMsg;
+
+  // Enable Step 4
+  $('cahoiBtnLoadFC').disabled=false;
+
+  toast('✅ Min loaded: '+CAHOI.fcTable.length+' dòng · '+(noNCC.length?'⚠️ '+noNCC.length+' CH chưa NCC':'✅ All NCC mapped'),noNCC.length?'warn':'success');
+}
+
+// ============ Step 4: Load FC (run full FC calculation) ============
+function cahoiStep4LoadFC(){
+  if(CAHOI.fcTable.length===0) return toast('❌ Chưa Load min! Làm Step 2 trước.','error');
+
+  // Re-run full calculation with current NCC MOV config
+  cahoiStep2LoadMin();
+
+  renderCahoiFCTable();
+  renderCahoiRecap();
+  renderCahoiHubReview();
+  updateCahoiKPIs();
+
+  $('cahoiStepStatus').innerHTML='<span style="color:#00796b">✅ FC loaded — '+CAHOI.fcTable.length+' dòng. <b>Done!</b></span>';
+  toast('🐟 Đã Load FC Cá Hồi: '+CAHOI.fcTable.length+' dòng','success');
+}
+
+// ============ Re-load FC (for checkbox toggle) ============
+function cahoiReloadFC(){
+  if(CAHOI.fcTable.length) cahoiStep2LoadMin();
+}
+
+// ============ Old combined (keep for backward compat) ============
+function cahoiLoadData(){
+  cahoiStep1LoadData();
+  if(Object.keys(CAHOI.saleData).length>0){
+    cahoiStep2LoadMin();
+    cahoiStep4LoadFC();
+  }
 }
 
 // ============ Render FC Table ============
