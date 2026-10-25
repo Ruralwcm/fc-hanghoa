@@ -299,52 +299,62 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   </div>
   </div>
 
+
+
+</div>
+
   <!-- ===== Cá Hồi Panel ===== -->
   <div id="cahoiPanel" class="hidden" style="display:flex;flex-direction:column;gap:10px;width:100%">
     <!-- KPI Bar -->
     <div class="card">
       <div class="card-body" style="padding:8px 12px">
         <div class="kpi-row">
-          <div class="kpi-box"><div class="kpi-val" id="ckpiCH">—</div><div class="kpi-label">CH đã chọn</div></div>
+          <div class="kpi-box"><div class="kpi-val" id="ckpiCH">—</div><div class="kpi-label">CH</div></div>
           <div class="kpi-box"><div class="kpi-val" id="ckpiRows">—</div><div class="kpi-label">Dòng FC</div></div>
           <div class="kpi-box"><div class="kpi-val" id="ckpiKG">—</div><div class="kpi-label">Tổng KG</div></div>
-          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="color:#c62828">—</div><div class="kpi-label">CH Block (hủy >30%)</div></div>
+          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="color:#c62828">—</div><div class="kpi-label">CH Block</div></div>
+          <div class="kpi-box" style="background:#fff8e1"><div class="kpi-val" id="ckpiTon" style="color:#ef6c00">—</div><div class="kpi-label">Tồn xấu</div></div>
         </div>
       </div>
     </div>
 
-    <!-- Upload Sale + CH Selection -->
+    <!-- Upload Data -->
     <div class="card">
       <div class="card-header">
-        <h3>🐟 Cá Hồi — Upload Sale &amp; Chọn CH</h3>
+        <h3>📥 Upload Data (Sale · Hủy · Tồn)</h3>
         <span class="badge orange" id="cahoiBadge">Chưa có dữ liệu</span>
       </div>
       <div class="card-body" style="padding:8px 12px">
-        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px">
-          <div style="flex:1;min-width:300px">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Sale Data (Store | Article | SL Bán | SL Hủy)</div>
-            <textarea id="cahoiSalePaste" rows="6" style="height:100px;font-size:9px" placeholder="2BII 10626483 15 2
-2BII 10053361 8 0
-6988 10626483 3 1"></textarea>
-          </div>
-          <div style="width:200px;flex-shrink:0">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">🏪 Chọn CH</div>
-            <div style="border:1px solid #e0e0e0;border-radius:6px;padding:6px;max-height:160px;overflow-y:auto;font-size:9px">
-              <input type="text" id="cahoiCHFilter" placeholder="Lọc CH..." style="width:100%;margin-bottom:4px;font-size:9px;padding:3px" oninput="renderCHCheckboxes()">
-              <div id="cahoiCHList"></div>
-              <div style="margin-top:4px;display:flex;gap:4px">
-                <button class="btn btn-xs btn-outline" onclick="selectAllCahoiCH()" style="font-size:8px">All</button>
-                <button class="btn btn-xs btn-outline" onclick="clearCahoiCH()" style="font-size:8px">Clear</button>
-                <button class="btn btn-xs btn-outline" onclick="selectByQLKV()" style="font-size:8px">QLKV</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-row">
+        <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Store | Article | SL Bán | SL Hủy | SL Tồn</div>
+        <textarea id="cahoiSalePaste" rows="5" style="height:110px;font-size:9px" placeholder="2BII 10626483 15 2 8
+2BII 10053361 8 0 4
+6988 10626483 3 1 10"></textarea>
+        <div class="flex-row" style="margin-top:6px">
           <button class="btn btn-sm btn-primary" onclick="cahoiLoadData()">📥 Load &amp; Tính FC</button>
           <button class="btn btn-sm btn-outline" onclick="cahoiExport()">📥 Xuất Excel</button>
           <button class="btn btn-sm btn-outline" onclick="cahoiClear()" style="color:#c62828">🧹 Clear</button>
-          <label style="font-size:9px;display:flex;align-items:center;gap:3px"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiLoadData()">Show all CH (kể cả ko sale)</label>
+          <label style="font-size:9px;display:flex;align-items:center;gap:3px"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiLoadData()">Show all CH</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- NCC MOV Config -->
+    <div class="card">
+      <div class="card-header"><h3>🚚 NCC — MOV (kg/ngày)</h3></div>
+      <div class="card-body" style="padding:8px 12px">
+        <div id="cahoiNCCList" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+
+    <!-- Cấu hình HUB -->
+    <div class="card">
+      <div class="card-header"><h3>⚙️ Cấu hình HUB</h3></div>
+      <div class="card-body" style="padding:8px 12px">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:10px;align-items:center">
+          <div style="display:flex;align-items:center;gap:4px"><label>Chu kỳ lock (ngày):</label><input type="number" id="cfgHubLock" value="30" style="width:58px;padding:3px;font-size:11px"></div>
+          <div style="display:flex;align-items:center;gap:4px"><label>KC cảnh báo (km):</label><input type="number" id="cfgHubKC" value="10" style="width:58px;padding:3px;font-size:11px"></div>
+          <div style="display:flex;align-items:center;gap:4px"><label>Hệ số tách HUB (×MOV):</label><input type="number" id="cfgHubSplit" value="2" style="width:58px;padding:3px;font-size:11px"></div>
+          <button class="btn btn-xs btn-outline" onclick="cahoiLoadData()" style="font-size:9px">🔄 Áp dụng</button>
         </div>
       </div>
     </div>
@@ -356,8 +366,8 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
         <div class="flex-row">
           <select id="cahoiFilterSKU" onchange="renderCahoiFCTable()" style="font-size:9px;width:140px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả SKU</option></select>
           <select id="cahoiFilterNCC" onchange="renderCahoiFCTable()" style="font-size:9px;width:150px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả NCC</option></select>
-          <select id="cahoiFilterBlock" onchange="renderCahoiFCTable()" style="font-size:9px;width:100px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
-            <option value="">Tất cả</option><option value="block">🔴 Block</option><option value="ok">🟢 OK</option>
+          <select id="cahoiFilterBlock" onchange="renderCahoiFCTable()" style="font-size:9px;width:110px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
+            <option value="">Tất cả</option><option value="block">🔴 Block</option><option value="ok">🟢 OK</option><option value="ton">🟠 Tồn</option>
           </select>
           <span class="badge green" id="cahoiFCRowCount">0 dòng</span>
         </div>
@@ -368,7 +378,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
             <thead>
               <tr>
                 <th>STT</th><th>CH</th><th>Tên CH</th><th>QLKV</th><th>Huyện</th><th>N</th>
-                <th>SKU</th><th>Tên SP</th><th>S.Lượng Bán</th><th>S.Lượng Hủy</th><th>%Hủy</th>
+                <th>SKU</th><th>Tên SP</th><th>SL Bán</th><th>SL Hủy</th><th>Tồn</th><th>%Hủy</th>
                 <th>Min</th><th>CAP</th><th>ĐH</th><th>KG</th><th>HUB</th><th>NCC</th><th>Block</th>
               </tr>
             </thead>
@@ -406,7 +416,6 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     </div>
   </div>
 
-</div>
 
 <div id="toast" class="toast hidden"></div>
 
@@ -427,112 +436,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     </div>
   </div>
 
-  <!-- ===== Cá Hồi Panel ===== -->
-  <div id="cahoiPanel" class="hidden" style="display:flex;flex-direction:column;gap:10px;width:100%">
-    <!-- KPI Bar -->
-    <div class="card">
-      <div class="card-body" style="padding:8px 12px">
-        <div class="kpi-row">
-          <div class="kpi-box"><div class="kpi-val" id="ckpiCH">—</div><div class="kpi-label">CH đã chọn</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiRows">—</div><div class="kpi-label">Dòng FC</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiKG">—</div><div class="kpi-label">Tổng KG</div></div>
-          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="color:#c62828">—</div><div class="kpi-label">CH Block (hủy >30%)</div></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Upload Sale + CH Selection -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🐟 Cá Hồi — Upload Sale &amp; Chọn CH</h3>
-        <span class="badge orange" id="cahoiBadge">Chưa có dữ liệu</span>
-      </div>
-      <div class="card-body" style="padding:8px 12px">
-        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px">
-          <div style="flex:1;min-width:300px">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Sale Data (Store | Article | SL Bán | SL Hủy)</div>
-            <textarea id="cahoiSalePaste" rows="6" style="height:100px;font-size:9px" placeholder="2BII 10626483 15 2
-2BII 10053361 8 0
-6988 10626483 3 1"></textarea>
-          </div>
-          <div style="width:200px;flex-shrink:0">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">🏪 Chọn CH</div>
-            <div style="border:1px solid #e0e0e0;border-radius:6px;padding:6px;max-height:160px;overflow-y:auto;font-size:9px">
-              <input type="text" id="cahoiCHFilter" placeholder="Lọc CH..." style="width:100%;margin-bottom:4px;font-size:9px;padding:3px" oninput="renderCHCheckboxes()">
-              <div id="cahoiCHList"></div>
-              <div style="margin-top:4px;display:flex;gap:4px">
-                <button class="btn btn-xs btn-outline" onclick="selectAllCahoiCH()" style="font-size:8px">All</button>
-                <button class="btn btn-xs btn-outline" onclick="clearCahoiCH()" style="font-size:8px">Clear</button>
-                <button class="btn btn-xs btn-outline" onclick="selectByQLKV()" style="font-size:8px">QLKV</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-row">
-          <button class="btn btn-sm btn-primary" onclick="cahoiLoadData()">📥 Load &amp; Tính FC</button>
-          <button class="btn btn-sm btn-outline" onclick="cahoiExport()">📥 Xuất Excel</button>
-          <button class="btn btn-sm btn-outline" onclick="cahoiClear()" style="color:#c62828">🧹 Clear</button>
-          <label style="font-size:9px;display:flex;align-items:center;gap:3px"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiLoadData()">Show all CH (kể cả ko sale)</label>
-        </div>
-      </div>
-    </div>
-
-    <!-- FC Table -->
-    <div class="card">
-      <div class="card-header">
-        <h3>📊 FC Table Cá Hồi</h3>
-        <div class="flex-row">
-          <select id="cahoiFilterSKU" onchange="renderCahoiFCTable()" style="font-size:9px;width:140px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả SKU</option></select>
-          <select id="cahoiFilterNCC" onchange="renderCahoiFCTable()" style="font-size:9px;width:150px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả NCC</option></select>
-          <select id="cahoiFilterBlock" onchange="renderCahoiFCTable()" style="font-size:9px;width:100px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
-            <option value="">Tất cả</option><option value="block">🔴 Block</option><option value="ok">🟢 OK</option>
-          </select>
-          <span class="badge green" id="cahoiFCRowCount">0 dòng</span>
-        </div>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:450px">
-          <table id="cahoiFCTable">
-            <thead>
-              <tr>
-                <th>STT</th><th>CH</th><th>Tên CH</th><th>QLKV</th><th>Huyện</th><th>N</th>
-                <th>SKU</th><th>Tên SP</th><th>S.Lượng Bán</th><th>S.Lượng Hủy</th><th>%Hủy</th>
-                <th>Min</th><th>CAP</th><th>ĐH</th><th>KG</th><th>HUB</th><th>NCC</th><th>Block</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RECAP Drill-down -->
-    <div class="card">
-      <div class="card-header">
-        <h3>📐 RECAP — Drill-down</h3>
-        <div class="flex-row">
-          <button class="btn btn-xs btn-outline" id="cahoiRecapNCC" onclick="cahoiRecapView('ncc')">NCC</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapTinh" onclick="cahoiRecapView('tinh')">Tỉnh</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapQLKV" onclick="cahoiRecapView('qlkv')">QLKV</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapHUB" onclick="cahoiRecapView('hub')">HUB</button>
-          <button class="btn btn-xs btn-outline active" id="cahoiRecapCH" onclick="cahoiRecapView('ch')">CH</button>
-        </div>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:350px" id="cahoiRecapWrap"></div>
-      </div>
-    </div>
-
-    <!-- HUB Review Daily -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🚚 HUB Review — KG/Ngày vs MOV</h3>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:350px" id="cahoiHubWrap"></div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
@@ -553,112 +457,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     </div>
   </div>
 
-  <!-- ===== Cá Hồi Panel ===== -->
-  <div id="cahoiPanel" class="hidden" style="display:flex;flex-direction:column;gap:10px;width:100%">
-    <!-- KPI Bar -->
-    <div class="card">
-      <div class="card-body" style="padding:8px 12px">
-        <div class="kpi-row">
-          <div class="kpi-box"><div class="kpi-val" id="ckpiCH">—</div><div class="kpi-label">CH đã chọn</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiRows">—</div><div class="kpi-label">Dòng FC</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiKG">—</div><div class="kpi-label">Tổng KG</div></div>
-          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="color:#c62828">—</div><div class="kpi-label">CH Block (hủy >30%)</div></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Upload Sale + CH Selection -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🐟 Cá Hồi — Upload Sale &amp; Chọn CH</h3>
-        <span class="badge orange" id="cahoiBadge">Chưa có dữ liệu</span>
-      </div>
-      <div class="card-body" style="padding:8px 12px">
-        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px">
-          <div style="flex:1;min-width:300px">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Sale Data (Store | Article | SL Bán | SL Hủy)</div>
-            <textarea id="cahoiSalePaste" rows="6" style="height:100px;font-size:9px" placeholder="2BII 10626483 15 2
-2BII 10053361 8 0
-6988 10626483 3 1"></textarea>
-          </div>
-          <div style="width:200px;flex-shrink:0">
-            <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">🏪 Chọn CH</div>
-            <div style="border:1px solid #e0e0e0;border-radius:6px;padding:6px;max-height:160px;overflow-y:auto;font-size:9px">
-              <input type="text" id="cahoiCHFilter" placeholder="Lọc CH..." style="width:100%;margin-bottom:4px;font-size:9px;padding:3px" oninput="renderCHCheckboxes()">
-              <div id="cahoiCHList"></div>
-              <div style="margin-top:4px;display:flex;gap:4px">
-                <button class="btn btn-xs btn-outline" onclick="selectAllCahoiCH()" style="font-size:8px">All</button>
-                <button class="btn btn-xs btn-outline" onclick="clearCahoiCH()" style="font-size:8px">Clear</button>
-                <button class="btn btn-xs btn-outline" onclick="selectByQLKV()" style="font-size:8px">QLKV</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-row">
-          <button class="btn btn-sm btn-primary" onclick="cahoiLoadData()">📥 Load &amp; Tính FC</button>
-          <button class="btn btn-sm btn-outline" onclick="cahoiExport()">📥 Xuất Excel</button>
-          <button class="btn btn-sm btn-outline" onclick="cahoiClear()" style="color:#c62828">🧹 Clear</button>
-          <label style="font-size:9px;display:flex;align-items:center;gap:3px"><input type="checkbox" id="cahoiShowAllCH" checked onchange="cahoiLoadData()">Show all CH (kể cả ko sale)</label>
-        </div>
-      </div>
-    </div>
-
-    <!-- FC Table -->
-    <div class="card">
-      <div class="card-header">
-        <h3>📊 FC Table Cá Hồi</h3>
-        <div class="flex-row">
-          <select id="cahoiFilterSKU" onchange="renderCahoiFCTable()" style="font-size:9px;width:140px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả SKU</option></select>
-          <select id="cahoiFilterNCC" onchange="renderCahoiFCTable()" style="font-size:9px;width:150px;padding:2px 4px;border:1px solid #ddd;border-radius:3px"><option value="">Tất cả NCC</option></select>
-          <select id="cahoiFilterBlock" onchange="renderCahoiFCTable()" style="font-size:9px;width:100px;padding:2px 4px;border:1px solid #ddd;border-radius:3px">
-            <option value="">Tất cả</option><option value="block">🔴 Block</option><option value="ok">🟢 OK</option>
-          </select>
-          <span class="badge green" id="cahoiFCRowCount">0 dòng</span>
-        </div>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:450px">
-          <table id="cahoiFCTable">
-            <thead>
-              <tr>
-                <th>STT</th><th>CH</th><th>Tên CH</th><th>QLKV</th><th>Huyện</th><th>N</th>
-                <th>SKU</th><th>Tên SP</th><th>S.Lượng Bán</th><th>S.Lượng Hủy</th><th>%Hủy</th>
-                <th>Min</th><th>CAP</th><th>ĐH</th><th>KG</th><th>HUB</th><th>NCC</th><th>Block</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RECAP Drill-down -->
-    <div class="card">
-      <div class="card-header">
-        <h3>📐 RECAP — Drill-down</h3>
-        <div class="flex-row">
-          <button class="btn btn-xs btn-outline" id="cahoiRecapNCC" onclick="cahoiRecapView('ncc')">NCC</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapTinh" onclick="cahoiRecapView('tinh')">Tỉnh</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapQLKV" onclick="cahoiRecapView('qlkv')">QLKV</button>
-          <button class="btn btn-xs btn-outline" id="cahoiRecapHUB" onclick="cahoiRecapView('hub')">HUB</button>
-          <button class="btn btn-xs btn-outline active" id="cahoiRecapCH" onclick="cahoiRecapView('ch')">CH</button>
-        </div>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:350px" id="cahoiRecapWrap"></div>
-      </div>
-    </div>
-
-    <!-- HUB Review Daily -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🚚 HUB Review — KG/Ngày vs MOV</h3>
-      </div>
-      <div class="card-body" style="padding:4px 8px">
-        <div class="table-wrap" style="max-height:350px" id="cahoiHubWrap"></div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
@@ -710,7 +509,7 @@ function switchFC(id){
   }else if(id==='cahoi'){
     $('resultsSection').classList.add('hidden');
     $('cahoiPanel').classList.remove('hidden');
-    renderCHCheckboxes();
+    renderCahoiNCCConfig();
     if(CAHOI.fcTable.length){renderCahoiFCTable();renderCahoiRecap();renderCahoiHubReview();updateCahoiKPIs();}
   }else{
     $('resultsSection').classList.remove('hidden');
@@ -1801,46 +1600,7 @@ const CAHOI_NCC_TINH_MAP={};
 CAHOI_NCC.forEach(ncc=>{ncc.t.forEach(t=>{CAHOI_NCC_TINH_MAP[t]=ncc.n})});
 
 // ============ Cá Hồi State ============
-let CAHOI={fcTable:[],saleData:{},selectedCH:new Set(),recapView:'ch'};
-
-// ============ Cá Hồi CH Checkboxes ============
-function renderCHCheckboxes(){
-  const filter=($('cahoiCHFilter')?.value||'').toLowerCase();
-  let h='';
-  const gdvs={};
-  CAHOI_STORES.forEach(s=>{
-    const g=s.q||'(Không QLKV)';
-    if(!gdvs[g]) gdvs[g]=[];
-    gdvs[g].push(s);
-  });
-  Object.keys(gdvs).sort().forEach(gdv=>{
-    const stores=gdvs[gdv];
-    h+='<div style="font-weight:600;font-size:9px;color:#1e3a5f;padding:2px 0">'+gdv+'</div>';
-    stores.forEach(s=>{
-      const label=s.c+' - '+s.n;
-      if(filter&&label.toLowerCase().indexOf(filter)<0) return;
-      h+='<label style="display:block;font-size:8px;padding:1px 0"><input type="checkbox" id="ch_cb_'+s.c+'" '+(CAHOI.selectedCH.has(s.c)?'checked':'')+' onchange="toggleCahoiCH(\''+s.c+'\')" style="width:10px;height:10px;accent-color:#00796b"> '+s.c+' '+s.n.substring(0,25)+' <span style="color:#999">('+s.ng+')</span></label>';
-    });
-  });
-  $('cahoiCHList').innerHTML=h||'<div style="color:#999;font-size:9px">Không tìm thấy</div>';
-}
-
-function toggleCahoiCH(code){
-  if(CAHOI.selectedCH.has(code)) CAHOI.selectedCH.delete(code);
-  else CAHOI.selectedCH.add(code);
-}
-
-function selectAllCahoiCH(){ CAHOI_STORES.forEach(s=>CAHOI.selectedCH.add(s.c)); renderCHCheckboxes(); }
-function clearCahoiCH(){ CAHOI.selectedCH.clear(); renderCHCheckboxes(); }
-function selectByQLKV(){
-  const filter=($('cahoiCHFilter')?.value||'').trim();
-  if(!filter){ CAHOI_STORES.forEach(s=>CAHOI.selectedCH.add(s.c)); }
-  else {
-    const fl=filter.toLowerCase();
-    CAHOI_STORES.forEach(s=>{if((s.q||'').toLowerCase().indexOf(fl)>=0) CAHOI.selectedCH.add(s.c);});
-  }
-  renderCHCheckboxes();
-}
+let CAHOI={fcTable:[],saleData:{},recapView:'ch',nccMov:{}};
 
 // ============ Determine NCC for a store ============
 function getNCCForCH(store){
@@ -1848,45 +1608,71 @@ function getNCCForCH(store){
   return CAHOI_NCC_TINH_MAP[tinh]||null;
 }
 
+// ============ Tồn risk ============
+function tonRisk(ton,sale){
+  if(sale<=0) return ton>0?'bad':'ok';
+  const r=ton/sale;
+  if(r>2) return 'bad';    // tồn xấu
+  if(r>1) return 'warn';   // tồn cao
+  return 'ok';
+}
+
+// ============ Render NCC MOV config ============
+function renderCahoiNCCConfig(){
+  if(!CAHOI.nccMov||Object.keys(CAHOI.nccMov).length===0){
+    CAHOI.nccMov={};
+    CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov:300,pctMin:80}; });
+  }
+  let h='';
+  CAHOI_NCC.forEach(ncc=>{
+    const cfg=CAHOI.nccMov[ncc.n]||{mov:300,pctMin:80};
+    h+='<div style="border:1px solid #e0e0e0;border-radius:6px;padding:8px 10px;min-width:220px">';
+    h+='<div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:6px">'+ncc.n+'</div>';
+    h+='<div style="display:flex;gap:6px;font-size:9px;align-items:center">';
+    h+='<label>MOV:</label><input type="number" id="nccMov_'+ncc.n.replace(/[^a-zA-Z0-9]/g,'_')+'" value="'+cfg.mov+'" style="width:64px;padding:2px 4px;font-size:10px" onchange="updateNCCMov(\''+ncc.n+'\',\'mov\',this.value)"> <span>kg/ngày</span>';
+    h+='<label style="margin-left:8px">%Min:</label><input type="number" id="nccMin_'+ncc.n.replace(/[^a-zA-Z0-9]/g,'_')+'" value="'+cfg.pctMin+'" style="width:52px;padding:2px 4px;font-size:10px" onchange="updateNCCMov(\''+ncc.n+'\',\'pctMin\',this.value)"> <span>%</span>';
+    h+='</div></div>';
+  });
+  $('cahoiNCCList').innerHTML=h;
+}
+
+function updateNCCMov(ncc,key,val){
+  const v=parseFloat(val)||0;
+  if(!CAHOI.nccMov[ncc]) CAHOI.nccMov[ncc]={mov:300,pctMin:80};
+  CAHOI.nccMov[ncc][key]=v;
+}
+
 // ============ Load & Calculate FC Cá Hồi ============
 function cahoiLoadData(){
-  // Parse sale data
+  // Parse sale data: Store | Article | SL Bán | SL Hủy | SL Tồn
   const lines=$('cahoiSalePaste').value.trim().split('\n');
   CAHOI.saleData={};
   lines.forEach(l=>{
     const parts=l.trim().split(/\s+|\t/);
-    if(parts.length<4) return;
+    if(parts.length<3) return;
     const ch=parts[0], sku=parts[1];
-    const sale=parseFloat(parts[2])||0, huy=parseFloat(parts[3])||0;
-    CAHOI.saleData[ch+'||'+sku]={sale,huy};
+    const sale=parseFloat(parts[2])||0;
+    const huy=parts.length>3?(parseFloat(parts[3])||0):0;
+    const ton=parts.length>4?(parseFloat(parts[4])||0):0;
+    CAHOI.saleData[ch+'||'+sku]={sale,huy,ton};
   });
 
-  // Determine which stores to include
-  let activeStores;
-  if(CAHOI.selectedCH.size>0){
-    activeStores=CAHOI_STORES.filter(s=>CAHOI.selectedCH.has(s.c));
-  } else {
-    // Default: all stores that have sale data
-    const chWithSale=new Set();
-    Object.keys(CAHOI.saleData).forEach(k=>{
-      const ch=k.split('||')[0];
-      chWithSale.add(ch);
-    });
-    activeStores=CAHOI_STORES.filter(s=>chWithSale.has(s.c));
-    if(activeStores.length===0) activeStores=CAHOI_STORES; // fallback: all if no sale
-  }
   const showAll=$('cahoiShowAllCH')?.checked!==false;
+  const chWithSale=new Set();
+  Object.keys(CAHOI.saleData).forEach(k=>chWithSale.add(k.split('||')[0]));
+
+  let activeStores=CAHOI_STORES.filter(s=>chWithSale.has(s.c));
+  if(activeStores.length===0) activeStores=CAHOI_STORES;
 
   // Build FC table
   CAHOI.fcTable=[];
-  const seen=new Set();
   let stt=0;
   activeStores.forEach(s=>{
     CAHOI_ASSORT.forEach(sku=>{
       stt++;
       const key=s.c+'||'+sku.a;
-      const sd=CAHOI.saleData[key]||{sale:0,huy:0};
-      if(!showAll&&sd.sale===0&&sd.huy===0){ stt--; return; }
+      const sd=CAHOI.saleData[key]||{sale:0,huy:0,ton:0};
+      if(!showAll&&sd.sale===0&&sd.huy===0&&sd.ton===0){ stt--; return; }
       const pctHuy=sd.sale+sd.huy>0?sd.huy/(sd.sale+sd.huy):0;
       const min=CAHOI_MIN_CFG[sku.a]?.[s.ng]||0;
       const cap=Math.round(sd.sale*(1-pctHuy)*0.85);
@@ -1894,11 +1680,12 @@ function cahoiLoadData(){
       const kg=Math.round(dh*sku.q*100)/100;
       const ncc=getNCCForCH(s)||'';
       const block=pctHuy>0.3;
+      const tRisk=tonRisk(sd.ton,sd.sale);
       CAHOI.fcTable.push({
-        stt,s,c:s.c,cn:s.n,qlkv:s.q,huyen:s.h,nGroup:s.ng,
+        stt,c:s.c,cn:s.n,qlkv:s.q,huyen:s.h,nGroup:s.ng,
         sku:sku.a,skuName:sku.n,dvt:sku.d,qc:sku.q,gia:sku.g,
-        sale:sd.sale,huy:sd.huy,pctHuy,min,cap,dh,kg,
-        hub:s.m,hubName:s.hn,ncc,block
+        sale:sd.sale,huy:sd.huy,ton:sd.ton,pctHuy,min,cap,dh,kg,
+        hub:s.m,hubName:s.hn,ncc,block,tRisk
       });
     });
   });
@@ -1922,8 +1709,8 @@ function renderCahoiFCTable(){
   if(fNcc) data=data.filter(r=>r.ncc===fNcc);
   if(fBlock==='block') data=data.filter(r=>r.block);
   if(fBlock==='ok') data=data.filter(r=>!r.block);
+  if(fBlock==='ton') data=data.filter(r=>r.tRisk!=='ok');
 
-  // Populate filter dropdowns
   ['cahoiFilterSKU','cahoiFilterNCC'].forEach(did=>{
     const sel=$(did); if(!sel) return;
     const cv=sel.value;
@@ -1937,11 +1724,14 @@ function renderCahoiFCTable(){
   let h='';
   data.forEach(r=>{
     const pctColor=r.pctHuy>0.3?'color:#c62828;font-weight:700':r.pctHuy>0.15?'color:#ef6c00':'color:#2e7d32';
+    const tonColor=r.tRisk==='bad'?'color:#c62828;font-weight:700':r.tRisk==='warn'?'color:#ef6c00':'color:#2e7d32';
+    const tonLabel=r.tRisk==='bad'?'🔴':r.tRisk==='warn'?'🟡':'🟢';
     h+='<tr class="'+(r.block?'row-loai':'')+'">';
     h+='<td>'+r.stt+'</td><td style="font-weight:600">'+r.c+'</td><td style="font-size:9px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.cn+'">'+r.cn+'</td>';
     h+='<td style="font-size:9px">'+r.qlkv+'</td><td style="font-size:9px">'+r.huyen+'</td><td style="text-align:center;font-weight:600">'+r.nGroup+'</td>';
     h+='<td style="font-weight:600">'+r.sku+'</td><td style="font-size:9px">'+r.skuName+'</td>';
     h+='<td style="text-align:center">'+fmt(r.sale)+'</td><td style="text-align:center">'+fmt(r.huy)+'</td>';
+    h+='<td style="text-align:center;'+tonColor+'">'+tonLabel+' '+fmt(r.ton)+'</td>';
     h+='<td style="text-align:center;'+pctColor+'">'+(r.pctHuy*100).toFixed(1)+'%</td>';
     h+='<td style="text-align:center;font-weight:600;color:#00796b">'+fmt(r.min)+'</td>';
     h+='<td style="text-align:center">'+fmt(r.cap)+'</td>';
@@ -1979,22 +1769,24 @@ function renderCahoiRecap(){
 
   data.forEach(r=>{
     const k=keyFn(r);
-    if(!groups[k]) groups[k]={totalKG:0,totalDH:0,totalSale:0,totalHuy:0,count:0,chSet:new Set(),skuSet:new Set(),totalMin:0,blockCount:0,items:[]};
+    if(!groups[k]) groups[k]={totalKG:0,totalDH:0,totalSale:0,totalHuy:0,totalTon:0,count:0,chSet:new Set(),skuSet:new Set(),totalMin:0,blockCount:0,tonBadCount:0,items:[]};
     const g=groups[k];
     g.items.push(r);
     g.totalKG+=r.kg;
     g.totalDH+=r.dh;
     g.totalSale+=r.sale;
     g.totalHuy+=r.huy;
+    g.totalTon+=r.ton;
     g.totalMin+=r.min;
     g.count++;
     g.chSet.add(r.c);
     g.skuSet.add(r.sku);
     if(r.block) g.blockCount++;
+    if(r.tRisk==='bad') g.tonBadCount++;
   });
 
   const labels={ncc:'🏷 NCC',tinh:'🗺 Tỉnh/Huyện',qlkv:'👤 QLKV',hub:'🚚 HUB',ch:'🏪 CH'};
-  let h='<table><thead><tr><th>'+labels[view]+'</th><th>#CH</th><th>#SKU</th><th>Dòng</th><th>SL Bán</th><th>SL Hủy</th><th>Min</th><th>ĐH</th><th>KG</th><th>Block</th></tr></thead><tbody>';
+  let h='<table><thead><tr><th>'+labels[view]+'</th><th>#CH</th><th>#SKU</th><th>Dòng</th><th>SL Bán</th><th>SL Hủy</th><th>Tồn</th><th>Min</th><th>ĐH</th><th>KG</th><th>Block</th></tr></thead><tbody>';
 
   const sortedKeys=Object.keys(groups).sort((a,b)=>{
     if(view==='ncc'){ const o=['2010078','2000843','2003413','2000798']; return o.findIndex(x=>a.indexOf(x)>=0)-o.findIndex(x=>b.indexOf(x)>=0); }
@@ -2002,17 +1794,17 @@ function renderCahoiRecap(){
     return groups[b].totalKG-groups[a].totalKG;
   });
 
-  let totals={ch:new Set(),sku:new Set(),rows:0,sale:0,huy:0,min:0,dh:0,kg:0,block:0};
+  let totals={ch:new Set(),sku:new Set(),rows:0,sale:0,huy:0,ton:0,min:0,dh:0,kg:0,block:0};
   sortedKeys.forEach(k=>{
     const g=groups[k];
     totals.ch=new Set([...totals.ch,...g.chSet]);
     totals.sku=new Set([...totals.sku,...g.skuSet]);
-    totals.rows+=g.count; totals.sale+=g.totalSale; totals.huy+=g.totalHuy;
+    totals.rows+=g.count; totals.sale+=g.totalSale; totals.huy+=g.totalHuy; totals.ton+=g.totalTon;
     totals.min+=g.totalMin; totals.dh+=g.totalDH; totals.kg+=g.totalKG; totals.block+=g.blockCount;
-    const pctHuy=g.totalSale+g.totalHuy>0?(g.totalHuy/(g.totalSale+g.totalHuy)*100).toFixed(1):'0.0';
     h+='<tr class="row-section" onclick="toggleCahoiRecapRow(this)" data-k="'+k.replace(/"/g,'&quot;')+'">';
     h+='<td>▶ '+k+'</td><td>'+g.chSet.size+'</td><td>'+g.skuSet.size+'</td><td>'+g.count+'</td>';
     h+='<td>'+fmt(Math.round(g.totalSale))+'</td><td>'+fmt(Math.round(g.totalHuy))+'</td>';
+    h+='<td style="color:'+(g.tonBadCount>0?'#ef6c00':'#2e7d32')+'">'+fmt(Math.round(g.totalTon))+'</td>';
     h+='<td>'+fmt(g.totalMin)+'</td><td>'+fmt(Math.round(g.totalDH))+'</td>';
     h+='<td><b>'+g.totalKG.toFixed(1)+'</b></td><td style="color:'+(g.blockCount>0?'#c62828':'#2e7d32')+'">'+g.blockCount+'</td>';
     h+='</tr>';
@@ -2022,18 +1814,19 @@ function renderCahoiRecap(){
     Object.entries(skuGrps).forEach(([sku,its])=>{
       const sKG=its.reduce((s,r)=>s+r.kg,0), sDH=its.reduce((s,r)=>s+r.dh,0);
       const sSale=its.reduce((s,r)=>s+r.sale,0), sHuy=its.reduce((s,r)=>s+r.huy,0);
+      const sTon=its.reduce((s,r)=>s+r.ton,0);
       const sBlock=its.filter(r=>r.block).length;
       h+='<tr style="display:none;font-size:9px;color:#666" class="cahoi-sub-row" data-p="'+k.replace(/"/g,'&quot;')+'">';
       h+='<td style="padding-left:20px">↳ '+sku+' '+CAHOI_SKU_MAP[sku]?.n||''+'</td><td>'+new Set(its.map(r=>r.c)).size+'</td><td>—</td><td>'+its.length+'</td>';
-      h+='<td>'+fmt(Math.round(sSale))+'</td><td>'+fmt(Math.round(sHuy))+'</td><td>—</td>';
+      h+='<td>'+fmt(Math.round(sSale))+'</td><td>'+fmt(Math.round(sHuy))+'</td><td>'+fmt(Math.round(sTon))+'</td><td>—</td>';
       h+='<td>'+fmt(Math.round(sDH))+'</td><td><b>'+sKG.toFixed(1)+'</b></td>';
       h+='<td style="color:'+(sBlock>0?'#c62828':'#2e7d32')+'">'+sBlock+'</td>';
       h+='</tr>';
     });
   });
-  const tpctHuy=totals.sale+totals.huy>0?(totals.huy/(totals.sale+totals.huy)*100).toFixed(1):'0.0';
   h+='<tr class="row-subtotal"><td><b>TỔNG</b></td><td>'+totals.ch.size+'</td><td>'+totals.sku.size+'</td><td>'+totals.rows+'</td>'
     +'<td>'+fmt(Math.round(totals.sale))+'</td><td>'+fmt(Math.round(totals.huy))+'</td>'
+    +'<td>'+fmt(Math.round(totals.ton))+'</td>'
     +'<td>'+fmt(totals.min)+'</td><td>'+fmt(Math.round(totals.dh))+'</td><td><b>'+totals.kg.toFixed(1)+'</b></td>'
     +'<td style="color:'+(totals.block>0?'#c62828':'#2e7d32')+'">'+totals.block+'</td></tr>';
   h+='</tbody></table>';
@@ -2054,7 +1847,6 @@ function renderCahoiHubReview(){
   const data=CAHOI.fcTable;
   if(!data.length){ $('cahoiHubWrap').innerHTML='<p style="padding:20px;color:#999;text-align:center">Chưa có dữ liệu</p>'; return; }
 
-  // Group by HUB
   const hubs={};
   data.forEach(r=>{
     const hk=r.hub;
@@ -2065,16 +1857,13 @@ function renderCahoiHubReview(){
     if(!hubs[hk].ncc||hubs[hk].ncc==='') hubs[hk].ncc=r.ncc;
   });
 
-  // For each HUB, kg/day = totalKG/7
   let h='<table><thead><tr><th>HUB</th><th>Tên HUB</th><th>NCC</th><th>#CH</th><th>Total KG</th><th>KG/Ngày</th><th>MOV</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th><th>Kết quả</th></tr></thead><tbody>';
 
   const sortedHubs=Object.entries(hubs).sort((a,b)=>b[1].totalKG-a[1].totalKG);
   sortedHubs.forEach(([hk,hub])=>{
     const kgDay=hub.totalKG/7;
-    // Try to get MOV from NCC - simplified: use 300kg as default MOV per day
-    const movDefault=300;
-    const movDay=movDefault;
-    // Daily assessment
+    const movCfg=CAHOI.nccMov[hub.ncc]||{mov:300,pctMin:80};
+    const movDay=movCfg.mov||300;
     const days=['T2','T3','T4','T5','T6','T7','CN'];
     let dayStatus='';
     let badDays=0, weakDays=0;
@@ -2111,10 +1900,12 @@ function updateCahoiKPIs(){
   const chSet=new Set(data.map(r=>r.c));
   const totalKG=data.reduce((s,r)=>s+r.kg,0);
   const blockCount=data.filter(r=>r.block).length;
+  const tonBadCount=data.filter(r=>r.tRisk==='bad').length;
   $('ckpiCH').textContent=chSet.size;
   $('ckpiRows').textContent=data.length;
   $('ckpiKG').textContent=totalKG.toFixed(1);
   $('ckpiBlock').textContent=blockCount;
+  $('ckpiTon').textContent=tonBadCount;
 }
 
 // ============ Export ============
@@ -2122,8 +1913,8 @@ function cahoiExport(){
   if(!CAHOI.fcTable.length) return toast('Chưa có dữ liệu!','error');
   try{
     const wb=XLSX.utils.book_new();
-    const cols=['STT','CH','Tên CH','QLKV','Huyện','N','SKU','Tên SP','SL Bán','SL Hủy','%Hủy','Min','CAP','ĐH','KG','HUB','NCC','Block'];
-    const keys=['stt','c','cn','qlkv','huyen','nGroup','sku','skuName','sale','huy','pctHuy','min','cap','dh','kg','hub','ncc','block'];
+    const cols=['STT','CH','Tên CH','QLKV','Huyện','N','SKU','Tên SP','SL Bán','SL Hủy','Tồn','%Hủy','Min','CAP','ĐH','KG','HUB','NCC','Block'];
+    const keys=['stt','c','cn','qlkv','huyen','nGroup','sku','skuName','sale','huy','ton','pctHuy','min','cap','dh','kg','hub','ncc','block'];
     const rows=CAHOI.fcTable.map(r=>keys.map(k=>k==='pctHuy'?(r[k]*100).toFixed(1)+'%':k==='block'?(r[k]?'🔴':'🟢'):r[k]));
     const ws=XLSX.utils.aoa_to_sheet([cols].concat(rows));
     XLSX.utils.book_append_sheet(wb,ws,'FC Ca Hoi');
@@ -2135,13 +1926,14 @@ function cahoiExport(){
 }
 
 function cahoiClear(){
-  CAHOI.fcTable=[]; CAHOI.saleData={}; CAHOI.selectedCH.clear();
+  CAHOI.fcTable=[]; CAHOI.saleData={};
   $('cahoiSalePaste').value='';
   renderCahoiFCTable(); renderCahoiRecap(); renderCahoiHubReview();
-  updateCahoiKPIs(); renderCHCheckboxes();
+  updateCahoiKPIs();
   $('cahoiBadge').innerHTML='Chưa có dữ liệu'; $('cahoiBadge').className='badge orange';
   toast('🧹 Đã clear!','info');
 }
+
 
 </script>
 </body>
