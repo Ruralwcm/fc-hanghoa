@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa by HaoDT v9.2.6</title>
+<title>FC Hàng Hóa by HaoDT v9.2.7</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -156,7 +156,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   .kpi-val{font-size:16px}
   .kpi-label{font-size:9px}
   #cahoiPanel{gap:6px}
-  #cahoiColLeft{width:300px !important}
+  #cahoiColLeft{width:280px !important}
 }
 @media (max-width:600px){
   body{flex-direction:column}
@@ -179,6 +179,8 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   .kpi-box{min-width:55px;padding:5px 6px}
   .kpi-val{font-size:14px}
   .kpi-label{font-size:8px}
+  /* Cá Hồi topbar KPI — hide some on mobile */
+  #metaCahoi .ckpi-hide-sm{display:none !important}
   .btn-xs{font-size:8px !important;padding:2px 4px !important}
   .btn-sm{font-size:10px !important;padding:4px 8px !important}
   /* Cá Hồi NCC cards stack */
@@ -203,18 +205,18 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.6</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.7</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.6</div>
+  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.7</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v9.2.6">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v9.2.7">🌡 FC Ambient</h2>
     <div class="meta">
       <span id="metaAmbient">
         <span>🏪 <b id="metaCH">—</b></span>
@@ -224,9 +226,14 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
         <label style="font-size:10px">Ngày KD:</label>
         <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
       </span>
-      <span id="metaCahoi" style="display:none">
+      <div id="metaCahoi" style="display:none;align-items:center;gap:6px;flex-wrap:wrap">
         <span style="color:#00796b">🐟 <b id="metaCahoiInfo">Cá Hồi</b></span>
-      </span>
+        <div class="kpi-box" style="flex:0 0 auto;min-width:55px;padding:3px 6px;text-align:center"><div class="kpi-val" id="ckpiCH" style="font-size:13px">—</div><div class="kpi-label" style="font-size:8px">CH</div></div>
+        <div class="kpi-box ckpi-hide-sm" style="flex:0 0 auto;min-width:55px;padding:3px 6px;text-align:center"><div class="kpi-val" id="ckpiRows" style="font-size:13px">—</div><div class="kpi-label" style="font-size:8px">Dòng FC</div></div>
+        <div class="kpi-box ckpi-hide-sm" style="flex:0 0 auto;min-width:55px;padding:3px 6px;text-align:center"><div class="kpi-val" id="ckpiKG" style="font-size:13px">—</div><div class="kpi-label" style="font-size:8px">Tổng KG</div></div>
+        <div class="kpi-box" style="flex:0 0 auto;min-width:55px;padding:3px 6px;text-align:center;background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="font-size:13px;color:#c62828">—</div><div class="kpi-label" style="font-size:8px">CH Block</div></div>
+        <div class="kpi-box" style="flex:0 0 auto;min-width:55px;padding:3px 6px;text-align:center;background:#fff8e1"><div class="kpi-val" id="ckpiTon" style="font-size:13px;color:#ef6c00">—</div><div class="kpi-label" style="font-size:8px">Tồn xấu</div></div>
+      </div>
       <button class="btn btn-outline btn-sm" onclick="showSaveModal()" style="padding:4px 10px;font-size:10px">💾 Lưu</button>
       <button class="btn btn-outline btn-sm" onclick="showLoadModal()" style="padding:4px 10px;font-size:10px">📂 Mở</button>
     </div>
@@ -363,22 +370,9 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
   <!-- ===== Cá Hồi Panel ===== -->
   <div id="cahoiPanel" class="hidden" style="display:flex;flex-direction:column;gap:10px;width:100%;min-width:0">
-    <!-- KPI Bar -->
-    <div class="card">
-      <div class="card-body" style="padding:8px 12px">
-        <div class="kpi-row">
-          <div class="kpi-box"><div class="kpi-val" id="ckpiCH">—</div><div class="kpi-label">CH</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiRows">—</div><div class="kpi-label">Dòng FC</div></div>
-          <div class="kpi-box"><div class="kpi-val" id="ckpiKG">—</div><div class="kpi-label">Tổng KG</div></div>
-          <div class="kpi-box" style="background:#ffebee"><div class="kpi-val" id="ckpiBlock" style="color:#c62828">—</div><div class="kpi-label">CH Block</div></div>
-          <div class="kpi-box" style="background:#fff8e1"><div class="kpi-val" id="ckpiTon" style="color:#ef6c00">—</div><div class="kpi-label">Tồn xấu</div></div>
-        </div>
-      </div>
-    </div>
-
     <!-- ===== Two-column layout: left = khai báo, right = kết quả ===== -->
     <div class="two-col" id="cahoiTwoCol">
-      <div class="col-left" id="cahoiColLeft" style="width:360px">
+      <div class="col-left" id="cahoiColLeft" style="width:320px">
 
     <!-- Chọn Vùng & Upload Data -->
     <div class="card">
@@ -386,21 +380,12 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
         <h3>📍 Chọn Vùng &amp; Import Dữ Liệu</h3>
         <span class="badge orange" id="cahoiBadge">Chưa có dữ liệu</span>
       </div>
-      <div class="card-body" style="padding:8px 12px">
+      <div class="card-body" style="padding:6px 8px">
         <div class="import-col-headers" style="display:flex;gap:12px;flex-wrap:wrap">
           <!-- Cột 1: Chọn Vùng -->
           <div style="flex:1;min-width:180px;max-width:320px">
             <div class="import-title" style="font-size:10px">🌍 Chọn Vùng / GĐV</div>
-            <div style="font-size:10px;margin-bottom:4px">
-              <select id="cahoiFilterGDV" onchange="cahoiFilterByGDV()" style="width:100%;font-size:10px;padding:3px;border-radius:3px;border:1px solid #ddd">
-                <option value="">Tất cả GĐV</option>
-              </select>
-            </div>
-            <div style="font-size:10px;margin-bottom:2px">
-              <select id="cahoiFilterQLKV" onchange="cahoiFilterByQLKV()" style="width:100%;font-size:10px;padding:3px;border-radius:3px;border:1px solid #ddd">
-                <option value="">Tất cả QLKV</option>
-              </select>
-            </div>
+            <div class="vung-tree" id="cahoiVungTree" style="max-height:120px"></div>
             <div style="font-size:9px;color:#888;margin-top:4px">
               🏪 <b id="cahoiStoreCount">1,221</b> CH active · Đã chọn: <b id="cahoiSelectedCount">—</b>
             </div>
@@ -411,7 +396,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
           <!-- Cột 2: Upload Data -->
           <div style="flex:2;min-width:280px">
             <div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:4px">📋 Paste Data: Store | Article | SL Bán | SL Hủy | SL Tồn</div>
-            <textarea id="cahoiSalePaste" rows="5" style="height:110px;font-size:9px;width:100%" placeholder="2BII 10626483 15 2 8
+            <textarea id="cahoiSalePaste" rows="5" style="height:80px;font-size:9px;width:100%" placeholder="2BII 10626483 15 2 8
 2BII 10053361 8 0 4
 6988 10626483 3 1 10"></textarea>
             <div class="flex-row" style="margin-top:6px;gap:4px;flex-wrap:wrap;align-items:center">
@@ -435,20 +420,20 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     <!-- NCC MOV Config -->
     <div class="card">
       <div class="card-header"><h3>🚚 NCC — MOV (kg/ngày)</h3></div>
-      <div class="card-body" style="padding:8px 12px">
-        <div id="cahoiNCCList" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+      <div class="card-body" style="padding:4px 8px">
+        <div id="cahoiNCCList" style="display:flex;gap:12px;flex-wrap:wrap;max-height:180px;overflow-y:auto"></div>
       </div>
     </div>
 
     <!-- Cấu hình HUB -->
     <div class="card">
       <div class="card-header"><h3>⚙️ Cấu hình HUB</h3></div>
-      <div class="card-body" style="padding:8px 12px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;align-items:center">
-          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">Lock (ngày):</label><input type="number" id="cfgHubLock" value="30" style="width:50px;padding:3px;font-size:10px"></div>
-          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">KC (km):</label><input type="number" id="cfgHubKC" value="10" style="width:50px;padding:3px;font-size:10px"></div>
-          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">Tách HUB (×MOV):</label><input type="number" id="cfgHubSplit" value="2" style="width:50px;padding:3px;font-size:10px"></div>
-          <button class="btn btn-xs btn-outline" onclick="cahoiStep4LoadFC()" style="font-size:9px">🔄 Áp dụng</button>
+      <div class="card-body" style="padding:4px 8px">
+        <div style="display:flex;gap:6px;flex-wrap:nowrap;font-size:9px;align-items:center">
+          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">Lock (ngày):</label><input type="number" id="cfgHubLock" value="30" style="width:42px;padding:3px;font-size:9px"></div>
+          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">KC (km):</label><input type="number" id="cfgHubKC" value="10" style="width:42px;padding:3px;font-size:9px"></div>
+          <div style="display:flex;align-items:center;gap:3px"><label style="white-space:nowrap">Tách HUB (×MOV):</label><input type="number" id="cfgHubSplit" value="2" style="width:42px;padding:3px;font-size:9px"></div>
+          <button class="btn btn-xs btn-outline" onclick="cahoiStep4LoadFC()" style="font-size:9px;padding:3px 6px">🔄 Áp dụng</button>
         </div>
       </div>
     </div>
@@ -604,7 +589,7 @@ function switchFC(id){
   // Toggle header meta bar by FC type
   const isCahoi=id==='cahoi';
   $('metaAmbient').style.display=isCahoi?'none':'inline';
-  $('metaCahoi').style.display=isCahoi?'inline':'none';
+  $('metaCahoi').style.display=isCahoi?'flex':'none';
   const c=current();$('configSaved').style.display=c.configSaved?'inline':'none';
   $('ambientPanel').classList.add('hidden');
   $('resultsSection').classList.add('hidden');
@@ -1577,8 +1562,7 @@ function getSaveData(){
       salePaste:($('cahoiSalePaste')&&$('cahoiSalePaste').value)||'',
       nccMov:CAHOI.nccMov||{},
       hub:{lock:+($('cfgHubLock').value||30),kc:+($('cfgHubKC').value||10),split:+($('cfgHubSplit').value||2)},
-      gdv:($('cahoiFilterGDV')&&$('cahoiFilterGDV').value)||'',
-      qlkv:($('cahoiFilterQLKV')&&$('cahoiFilterQLKV').value)||'',
+      provinces:[...cahoiSelectedProvinceKeys],
       showAll:($('cahoiShowAllCH')&&$('cahoiShowAllCH').checked)!==false
     };
   }
@@ -1649,8 +1633,7 @@ async function restoreSaveData(item){
       if($('cfgHubSplit')) $('cfgHubSplit').value=c.hub.split||2;
     }
     if(c.showAll!==undefined && $('cahoiShowAllCH')) $('cahoiShowAllCH').checked=c.showAll;
-    if(c.gdv && $('cahoiFilterGDV')) $('cahoiFilterGDV').value=c.gdv;
-    if(c.qlkv && $('cahoiFilterQLKV')) $('cahoiFilterQLKV').value=c.qlkv;
+    if(c.provinces){ cahoiSelectedProvinceKeys=new Set(c.provinces); }
     renderCahoiNCCConfig();
     // Re-parse sale data
     if(c.salePaste && c.salePaste.trim()){
@@ -1754,6 +1737,7 @@ CAHOI_NCC.forEach(ncc=>{ncc.t.forEach(t=>{CAHOI_NCC_TINH_MAP[t]=ncc.n})});
 
 // ============ Cá Hồi State ============
 let CAHOI={fcTable:[],saleData:{},recapView:'ch',nccMov:{}};
+let cahoiSelectedProvinceKeys=new Set(); // selected "gdv|tinh" keys for Cá Hồi
 
 // ============ Determine NCC for a store ============
 function getNCCForCH(store){
@@ -1770,32 +1754,124 @@ function tonRisk(ton,sale){
   return 'ok';
 }
 
-// ============ Chọn Vùng filter helpers ============
+// ============ Chọn Vùng filter helpers (vung-tree) ============
 function cahoiInitFilters(){
-  const gdvSet=new Set(), qlkvSet=new Set();
-  CAHOI_STORES.forEach(s=>{ if(s.g)gdvSet.add(s.g); if(s.q)qlkvSet.add(s.q); });
-  const gdvSel=$('cahoiFilterGDV'), qlkvSel=$('cahoiFilterQLKV');
-  const savedGdv=gdvSel.value, savedQlkv=qlkvSel.value;
-  gdvSel.innerHTML='<option value="">Tất cả GĐV</option>'+[...gdvSet].sort().map(g=>'<option value="'+g+'">'+g+'</option>').join('');
-  qlkvSel.innerHTML='<option value="">Tất cả QLKV</option>'+[...qlkvSet].sort().map(q=>'<option value="'+q+'">'+q+'</option>').join('');
-  if(savedGdv) gdvSel.value=savedGdv;
-  if(savedQlkv) qlkvSel.value=savedQlkv;
+  buildCahoiVungTree();
   $('cahoiStoreCount').textContent=CAHOI_STORES.length.toLocaleString();
 }
 
 function cahoiGetFilteredStores(){
-  const gdv=$('cahoiFilterGDV').value, qlkv=$('cahoiFilterQLKV').value;
   let stores=CAHOI_STORES;
-  if(gdv) stores=stores.filter(s=>s.g===gdv);
-  if(qlkv) stores=stores.filter(s=>s.q===qlkv);
+  if(cahoiSelectedProvinceKeys.size>0){
+    stores=stores.filter(s=>{
+      const sl=STATE.storelist[s.c];
+      const gdv=sl?sl.gdv:'';
+      return cahoiSelectedProvinceKeys.has(gdv+'||'+s.h);
+    });
+  }
   return stores;
 }
-function cahoiFilterByGDV(){
-  $('cahoiFilterQLKV').value='';
-  $('cahoiSelectedCount').textContent=cahoiGetFilteredStores().length.toLocaleString();
-}
-function cahoiFilterByQLKV(){
-  $('cahoiFilterGDV').value='';
+
+function buildCahoiVungTree(){
+  const sapSet=new Set(CAHOI_STORES.map(s=>s.c));
+  const tree={};
+  Object.entries(STATE.storelist||{}).forEach(([sap,st])=>{
+    if(!sapSet.has(sap)||!st) return;
+    const mien=getMien(st.tinh), gdv=st.gdv||'(Không GĐV)', tinh=st.tinh||'(Khác)';
+    if(!tree[mien]) tree[mien]={};
+    if(!tree[mien][gdv]) tree[mien][gdv]={};
+    tree[mien][gdv][tinh]=(tree[mien][gdv][tinh]||0)+1;
+  });
+  STATE.cahoiTreeData=tree;
+
+  let h='';
+  const mienOrder=['BẮC','TRUNG','NAM','KHÁC'];
+  for(const mien of mienOrder){
+    if(!tree[mien]) continue;
+    const gdvs=tree[mien];
+    let mienTotal=0, mienAllChecked=true;
+    for(const gdv of Object.keys(gdvs).sort()){
+      for(const tinh of Object.keys(gdvs[gdv])){
+        mienTotal+=gdvs[gdv][tinh];
+        if(!cahoiSelectedProvinceKeys.has(gdv+'||'+tinh)) mienAllChecked=false;
+      }
+    }
+    h+='<div class="tree-mien open" data-mien="'+mien+'"><span class="tree-arrow">▼</span><input type="checkbox" '+(mienAllChecked&&mienTotal>0?'checked':'')+' data-mien="'+mien+'" style="width:12px;height:12px;accent-color:#1a3c6e;margin-right:2px">📍 '+mien+' ('+mienTotal+' CH)</div>';
+    h+='<div class="tree-mien-children">';
+    for(const [gdv,tinhs] of Object.entries(gdvs).sort()){
+      let gdvTotal=0, gdvAllChecked=true;
+      for(const tinh of Object.keys(tinhs)){
+        gdvTotal+=tinhs[tinh];
+        if(!cahoiSelectedProvinceKeys.has(gdv+'||'+tinh)) gdvAllChecked=false;
+      }
+      h+='<div class="tree-gdv" data-gdv="'+gdv+'"><span class="tree-arrow">▶</span><input type="checkbox" '+(gdvAllChecked&&gdvTotal>0?'checked':'')+' data-gdv="'+gdv+'" style="width:12px;height:12px;accent-color:#1a3c6e;margin-right:2px">👤 '+gdv+' ('+gdvTotal+')</div>';
+      h+='<div class="tree-gdv-children" style="display:none">';
+      for(const [tinh,count] of Object.entries(tinhs).sort()){
+        const key=gdv+'||'+tinh, checked=cahoiSelectedProvinceKeys.has(key);
+        h+='<label class="tree-tinh'+(checked?' selected':'')+'"><input type="checkbox" '+(checked?'checked':'')+' data-gdv="'+gdv+'" data-tinh="'+tinh+'">'+tinh+' <span style="color:#aaa;font-size:8px">('+count+')</span></label>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+  $('cahoiVungTree').innerHTML=h;
+
+  // toggle miền / gđv
+  $('cahoiVungTree').querySelectorAll('.tree-mien, .tree-gdv').forEach(el=>{
+    el.addEventListener('click',function(e){
+      if(e.target.tagName==='INPUT') return;
+      e.stopPropagation();
+      this.classList.toggle('open');
+      const children=this.nextElementSibling;
+      if(children) children.style.display=this.classList.contains('open')?'':'none';
+    });
+  });
+
+  // miền checkbox
+  $('cahoiVungTree').querySelectorAll('.tree-mien input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(e){
+      e.stopPropagation();
+      const mien=this.getAttribute('data-mien');
+      const gdvs=STATE.cahoiTreeData[mien]||{};
+      if(this.checked){
+        Object.entries(gdvs).forEach(([gdv,tinhs])=>{
+          Object.keys(tinhs).forEach(tinh=>cahoiSelectedProvinceKeys.add(gdv+'||'+tinh));
+        });
+      } else {
+        Object.entries(gdvs).forEach(([gdv,tinhs])=>{
+          Object.keys(tinhs).forEach(tinh=>cahoiSelectedProvinceKeys.delete(gdv+'||'+tinh));
+        });
+      }
+      buildCahoiVungTree();
+    });
+  });
+
+  // gđv checkbox
+  $('cahoiVungTree').querySelectorAll('.tree-gdv input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(e){
+      e.stopPropagation();
+      const gdv=this.getAttribute('data-gdv');
+      Object.values(STATE.cahoiTreeData).forEach(gdvs=>{
+        const tinhs=gdvs[gdv];
+        if(tinhs){
+          if(this.checked) Object.keys(tinhs).forEach(t=>cahoiSelectedProvinceKeys.add(gdv+'||'+t));
+          else Object.keys(tinhs).forEach(t=>cahoiSelectedProvinceKeys.delete(gdv+'||'+t));
+        }
+      });
+      buildCahoiVungTree();
+    });
+  });
+
+  // tỉnh checkbox
+  $('cahoiVungTree').querySelectorAll('.tree-tinh input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',function(){
+      const gdv=this.getAttribute('data-gdv'), tinh=this.getAttribute('data-tinh');
+      const key=gdv+'||'+tinh;
+      if(this.checked) cahoiSelectedProvinceKeys.add(key); else cahoiSelectedProvinceKeys.delete(key);
+      buildCahoiVungTree();
+    });
+  });
+
   $('cahoiSelectedCount').textContent=cahoiGetFilteredStores().length.toLocaleString();
 }
 
