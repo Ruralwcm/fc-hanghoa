@@ -1920,25 +1920,18 @@ function renderCahoiNCCConfig(){
   let h='';
   CAHOI_NCC.forEach((ncc,i)=>{
     const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80};
-    const tinhList=ncc.t.map(t=>'<span>'+t+': <b>'+(cfg.mov3||300)+'</b> kg</span>').join(', ');
+    const tinhList=ncc.t.map(t=>t+': <b>'+cfg.mov3+'</b> kg').join(', ');
     h+='<tr>';
     h+='<td style="text-align:center;font-size:9px;color:#888">'+(i+1)+'</td>';
     h+='<td style="font-weight:600;color:#1e3a5f;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+ncc.n+'">'+ncc.n+'</td>';
-    h+='<td><input type="number" id="nccMov1_'+i+'" value="'+cfg.mov1+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov1\',this.value)"></td>';
-    h+='<td><input type="number" id="nccMov2_'+i+'" value="'+cfg.mov2+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov2\',this.value)"></td>';
-    h+='<td><input type="number" id="nccMov3_'+i+'" value="'+cfg.mov3+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov3\',this.value)"></td>';
-    h+='<td><input type="number" id="nccMin_'+i+'" value="'+cfg.pctMin+'" style="width:46px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'pctMin\',this.value)"></td>';
+    h+='<td style="text-align:center;font-weight:500">'+fmt(cfg.mov1)+'</td>';
+    h+='<td style="text-align:center;font-weight:500">'+fmt(cfg.mov2)+'</td>';
+    h+='<td style="text-align:center;font-weight:700;color:#1e3a5f">'+fmt(cfg.mov3)+'</td>';
+    h+='<td style="text-align:center;color:#2e7d32">'+(cfg.pctMin||80)+'%</td>';
     h+='<td style="font-size:8px;color:#666;max-width:180px;cursor:help" title="'+tinhList.replace(/<[^>]*>/g,'')+'">🗺 <b>'+ncc.t.length+'</b> tỉnh <span style="font-size:7px;color:#aaa">(hover)</span></td>';
     h+='</tr>';
   });
   $('cahoiNCCList').innerHTML=h;
-}
-
-function updateNCCMovIdx(i,key,val){
-  const v=parseFloat(val)||0;
-  const nccName=CAHOI_NCC[i].n;
-  if(!CAHOI.nccMov[nccName]) CAHOI.nccMov[nccName]={mov1:100,mov2:200,mov3:300,pctMin:80};
-  CAHOI.nccMov[nccName][key]=v;
 }
 
 function cahoiImportMOVExcel(){
