@@ -1941,17 +1941,57 @@ function cahoiImportMOVExcel(){
   $('cahoiMOVFileInput').click();
 }
 function cahoiDownloadMOVTemplate(){
-  const rows=[['Mã NCC','MOV 1','MOV 2','MOV 3','%Biên']];
+  const rows=[['Mã NCC','Tỉnh','MOV 1','Giá trị MOV','Biên độ']];
   CAHOI_NCC.forEach(ncc=>{
     const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80};
-    rows.push([ncc.n,cfg.mov1,cfg.mov2,cfg.mov3,cfg.pctMin]);
+    ncc.t.forEach(tinh=>{
+      rows.push([ncc.n,tinh,cfg.mov1,cfg.mov3,cfg.pctMin]);
+    });
   });
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:35},{wch:8},{wch:8},{wch:8},{wch:8}];
+  ws['!cols']=[{wch:35},{wch:18},{wch:8},{wch:12},{wch:8}];
   XLSX.utils.book_append_sheet(wb,ws,'MOV');
   XLSX.writeFile(wb,'MOV_Ca_Hoi_Template.xlsx');
-  toast('📥 Đã tải template MOV Cá Hồi','success');
+  toast('📥 Đã tải template MOV Cá Hồi ('+rows.length+' dòng)','success');
+}
+function cahoiImportMOVExcel(){
+  $('cahoiMOVFileInput').click();
+}
+function cahoiHandleMOVFile(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      // Reset all NCC mov to defaults
+      CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov1:100,mov2:200,mov3:300,pctMin:80}; });
+      let count=0;
+      for(let i=1;i<data.length;i++){
+        const r=data[i]; if(!r||!r[0]) continue;
+        const nccName=String(r[0]||'').trim();
+        const tinh=String(r[1]||'').trim();
+        const mov1=parseFloat(r[2])||100;
+        const movVal=parseFloat(r[3])||300;
+        const bienDo=parseFloat(r[4])||80;
+        // Find matching NCC
+        let found=CAHOI_NCC.find(n=>n.n===nccName||n.n.startsWith(nccName.split(' - ')[0]));
+        if(found){
+          if(!CAHOI.nccMov[found.n]) CAHOI.nccMov[found.n]={mov1:100,mov2:200,mov3:300,pctMin:80};
+          CAHOI.nccMov[found.n].mov1=mov1;
+          CAHOI.nccMov[found.n].mov3=Math.max(CAHOI.nccMov[found.n].mov3,movVal); // take max MOV across tỉnh
+          CAHOI.nccMov[found.n].pctMin=bienDo;
+          count++;
+        }
+      }
+      renderCahoiNCCConfig();
+      toast('✅ Import MOV: '+count+' dòng','success');
+    }catch(ex){toast('❌ Lỗi: '+ex.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value='';
 }
 function cahoiHandleMOVFile(e){
   const file=e.target.files[0]; if(!file)return;
