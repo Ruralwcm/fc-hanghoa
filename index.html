@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa by HaoDT v9.2.4</title>
+<title>FC Hàng Hóa by HaoDT v9.2.6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -203,25 +203,30 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.4</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.6</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.4</div>
+  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.6</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v9.2.4">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v9.2.6">🌡 FC Ambient</h2>
     <div class="meta">
-      <span>🏪 <b id="metaCH">—</b></span>
-      <span>📋 <b id="metaSKU">—</b></span>
-      <span>📦 <b id="metaFC">—</b></span>
-      <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
-      <label style="font-size:10px">Ngày KD:</label>
-      <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
+      <span id="metaAmbient">
+        <span>🏪 <b id="metaCH">—</b></span>
+        <span>📋 <b id="metaSKU">—</b></span>
+        <span>📦 <b id="metaFC">—</b></span>
+        <span style="color:#2e7d32" id="sheetDot">🟢 Live</span>
+        <label style="font-size:10px">Ngày KD:</label>
+        <input type="number" id="ngayKD" value="30" style="width:45px;text-align:center;padding:3px;font-size:10px">
+      </span>
+      <span id="metaCahoi" style="display:none">
+        <span style="color:#00796b">🐟 <b id="metaCahoiInfo">Cá Hồi</b></span>
+      </span>
       <button class="btn btn-outline btn-sm" onclick="showSaveModal()" style="padding:4px 10px;font-size:10px">💾 Lưu</button>
       <button class="btn btn-outline btn-sm" onclick="showLoadModal()" style="padding:4px 10px;font-size:10px">📂 Mở</button>
     </div>
@@ -596,6 +601,10 @@ function buildFCSidebar(){
 function switchFC(id){
   STATE.currentFC=id;buildFCSidebar();
   $('currentFCLabel').textContent=FC_TYPES[id].name;
+  // Toggle header meta bar by FC type
+  const isCahoi=id==='cahoi';
+  $('metaAmbient').style.display=isCahoi?'none':'inline';
+  $('metaCahoi').style.display=isCahoi?'inline':'none';
   const c=current();$('configSaved').style.display=c.configSaved?'inline':'none';
   $('ambientPanel').classList.add('hidden');
   $('resultsSection').classList.add('hidden');
@@ -1554,21 +1563,33 @@ async function doSave(){
 
 function getSaveData(){
   const fc=current();
+  const data={
+    stores:[...STATE.selectedTinh],
+    template:$('tmplPaste').value,
+    config:{recapTable:fc.recapTable||[],movTable:fc.movTable||[]},
+    ngayKD:STATE.ngayKD,
+    storeType:STATE.storeType,
+    fcType:STATE.currentFC
+  };
+  // Cá Hồi extra state
+  if(STATE.currentFC==='cahoi'){
+    data.cahoi={
+      salePaste:($('cahoiSalePaste')&&$('cahoiSalePaste').value)||'',
+      nccMov:CAHOI.nccMov||{},
+      hub:{lock:+($('cfgHubLock').value||30),kc:+($('cfgHubKC').value||10),split:+($('cfgHubSplit').value||2)},
+      gdv:($('cahoiFilterGDV')&&$('cahoiFilterGDV').value)||'',
+      qlkv:($('cahoiFilterQLKV')&&$('cahoiFilterQLKV').value)||'',
+      showAll:($('cahoiShowAllCH')&&$('cahoiShowAllCH').checked)!==false
+    };
+  }
   return {
-    app:'FC-Hang-Hoa', version:'8.7',
+    app:'FC-Hang-Hoa', version:'9.2',
     name:$('saveName').value.trim()||FC_TYPES[STATE.currentFC].name,
     savedAt:new Date().toISOString(),
     fcType:FC_TYPES[STATE.currentFC].name,
     fcTypeId:STATE.currentFC,
     createdBy:'HaoDT',
-    data:{
-      stores:[...STATE.selectedTinh],
-      template:$('tmplPaste').value,
-      config:{recapTable:fc.recapTable||[],movTable:fc.movTable||[]},
-      ngayKD:STATE.ngayKD,
-      storeType:STATE.storeType,
-      fcType:STATE.currentFC
-    }
+    data
   };
 }
 
@@ -1617,6 +1638,37 @@ async function restoreSaveData(item){
   }
   if(d.ngayKD){ STATE.ngayKD=d.ngayKD; $('ngayKD').value=d.ngayKD; }
   if(d.storeType){ STATE.storeType=d.storeType; $('storeTypeFilter').value=d.storeType; buildVungTree(); }
+  // Cá Hồi restore
+  if(d.cahoi){
+    const c=d.cahoi;
+    if(c.salePaste!==undefined && $('cahoiSalePaste')) $('cahoiSalePaste').value=c.salePaste;
+    if(c.nccMov) CAHOI.nccMov=c.nccMov;
+    if(c.hub){
+      if($('cfgHubLock')) $('cfgHubLock').value=c.hub.lock||30;
+      if($('cfgHubKC')) $('cfgHubKC').value=c.hub.kc||10;
+      if($('cfgHubSplit')) $('cfgHubSplit').value=c.hub.split||2;
+    }
+    if(c.showAll!==undefined && $('cahoiShowAllCH')) $('cahoiShowAllCH').checked=c.showAll;
+    if(c.gdv && $('cahoiFilterGDV')) $('cahoiFilterGDV').value=c.gdv;
+    if(c.qlkv && $('cahoiFilterQLKV')) $('cahoiFilterQLKV').value=c.qlkv;
+    renderCahoiNCCConfig();
+    // Re-parse sale data
+    if(c.salePaste && c.salePaste.trim()){
+      const lines=c.salePaste.trim().split('\n');
+      CAHOI.saleData={};
+      lines.forEach(l=>{
+        const parts=l.trim().split(/\s+|\t/);
+        if(parts.length<3) return;
+        const ch=parts[0], sku=parts[1];
+        CAHOI.saleData[ch+'||'+sku]={sale:parseFloat(parts[2])||0,huy:parts.length>3?(parseFloat(parts[3])||0):0,ton:parts.length>4?(parseFloat(parts[4])||0):0};
+      });
+      const chSet=new Set(); Object.keys(CAHOI.saleData).forEach(k=>chSet.add(k.split('||')[0]));
+      $('cahoiBadge').innerHTML='✅ '+chSet.size+' CH · '+lines.length+' dòng';
+      $('cahoiBadge').className='badge orange';
+      $('cahoiBtnLoadMin').disabled=false;
+    }
+  }
+  switchFC(STATE.currentFC);
 }
 
 async function doLoad(id){
