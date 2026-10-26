@@ -183,9 +183,6 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   #metaCahoi .ckpi-hide-sm{display:none !important}
   .btn-xs{font-size:8px !important;padding:2px 4px !important}
   .btn-sm{font-size:10px !important;padding:4px 8px !important}
-  /* Cá Hồi NCC cards stack */
-  #cahoiNCCList{flex-direction:column;gap:6px !important}
-  #cahoiNCCList>div{min-width:0 !important;max-width:100% !important}
   /* Cá Hồi two-col stack vertically */
   #cahoiTwoCol{flex-direction:column !important}
   #cahoiColLeft{width:100% !important}
@@ -404,12 +401,12 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
                 <button class="btn btn-xs btn-primary" onclick="cahoiStep1LoadData()" style="font-size:9px;padding:3px 6px">1️⃣ Load data</button>
                 <button class="btn btn-xs" id="cahoiBtnLoadMin" onclick="cahoiStep2LoadMin()" style="font-size:9px;padding:3px 6px;background:#ef6c00;color:#fff" disabled>2️⃣ Load min</button>
                 <button class="btn btn-xs btn-success" id="cahoiBtnLoadFC" onclick="cahoiStep4LoadFC()" style="font-size:9px;padding:3px 6px" disabled>▶️ Load FC</button>
+                <button class="btn btn-xs btn-outline" onclick="cahoiImportExcel()" style="font-size:9px;padding:3px 6px">📎 Excel</button>
               </div>
               <span style="font-size:9px;color:#ccc">|</span>
               <button class="btn btn-xs btn-outline" onclick="cahoiExport()" style="font-size:9px;padding:3px 6px">📥 Export</button>
               <button class="btn btn-xs btn-outline" onclick="cahoiClear()" style="font-size:9px;padding:3px 6px;color:#c62828">🧹 Clear</button>
-              <button class="btn btn-xs btn-outline" onclick="cahoiImportExcel()" style="font-size:9px;padding:3px 6px">📎 Excel</button>
-              <input type="file" id="cahoiFileInput" accept=".xxlsx,.xlsb,.csv" onchange="cahoiHandleFile(event)" style="display:none">
+              <input type="file" id="cahoiFileInput" accept=".xlsx,.xlsb,.csv" onchange="cahoiHandleFile(event)" style="display:none">
             </div>
             <div id="cahoiStepStatus" style="margin-top:6px;font-size:9px;color:#888"></div>
           </div>
@@ -419,9 +416,18 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
     <!-- NCC MOV Config -->
     <div class="card">
-      <div class="card-header"><h3>🚚 NCC — MOV (kg/ngày)</h3></div>
+      <div class="card-header">
+        <h3>🚚 NCC — MOV</h3>
+        <button class="btn btn-xs btn-outline" onclick="cahoiImportMOVExcel()" style="font-size:8px;padding:2px 6px">📎 Import MOV</button>
+        <input type="file" id="cahoiMOVFileInput" accept=".xlsx,.xlsb,.csv" onchange="cahoiHandleMOVFile(event)" style="display:none">
+      </div>
       <div class="card-body" style="padding:4px 8px">
-        <div id="cahoiNCCList" style="display:flex;gap:12px;flex-wrap:wrap;max-height:180px;overflow-y:auto"></div>
+        <div class="table-wrap" style="max-height:200px;overflow-y:auto">
+          <table style="font-size:9px;width:100%">
+            <thead><tr><th>#</th><th>Mã NCC</th><th>MOV 1</th><th>MOV 2</th><th>MOV 3</th><th>%Biên</th><th title="Tỉnh áp dụng & MOV">🗺 Tỉnh</th></tr></thead>
+            <tbody id="cahoiNCCList"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -1909,25 +1915,68 @@ function cahoiHandleFile(e){
 function renderCahoiNCCConfig(){
   if(!CAHOI.nccMov||Object.keys(CAHOI.nccMov).length===0){
     CAHOI.nccMov={};
-    CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov:300,pctMin:80}; });
+    CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov1:100,mov2:200,mov3:300,pctMin:80}; });
   }
   let h='';
-  CAHOI_NCC.forEach(ncc=>{
-    const cfg=CAHOI.nccMov[ncc.n]||{mov:300,pctMin:80};
-    h+='<div style="border:1px solid #e0e0e0;border-radius:6px;padding:6px 8px;min-width:160px;flex:1 1 auto;max-width:250px">';
-    h+='<div style="font-size:10px;font-weight:600;color:#1e3a5f;margin-bottom:6px">'+ncc.n+'</div>';
-    h+='<div style="display:flex;gap:6px;font-size:9px;align-items:center">';
-    h+='<label>MOV:</label><input type="number" id="nccMov_'+ncc.n.replace(/[^a-zA-Z0-9]/g,'_')+'" value="'+cfg.mov+'" style="width:64px;padding:2px 4px;font-size:10px" onchange="updateNCCMov(\''+ncc.n+'\',\'mov\',this.value)"> <span>kg/ngày</span>';
-    h+='<label style="margin-left:8px">%Min:</label><input type="number" id="nccMin_'+ncc.n.replace(/[^a-zA-Z0-9]/g,'_')+'" value="'+cfg.pctMin+'" style="width:52px;padding:2px 4px;font-size:10px" onchange="updateNCCMov(\''+ncc.n+'\',\'pctMin\',this.value)"> <span>%</span>';
-    h+='</div></div>';
+  CAHOI_NCC.forEach((ncc,i)=>{
+    const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80};
+    const tinhList=ncc.t.map(t=>'<span>'+t+': <b>'+(cfg.mov3||300)+'</b> kg</span>').join(', ');
+    h+='<tr>';
+    h+='<td style="text-align:center;font-size:9px;color:#888">'+(i+1)+'</td>';
+    h+='<td style="font-weight:600;color:#1e3a5f;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+ncc.n+'">'+ncc.n+'</td>';
+    h+='<td><input type="number" id="nccMov1_'+i+'" value="'+cfg.mov1+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov1\',this.value)"></td>';
+    h+='<td><input type="number" id="nccMov2_'+i+'" value="'+cfg.mov2+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov2\',this.value)"></td>';
+    h+='<td><input type="number" id="nccMov3_'+i+'" value="'+cfg.mov3+'" style="width:52px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'mov3\',this.value)"></td>';
+    h+='<td><input type="number" id="nccMin_'+i+'" value="'+cfg.pctMin+'" style="width:46px;padding:2px 3px;font-size:9px;text-align:center" onchange="updateNCCMovIdx('+i+',\'pctMin\',this.value)"></td>';
+    h+='<td style="font-size:8px;color:#666;max-width:180px;cursor:help" title="'+tinhList.replace(/<[^>]*>/g,'')+'">🗺 <b>'+ncc.t.length+'</b> tỉnh <span style="font-size:7px;color:#aaa">(hover)</span></td>';
+    h+='</tr>';
   });
   $('cahoiNCCList').innerHTML=h;
 }
 
-function updateNCCMov(ncc,key,val){
+function updateNCCMovIdx(i,key,val){
   const v=parseFloat(val)||0;
-  if(!CAHOI.nccMov[ncc]) CAHOI.nccMov[ncc]={mov:300,pctMin:80};
-  CAHOI.nccMov[ncc][key]=v;
+  const nccName=CAHOI_NCC[i].n;
+  if(!CAHOI.nccMov[nccName]) CAHOI.nccMov[nccName]={mov1:100,mov2:200,mov3:300,pctMin:80};
+  CAHOI.nccMov[nccName][key]=v;
+}
+
+function cahoiImportMOVExcel(){
+  $('cahoiMOVFileInput').click();
+}
+function cahoiHandleMOVFile(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      let count=0;
+      for(let i=1;i<data.length;i++){
+        const r=data[i]; if(!r||!r[0]) continue;
+        const nccName=String(r[0]||'').trim();
+        let found=null;
+        for(let j=0;j<CAHOI_NCC.length;j++){
+          if(CAHOI_NCC[j].n===nccName||CAHOI_NCC[j].n.startsWith(nccName.split(' - ')[0])){found=j;break;}
+        }
+        if(found===null&&i-1<CAHOI_NCC.length) found=i-1;
+        if(found!==null){
+          CAHOI.nccMov[CAHOI_NCC[found].n]={
+            mov1:parseFloat(r[1])||100,
+            mov2:parseFloat(r[2])||200,
+            mov3:parseFloat(r[3])||300,
+            pctMin:parseFloat(r[4])||80
+          };
+          count++;
+        }
+      }
+      renderCahoiNCCConfig();
+      toast('✅ Import MOV: '+count+' NCC','success');
+    }catch(ex){toast('❌ Lỗi: '+ex.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value='';
 }
 
 // ============ Step 1: Load Data (parse sale/hủy/tồn) ============
@@ -2226,8 +2275,9 @@ function renderCahoiHubReview(){
   const sortedHubs=Object.entries(hubs).sort((a,b)=>b[1].totalKG-a[1].totalKG);
   sortedHubs.forEach(([hk,hub])=>{
     const kgDay=hub.totalKG/7;
-    const movCfg=CAHOI.nccMov[hub.ncc]||{mov:300,pctMin:80};
-    const movDay=movCfg.mov||300;
+    const movCfg=CAHOI.nccMov[hub.ncc]||{mov1:100,mov2:200,mov3:300,pctMin:80};
+    const movDay=movCfg.mov3||300;
+    const pctMin=movCfg.pctMin||80;
     const days=['T2','T3','T4','T5','T6','T7','CN'];
     let dayStatus='';
     let badDays=0, weakDays=0;
