@@ -418,8 +418,11 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     <div class="card">
       <div class="card-header">
         <h3>🚚 NCC — MOV</h3>
-        <button class="btn btn-xs btn-outline" onclick="cahoiImportMOVExcel()" style="font-size:8px;padding:2px 6px">📎 Import MOV</button>
-        <input type="file" id="cahoiMOVFileInput" accept=".xlsx,.xlsb,.csv" onchange="cahoiHandleMOVFile(event)" style="display:none">
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-xs btn-outline" onclick="cahoiDownloadMOVTemplate()" style="font-size:8px;padding:2px 6px">📥 Tải template</button>
+          <button class="btn btn-xs btn-outline" onclick="cahoiImportMOVExcel()" style="font-size:8px;padding:2px 6px">📎 Import MOV</button>
+          <input type="file" id="cahoiMOVFileInput" accept=".xlsx,.xlsb,.csv" onchange="cahoiHandleMOVFile(event)" style="display:none">
+        </div>
       </div>
       <div class="card-body" style="padding:4px 8px">
         <div class="table-wrap" style="max-height:200px;overflow-y:auto">
@@ -1936,6 +1939,19 @@ function renderCahoiNCCConfig(){
 
 function cahoiImportMOVExcel(){
   $('cahoiMOVFileInput').click();
+}
+function cahoiDownloadMOVTemplate(){
+  const rows=[['Mã NCC','MOV 1','MOV 2','MOV 3','%Biên']];
+  CAHOI_NCC.forEach(ncc=>{
+    const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80};
+    rows.push([ncc.n,cfg.mov1,cfg.mov2,cfg.mov3,cfg.pctMin]);
+  });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:35},{wch:8},{wch:8},{wch:8},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws,'MOV');
+  XLSX.writeFile(wb,'MOV_Ca_Hoi_Template.xlsx');
+  toast('📥 Đã tải template MOV Cá Hồi','success');
 }
 function cahoiHandleMOVFile(e){
   const file=e.target.files[0]; if(!file)return;
