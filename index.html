@@ -156,6 +156,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   .kpi-val{font-size:16px}
   .kpi-label{font-size:9px}
   #cahoiPanel{gap:6px}
+  #cahoiColLeft{width:300px !important}
 }
 @media (max-width:600px){
   body{flex-direction:column}
@@ -183,6 +184,13 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
   /* Cá Hồi NCC cards stack */
   #cahoiNCCList{flex-direction:column;gap:6px !important}
   #cahoiNCCList>div{min-width:0 !important;max-width:100% !important}
+  /* Cá Hồi two-col stack vertically */
+  #cahoiTwoCol{flex-direction:column !important}
+  #cahoiColLeft{width:100% !important}
+  #cahoiColRight{width:100%}
+  /* Chọn Vùng & Upload inner cols stack */
+  .import-col-headers{flex-direction:column !important}
+  .import-col-headers>div{min-width:0 !important;max-width:100% !important}
   /* FC table max-height */
   .table-wrap{max-height:300px !important}
   table{font-size:7px !important}
@@ -363,6 +371,10 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
       </div>
     </div>
 
+    <!-- ===== Two-column layout: left = khai báo, right = kết quả ===== -->
+    <div class="two-col" id="cahoiTwoCol">
+      <div class="col-left" id="cahoiColLeft" style="width:360px">
+
     <!-- Chọn Vùng & Upload Data -->
     <div class="card">
       <div class="card-header">
@@ -436,6 +448,9 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
       </div>
     </div>
 
+      </div><!-- /col-left -->
+      <div class="col-right" id="cahoiColRight" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px">
+
     <!-- FC Table -->
     <div class="card">
       <div class="card-header">
@@ -491,6 +506,9 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
         <div class="table-wrap" style="max-height:350px;overflow-x:auto" id="cahoiHubWrap"></div>
       </div>
     </div>
+
+      </div><!-- /col-right -->
+    </div><!-- /two-col -->
   </div>
 
 
