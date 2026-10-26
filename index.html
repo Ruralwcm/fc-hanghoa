@@ -452,16 +452,16 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
     <!-- Khai báo Danh mục -->
     <div class="card">
       <div class="card-header">
-        <h3>📐 Khai báo Danh mục — Min &amp; %Hủy</h3>
+        <h3>📐 Khai báo Danh mục — Min &amp; %Tăng trưởng</h3>
         <div style="display:flex;gap:4px">
           <button class="btn btn-xs btn-warning" onclick="cahoiTinhMin()" style="font-size:8px;padding:2px 6px">🧮 Tính Min</button>
           <button class="btn btn-xs btn-success" onclick="cahoiSaveMinConfig()" style="font-size:8px;padding:2px 6px">💾 Lưu</button>
         </div>
       </div>
       <div class="card-body" style="padding:4px 8px;overflow:hidden;max-width:100%;box-sizing:border-box">
-        <div class="table-wrap" style="max-height:200px;overflow-y:auto">
+        <div class="table-wrap" style="max-height:220px;overflow-y:auto">
           <table style="font-size:9px;width:100%" id="cahoiMinCfgTable">
-            <thead><tr><th>Mã SP</th><th>Tên SP</th><th>QC</th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th><th>N8</th><th>%Hủy</th></tr></thead>
+            <thead><tr><th>Phân nhóm</th><th>Sale<br>(tự động)</th><th>Hủy hiện tại<br>(tự động)</th><th>Min<br>(user set)</th><th>% Tăng trưởng<br>(user set)</th></tr></thead>
             <tbody id="cahoiMinCfgBody"></tbody>
           </table>
         </div>
@@ -1758,6 +1758,8 @@ const CAHOI_ASSORT=[{"a":"10626483","n":"WMS-Lườn cá hồi","d":"KG","g":990
 const CAHOI_MIN_CFG={"10626483":{"N3":2.0,"N4":2.0,"N5":2.0,"N6":2.0,"N7":4.0,"N8":4.0,"pctHuy":0.05},"10053352":{"N3":2.0,"N4":2.0,"N5":2.0,"N6":2.0,"N7":4.0,"N8":4.0,"pctHuy":0.05},"10053351":{"N5":2.0,"N6":2.0,"N7":2.0,"N8":2.0,"pctHuy":0.05},"10283887":{"N1":1.0,"N2":1.0,"N3":2.0,"N4":2.0,"N5":3.0,"N6":3.0,"N7":4.0,"N8":4.0,"pctHuy":0.05},"10053361":{"N1":1.0,"N2":1.0,"N3":2.0,"N4":2.0,"N5":3.0,"N6":3.0,"N7":4.0,"N8":4.0,"pctHuy":0.05}};
 const CAHOI_NCC=[{"n":"2010078 - VIMEX VN _Lan (0394306082)","nx":"Nhóm 1","t":["T. Bắc Ninh","T. Bắc Giang","T. Lạng Sơn","T. Quảng Ninh","T. Hải Dương","TP. Hải Phòng"]},{"n":"2000843 - Hoàng Lê_Hiền (0968052365)","nx":"Nhóm 2","t":["T. Vĩnh Phúc","T. Phú Thọ","T. Yên Bái","T. Lào Cai","T. Hòa Bình","T. Sơn La","T. Điện Biên","T. Lai Châu"]},{"n":"2003413 - Cao Cấp_Nguyên (0941419009)","nx":"Nhóm 3","t":["T. Thái Nguyên","T. Bắc Kạn","T. Cao Bằng","T. Tuyên Quang","T. Hà Giang"]},{"n":"2000798 - TP_ A Hưng(0988733977)","nx":"Nhóm 4","t":["T. Hưng Yên","T. Hà Nam","T. Nam Định","T. Thái Bình","T. Ninh Bình"]}];
 const CAHOI_STORE_MAP=Object.fromEntries(CAHOI_STORES.map(s=>[s.c,s]));
+// Min & tăng trưởng theo PHÂN NHÓM (N1-N8) — không theo SKU
+const CAHOI_NGROUP_CFG={"N1":{min:1,growth:10},"N2":{min:1,growth:10},"N3":{min:2,growth:10},"N4":{min:2,growth:10},"N5":{min:3,growth:10},"N6":{min:3,growth:10},"N7":{min:4,growth:10},"N8":{min:4,growth:10}};
 const CAHOI_SKU_MAP=Object.fromEntries(CAHOI_ASSORT.map(s=>[s.a,s]));
 const CAHOI_NCC_TINH_MAP={};
 CAHOI_NCC.forEach(ncc=>{ncc.t.forEach(t=>{CAHOI_NCC_TINH_MAP[t]=ncc.n})});
@@ -2016,68 +2018,57 @@ function cahoiHandleMOVFile(e){
 function renderCahoiMinConfig(){
   const isCahoiActive=!$('cahoiPanel').classList.contains('hidden');
   if(!isCahoiActive) return;
-  let h='';
-  CAHOI_ASSORT.forEach(sku=>{
-    const cfg=CAHOI_MIN_CFG[sku.a]||{pctHuy:0.05};
-    h+='<tr>';
-    h+='<td style="font-weight:600;white-space:nowrap">'+sku.a+'</td>';
-    h+='<td style="font-size:9px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+sku.n+'">'+sku.n+'</td>';
-    h+='<td style="text-align:center;color:#888">'+sku.d+'</td>';
-    for(let n=1;n<=8;n++){
-      const v=cfg['N'+n]!==undefined?cfg['N'+n]:'';
-      h+='<td style="text-align:center"><input type="number" data-sku="'+sku.a+'" data-n="N'+n+'" value="'+v+'" step="0.5" min="0" style="width:38px;padding:2px 3px;font-size:9px;text-align:center"></td>';
-    }
-    h+='<td style="text-align:center"><input type="number" data-sku="'+sku.a+'" data-n="pctHuy" value="'+(cfg.pctHuy||0.05)+'" step="0.01" min="0" style="width:42px;padding:2px 3px;font-size:9px;text-align:center"></td>';
-    h+='</tr>';
+  // Build CH -> N-group map from filtered stores
+  const stores=cahoiGetFilteredStores();
+  const chNg={};
+  stores.forEach(s=>{ chNg[s.c]=s.ng||'N1'; });
+  // Aggregate sale/hủy per N-group
+  const agg={};
+  for(let n=1;n<=8;n++) agg['N'+n]={sale:0,huy:0};
+  Object.keys(CAHOI.saleData).forEach(k=>{
+    const ch=k.split('||')[0];
+    const sd=CAHOI.saleData[k];
+    const ng=chNg[ch]||'N1';
+    if(!agg[ng]) agg[ng]={sale:0,huy:0};
+    agg[ng].sale+=sd.sale||0;
+    agg[ng].huy+=sd.huy||0;
   });
+  let h='';
+  for(let n=1;n<=8;n++){
+    const ng='N'+n;
+    const cfg=CAHOI_NGROUP_CFG[ng]||{min:0,growth:0};
+    const a=agg[ng]||{sale:0,huy:0};
+    h+='<tr>';
+    h+='<td style="font-weight:700;color:#1e3a5f;text-align:center">'+ng+'</td>';
+    h+='<td style="text-align:center;font-weight:500">'+a.sale+'</td>';
+    h+='<td style="text-align:center;color:#c62828">'+a.huy+'</td>';
+    h+='<td style="text-align:center"><input type="number" data-ng="'+ng+'" data-f="min" value="'+cfg.min+'" step="0.5" min="0" style="width:44px;padding:2px 3px;font-size:9px;text-align:center"></td>';
+    h+='<td style="text-align:center"><input type="number" data-ng="'+ng+'" data-f="growth" value="'+cfg.growth+'" step="1" min="0" style="width:48px;padding:2px 3px;font-size:9px;text-align:center"> %</td>';
+    h+='</tr>';
+  }
   $('cahoiMinCfgBody').innerHTML=h;
 }
 
-// ============ Tính Min: nội suy từ 2 mốc N-group ============
+// ============ Tính Min: refresh Sale & Hủy theo phân nhóm ============
 function cahoiTinhMin(){
-  const n1=parseFloat($('cfgN1')?.value)||1;
-  const n8=parseFloat($('cfgN8')?.value)||4;
-  // Đọc inputs từ table và ghi vào CAHOI_MIN_CFG
-  const rows=$('cahoiMinCfgBody').querySelectorAll('tr');
-  rows.forEach(row=>{
-    const inputs=row.querySelectorAll('input');
-    const sku=inputs[0]?.getAttribute('data-sku');
-    if(!sku) return;
-    if(!CAHOI_MIN_CFG[sku]) CAHOI_MIN_CFG[sku]={};
-    inputs.forEach(inp=>{
-      const n=inp.getAttribute('data-n');
-      const v=parseFloat(inp.value)||0;
-      CAHOI_MIN_CFG[sku][n]=v;
-    });
-  });
-  // Nội suy: với N1 và N8 đã có, điền N2-N7 theo linear
-  CAHOI_ASSORT.forEach(sku=>{
-    const cfg=CAHOI_MIN_CFG[sku.a]||{};
-    for(let n=2;n<=7;n++){
-      const v=n1+(n8-n1)*(n-1)/(8-1);
-      cfg['N'+n]=Math.round(v*10)/10;
-    }
-    CAHOI_MIN_CFG[sku.a]=cfg;
-  });
   renderCahoiMinConfig();
-  toast('🧮 Đã tính Min: N1='+n1+' → N8='+n8,'success');
+  toast('🧮 Đã cập nhật Sale & Hủy theo phân nhóm','success');
 }
 
-// ============ Save Min Config ============
+// ============ Save Min Config (theo phân nhóm) ============
 function cahoiSaveMinConfig(){
   const rows=$('cahoiMinCfgBody').querySelectorAll('tr');
   rows.forEach(row=>{
     const inputs=row.querySelectorAll('input');
-    const sku=inputs[0]?.getAttribute('data-sku');
-    if(!sku) return;
-    if(!CAHOI_MIN_CFG[sku]) CAHOI_MIN_CFG[sku]={};
     inputs.forEach(inp=>{
-      const n=inp.getAttribute('data-n');
-      if(!n) return;
-      CAHOI_MIN_CFG[sku][n]=n.startsWith('N')?(parseFloat(inp.value)||0):(parseFloat(inp.value)||0.05);
+      const ng=inp.getAttribute('data-ng');
+      const f=inp.getAttribute('data-f');
+      if(!ng||!f) return;
+      if(!CAHOI_NGROUP_CFG[ng]) CAHOI_NGROUP_CFG[ng]={min:0,growth:0};
+      CAHOI_NGROUP_CFG[ng][f]=parseFloat(inp.value)||0;
     });
   });
-  toast('💾 Đã lưu Min Config: '+CAHOI_ASSORT.length+' SKU','success');
+  toast('💾 Đã lưu Min & %Tăng trưởng theo phân nhóm','success');
   // Re-run FC with updated min config
   if(CAHOI.fcTable.length) cahoiStep2LoadMin();
 }
@@ -2138,7 +2129,7 @@ function cahoiStep2LoadMin(){
     else assigned[s.c]=ncc;
   });
 
-  // Build skeleton FC with min from CAHOI_MIN_CFG
+  // Build skeleton FC with min & growth from CAHOI_NGROUP_CFG
   CAHOI.fcTable=[];
   let stt=0;
   const showAll=$('cahoiShowAllCH')?.checked!==false;
@@ -2148,11 +2139,13 @@ function cahoiStep2LoadMin(){
       const key=s.c+'||'+sku.a;
       const sd=CAHOI.saleData[key]||{sale:0,huy:0,ton:0};
       if(!showAll&&sd.sale===0&&sd.huy===0&&sd.ton===0){ stt--; return; }
-      const cfgMin=CAHOI_MIN_CFG[sku.a]||{};
-      const pctHuy=cfgMin.pctHuy!==undefined?cfgMin.pctHuy:(sd.sale+sd.huy>0?sd.huy/(sd.sale+sd.huy):0);
-      const min=cfgMin[s.ng]||0;
-      const cap=Math.round(sd.sale*(1-pctHuy)*0.85);
-      const dh=Math.max(0,Math.round(sd.sale+min-sd.huy));
+      const gcfg=CAHOI_NGROUP_CFG[s.ng]||{min:0,growth:0};
+      const min=gcfg.min||0;
+      const growth=(gcfg.growth||0)/100;
+      const pctHuy=sd.sale+sd.huy>0?sd.huy/(sd.sale+sd.huy):0;
+      const forecast=sd.sale*(1+growth);
+      const cap=Math.round(forecast*(1-pctHuy)*0.85);
+      const dh=Math.max(0,Math.round(forecast+min-sd.huy));
       const kg=Math.round(dh*sku.q*100)/100;
       const ncc=assigned[s.c]||'';
       const block=pctHuy>0.3;
