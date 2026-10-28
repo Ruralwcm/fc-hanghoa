@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Hàng Hóa V3 by HaoDT</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Be Vietnam Pro',-apple-system,sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh}
+
+/* Brand */
+:root{--red:#d71920;--blue:#1a3c6e;--yellow:#ffc107;--green:#2e7d32;--bg:#f0f2f5;--card:#fff;--border:#e0e0e0}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:6px;color:#fff;font-size:12px;font-weight:500;z-index:9999;animation:slideUp .3s ease;max-width:400px}
+.toast.success{background:var(--green)}.toast.error{background:#c62828}.toast.info{background:var(--blue)}.toast.warn{background:#ef6c00}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Top Bar */
+.topbar{background:var(--red);color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:16px;font-weight:700}
+.topbar .sub{font-size:10px;opacity:.8}
+
+/* Step Indicator */
+.steps{display:flex;justify-content:center;gap:0;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#999;cursor:default;transition:all .2s;position:relative}
+.step .num{width:28px;height:28px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all .2s}
+.step.active .num{background:var(--blue);color:#fff;box-shadow:0 2px 6px rgba(26,60,110,.3)}
+.step.active{color:var(--blue)}
+.step.done .num{background:var(--green);color:#fff}
+.step.done{color:var(--green)}
+.step-arrow{color:#ccc;font-size:14px;margin:0 -2px}
+
+/* Main Content */
+.content{max-width:1400px;margin:0 auto;padding:12px 16px}
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* Cards */
+.card{background:var(--card);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
+.card-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.card-header h2{font-size:14px;font-weight:700;color:var(--blue)}
+.card-body{padding:12px 14px}
+
+/* Buttons */
+.btn{padding:7px 16px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:5px;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2a4f7f}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#388e3c}
+.btn-outline{background:#fff;color:var(--blue);border:1px solid var(--blue)}.btn-outline:hover{background:#f5f5f5}
+.btn-warning{background:#ef6c00;color:#fff}.btn-warning:hover{background:#d84315}
+.btn-danger{background:#c62828;color:#fff}.btn-danger:hover{background:#b71c1c}
+.btn-sm{padding:5px 10px;font-size:10px}.btn-xs{padding:3px 8px;font-size:9px}.btn-lg{padding:10px 24px;font-size:14px}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* Badges */
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;background:#e3f2fd;color:var(--blue);white-space:nowrap}
+.badge.green{background:#e8f5e9;color:var(--green)}
+.badge.orange{background:#fef9c3;color:#ef6c00}
+.badge.red{background:#ffebee;color:#c62828}
+
+/* Form elements */
+textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:11px;resize:vertical;line-height:1.5}
+textarea:focus{border-color:var(--blue);outline:none}
+select,input[type=text],input[type=number]{padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit}
+select:focus,input:focus{border-color:var(--blue);outline:none}
+label{font-size:11px;font-weight:500}
+
+/* Tables */
+.table-wrap{overflow-x:auto;max-height:500px;overflow-y:auto;border:1px solid var(--border);border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:#f5f7fa;padding:7px 6px;text-align:left;font-weight:600;position:sticky;top:0;z-index:1;border-bottom:2px solid var(--border);white-space:nowrap;font-size:10px}
+td{padding:5px 6px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+td input,td select{width:100%;border:1px solid #ddd;border-radius:3px;padding:3px 5px;font-size:10px;min-width:40px;font-family:inherit}
+td input[type=checkbox]{width:auto;min-width:auto}
+tr:hover td{background:#fafbfc}
+tr.row-section td{background:#e3f2fd!important;font-weight:600;cursor:pointer}
+tr.row-subtotal td{background:#f5f5f5;font-weight:700;border-top:1px solid var(--border)}
+
+/* Tree */
+.tree-wrap{max-height:250px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:#fafbfc;padding:4px 0;font-size:11px;user-select:none}
+.tree-mien{cursor:pointer;padding:5px 10px;display:flex;align-items:center;gap:5px;font-weight:700;color:var(--blue);border-bottom:1px solid #f0f0f0}
+.tree-mien:hover{background:#e8f0f8}
+.tree-mien .arrow{font-size:10px;width:14px;text-align:center;transition:transform .15s}
+.tree-mien.open .arrow{transform:rotate(90deg)}
+.tree-gdv{cursor:pointer;padding:4px 10px 4px 24px;display:flex;align-items:center;gap:4px;font-weight:600;color:#555;font-size:10px}
+.tree-gdv:hover{background:#e8f0f8}
+.tree-gdv .arrow{font-size:10px;width:14px;text-align:center;transition:transform .15s}
+.tree-gdv.open .arrow{transform:rotate(90deg)}
+.tree-child{padding:2px 10px 2px 40px;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:10px;color:#777}
+.tree-child:hover{background:#e8f0f8}
+.tree-child input[type=checkbox]{width:13px;height:13px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.tree-child.selected{color:var(--blue);font-weight:600}
+
+/* Two column */
+.two-col{display:flex;gap:12px}
+.col-left{width:420px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+
+/* Tabs */
+.tab-row{display:flex;gap:2px;background:#e8ecf1;border-radius:6px;padding:3px}
+.tab-btn{padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;background:transparent;color:#666}
+.tab-btn:hover{background:rgba(255,255,255,.6)}
+.tab-btn.active{background:#fff;color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* KPI */
+.kpi-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.kpi-card{flex:1;min-width:80px;background:#f8fafc;border-radius:6px;padding:10px;text-align:center}
+.kpi-val{font-size:20px;font-weight:700;color:var(--blue)}
+.kpi-label{font-size:9px;color:#999;margin-top:2px}
+
+/* Flex utilities */
+.flex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.gap-4{gap:4px}.gap-8{gap:8px}
+.mt-8{margin-top:8px}.mb-8{margin-bottom:8px}
+.text-sm{font-size:10px}.text-muted{color:#888}
+.text-center{text-align:center}
+.hidden{display:none!important}
+
+/* FC Types sidebar-like selector */
+.fc-type-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.fc-type-chip{padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;border:2px solid transparent;background:#f0f2f5;color:#666;transition:all .15s}
+.fc-type-chip:hover{background:#e8ecf1}
+.fc-type-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* MOV table */
+.mov-table-wrap{max-height:200px;overflow-y:auto}
+.mov-table td,.mov-table th{font-size:10px;padding:4px 6px}
+
+/* HUB section */
+.hub-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px}
+.hub-row input{width:120px;padding:4px 6px;font-size:10px}
+.hub-row select{font-size:10px;padding:4px 6px}
+
+/* Loading */
+.loading{display:flex;align-items:center;gap:8px;color:#888;font-size:11px}
+.spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* B4 Filter bar */
+.filter-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.filter-bar select{font-size:10px;padding:4px 6px}
+
+/* Responsive */
+@media(max-width:900px){
+  .two-col{flex-direction:column}
+  .col-left{width:100%}
+  .kpi-card{min-width:60px;padding:6px}.kpi-val{font-size:16px}.kpi-label{font-size:8px}
+  .step{padding:6px 8px;font-size:10px;gap:4px}
+  .step .num{width:22px;height:22px;font-size:11px}
+  .step-arrow{font-size:12px}
+  table{font-size:9px}
+  th,td{padding:3px 4px}
+}
+@media(max-width:600px){
+  .steps{flex-direction:column;align-items:flex-start;gap:4px;padding:8px}
+  .step-arrow{display:none}
+  .topbar{padding:6px 10px}.topbar h1{font-size:14px}
+  .card-header h2{font-size:12px}
+  .btn-lg{font-size:12px;padding:8px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div><h1>📦 FC Hàng Hóa V3</h1><div class="sub">by HaoDT · 4-Step Wizard</div></div>
+  <div class="flex-row gap-4">
+    <span id="sheetStatus" style="font-size:10px"></span>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="exportConfig()">💾 Backup</button>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="importConfigFile()">📂 Restore</button>
+    <input type="file" id="configFileInput" accept=".json" onchange="handleConfigImport(this)" style="display:none">
+  </div>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="steps" id="stepIndicator">
+  <div class="step active" data-step="1"><div class="num">1</div>Data Input</div>
+  <div class="step-arrow">→</div>
+  <div class="step" data-step="2"><div class="num">2</div>Danh mục & Min</div>
+  <div class="step-arrow">→</div>
+  <div class="step" data-step="3"><div class="num">3</div>RECAP</div>
+  <div class="step-arrow">→</div>
+  <div class="step" data-step="4"><div class="num">4</div>Chi Tiết FC</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ==================== B1: DATA INPUT ==================== -->
+<div class="step-panel active" id="panelB1">
+  <div class="fc-type-selector" id="fcTypeSelector"></div>
+  
+  <div class="two-col">
+    <div class="col-left">
+      <!-- Store Selection -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🏪 Chọn Cửa Hàng</h2>
+          <div class="flex-row gap-4">
+            <select id="storeTypeFilterB1" onchange="buildStoreTree()" style="font-size:10px;padding:3px 6px">
+              <option value="all">✅ All Active</option>
+              <option value="all-stores">🏪 All Stores</option>
+              <option value="LFL">📊 LFL</option>
+              <option value="STU">🆕 STU</option>
+              <option value="NSO">🏗 NSO</option>
+            </select>
+            <button class="btn btn-xs btn-outline" onclick="selectAllStores()">Tất cả</button>
+            <button class="btn btn-xs btn-outline" onclick="clearAllStores()">Clear</button>
+            <span class="badge" id="storeCountB1">— CH</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:6px 10px">
+          <div class="tree-wrap" id="storeTree"></div>
+          <div class="loading hidden" id="storeLoading"><div class="spinner"></div>Đang tải Storelist...</div>
+        </div>
+      </div>
+
+      <!-- NCC & MOV Config -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🚚 NCC & MOV</h2>
+          <div class="flex-row gap-4">
+            <button class="btn btn-xs btn-primary" onclick="addNCC()">+ Thêm NCC</button>
+            <span class="badge green" id="nccCount">0 NCC</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:6px 10px">
+          <div class="mov-table-wrap table-wrap">
+            <table class="mov-table">
+              <thead><tr><th>NCC</th><th>Tỉnh</th><th>MOV 1</th><th>MOV 2</th><th>MOV 3</th><th>%Biên</th><th>Cách gom HUB</th><th></th></tr></thead>
+              <tbody id="nccTableBody"><tr><td colspan="8" class="text-center text-muted text-sm">Chưa có NCC. Bấm "+ Thêm NCC"</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUB Config -->
+      <div class="card">
+        <div class="card-header">
+          <h2>⚙️ Cấu hình HUB</h2>
+          <div class="flex-row gap-4">
+            <button class="btn btn-xs btn-primary" onclick="addHUB()">+ Thêm HUB</button>
+            <span class="badge green" id="hubCount">0 HUB</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:6px 10px">
+          <div class="mov-table-wrap table-wrap">
+            <table>
+              <thead><tr><th>HUB</th><th>Store → HUB mapping</th><th></th></tr></thead>
+              <tbody id="hubTableBody"><tr><td colspan="3" class="text-center text-muted text-sm">Chưa có HUB</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <!-- Data Paste -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📋 Paste Dữ Liệu Sale / Tồn / CG / Hủy</h2>
+          <span class="badge orange" id="dataBadge">Chưa có dữ liệu</span>
+        </div>
+        <div class="card-body" style="padding:8px 12px">
+          <div class="text-sm text-muted mb-8">Định dạng: <code>Mã_CH Mã_SP Sale Tồn CG Hủy</code> (tab hoặc space, mỗi dòng 1 CH×SKU)</div>
+          <textarea id="saleDataPaste" style="height:150px;font-size:10px" placeholder="2797&#9;10006145&#9;87&#9;44&#9;0&#9;5
+2924&#9;10006145&#9;163&#9;36&#9;0&#9;2
+3088&#9;10006145&#9;494&#9;0&#9;90&#9;10"></textarea>
+          <div class="flex-row gap-4 mt-8">
+            <button class="btn btn-sm btn-success" onclick="parseSaleData()">🔍 Parse Data</button>
+            <button class="btn btn-sm btn-outline" onclick="downloadDataTemplate()">📥 Tải Template</button>
+            <span class="text-sm text-muted" id="parseResult"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ngày KD setting -->
+      <div class="card">
+        <div class="card-body" style="padding:8px 12px">
+          <div class="flex-row gap-8">
+            <label>Số ngày KD: <input type="number" id="ngayKD" value="30" min="1" max="90" style="width:60px;text-align:center"></label>
+            <span class="text-sm text-muted">(mặc định 30 ngày)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-row gap-8 mt-8" style="justify-content:flex-end">
+    <button class="btn btn-lg btn-primary" onclick="goToStep(2)" id="btnGotoB2">Tiếp tục → B2: Danh mục & Min</button>
+  </div>
+</div>
+
+<!-- ==================== B2: DANH MỤC & MIN ==================== -->
+<div class="step-panel" id="panelB2">
+  <div class="card">
+    <div class="card-header">
+      <h2>📐 Danh mục SKU & Bộ Min & Tăng Trưởng</h2>
+      <div class="flex-row gap-4">
+        <button class="btn btn-xs btn-outline" onclick="addSKURow()">+ Thêm SKU</button>
+        <button class="btn btn-xs btn-warning" onclick="autoCalcMinB2()">🧮 Tính Min</button>
+        <input type="text" id="skuSearch" placeholder="Lọc Mã SP/Tên SP..." oninput="renderSKUTable()" style="font-size:10px;width:140px;padding:4px 6px" >
+        <select id="skuFilterNCC" onchange="renderSKUTable()" style="font-size:10px;width:120px;padding:4px 6px"><option value="">Tất cả NCC</option></select>
+        <span class="badge green" id="skuCount">0 SKU</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:6px 10px">
+      <div class="table-wrap" style="max-height:350px">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th>
+              <th style="background:#fff3e0">N1</th><th style="background:#fff3e0">N2</th><th style="background:#fff3e0">N3</th><th style="background:#fff3e0">N4</th>
+              <th style="background:#fff3e0">N5</th><th style="background:#fff3e0">N6</th><th style="background:#fff3e0">N7</th><th style="background:#fff3e0">N8</th>
+              <th>Growth%</th><th>Block</th><th>+Stock</th><th>+CG</th><th>Lock Max</th><th>Cover</th><th>Rank</th><th>NCC</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="skuTableBody"><tr><td colspan="24" class="text-center text-muted text-sm">Chưa có SKU. Bấm "+ Thêm SKU" hoặc quay lại B1 import template.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- N-group mapping -->
+  <div class="card">
+    <div class="card-header"><h2>📊 Phân Nhóm N cho Cửa Hàng</h2></div>
+    <div class="card-body" style="padding:6px 10px">
+      <div class="text-sm text-muted mb-8">Mỗi cửa hàng được gán vào 1 nhóm N (N1-N8). Dựa vào sale BQ/CH để xác định nhóm.</div>
+      <div class="table-wrap" style="max-height:200px">
+        <table>
+          <thead><tr><th>Mã CH</th><th>Tên CH</th><th>Tỉnh</th><th>GĐV</th><th>Nhóm N</th><th>Sale BQ</th></tr></thead>
+          <tbody id="nhomNTableBody"><tr><td colspan="6" class="text-center text-muted text-sm">Chưa có dữ liệu. Vào B1 chọn store + paste data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import template for B2 -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📥 Import Danh mục từ Template</h2>
+    </div>
+    <div class="card-body" style="padding:8px 12px">
+      <div class="flex-row gap-4">
+        <textarea id="skuTemplatePaste" style="height:80px;font-size:10px" placeholder="Mã SP&#9;Tên SP&#9;ĐVT&#9;QC&#9;Giá mua&#9;Giá thường&#9;Giá KM&#9;NCC
+10007893&#9;HẢO HẢO Mì tôm chua cay 75g&#9;G1&#9;30&#9;3580&#9;43000&#9;64900&#9;Chia hàng"></textarea>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="btn btn-sm btn-primary" onclick="importSKUTemplate()">✅ Import SKU</button>
+          <button class="btn btn-sm btn-outline" onclick="downloadSKUTemplate()">📥 Tải Template SKU</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('skuFileInput').click()">📎 Upload Excel</button>
+          <input type="file" id="skuFileInput" accept=".xlsx,.xlsb,.csv" onchange="handleSKUFileUpload(this)" style="display:none">
+        </div>
+      </div>
+      <span class="text-sm" id="skuImportResult"></span>
+    </div>
+  </div>
+
+  <div class="flex-row gap-8 mt-8" style="justify-content:space-between">
+    <button class="btn btn-lg btn-outline" onclick="goToStep(1)">← B1: Data Input</button>
+    <button class="btn btn-lg btn-success" onclick="tinhFC()">Tính FC → B3: RECAP</button>
+  </div>
+</div>
+
+<!-- ==================== B3: RECAP ==================== -->
+<div class="step-panel" id="panelB3">
+  <!-- KPI -->
+  <div class="kpi-row" id="recapKPIs">
+    <div class="kpi-card"><div class="kpi-val" id="rkpiCH">—</div><div class="kpi-label">Cửa hàng</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="rkpiSKU">—</div><div class="kpi-label">SKU</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="rkpiSL">—</div><div class="kpi-label">Tổng SL FC</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="rkpiGT">—</div><div class="kpi-label">Tổng GT FC</div></div>
+    <div class="kpi-card" style="background:#e8f5e9"><div class="kpi-val" id="rkpiDu" style="color:var(--green)">—</div><div class="kpi-label">Đủ MOV</div></div>
+    <div class="kpi-card" style="background:#fef9c3"><div class="kpi-val" id="rkpiThieu" style="color:#ef6c00">—</div><div class="kpi-label">Thiếu MOV</div></div>
+    <div class="kpi-card" style="background:#ffebee"><div class="kpi-val" id="rkpiLoai" style="color:#c62828">—</div><div class="kpi-label">Loại FC</div></div>
+  </div>
+
+  <!-- RECAP Tab Views -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📊 RECAP — Số Đặt Theo Chiều</h2>
+      <div class="tab-row" id="recapTabs">
+        <button class="tab-btn active" onclick="switchRecapView('mien')">🗺 Theo Vùng/Miền</button>
+        <button class="tab-btn" onclick="switchRecapView('tinh')">📍 Theo Tỉnh</button>
+        <button class="tab-btn" onclick="switchRecapView('gdv')">👤 Theo GĐV</button>
+        <button class="tab-btn" onclick="switchRecapView('qlkv')">🏢 Theo QLKV</button>
+        <button class="tab-btn" onclick="switchRecapView('hub')">🚚 Theo HUB</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:8px 12px">
+      <div class="table-wrap" id="recapTableWrap">
+        <table>
+          <thead id="recapTableHead"></thead>
+          <tbody id="recapTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-row gap-8 mt-8" style="justify-content:space-between">
+    <button class="btn btn-lg btn-outline" onclick="goToStep(2)">← B2: Danh mục & Min</button>
+    <button class="btn btn-lg btn-primary" onclick="goToStep(4)">Xem chi tiết → B4</button>
+  </div>
+</div>
+
+<!-- ==================== B4: CHI TIẾT FC ==================== -->
+<div class="step-panel" id="panelB4">
+  <div class="card">
+    <div class="card-header">
+      <h2>📋 Chi Tiết FC — SKU × Cửa Hàng</h2>
+      <div class="flex-row gap-4">
+        <button class="btn btn-sm btn-success" onclick="exportB4Excel()">📥 Xuất Excel</button>
+        <span class="badge green" id="b4RowCount">0 dòng</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:8px 12px">
+      <!-- Filters -->
+      <div class="filter-bar">
+        <select id="fTinh" onchange="renderB4Table()"><option value="">Tất cả Tỉnh</option></select>
+        <select id="fGDV" onchange="renderB4Table()"><option value="">Tất cả GĐV</option></select>
+        <select id="fQLKV" onchange="renderB4Table()"><option value="">Tất cả QLKV</option></select>
+        <select id="fHUB" onchange="renderB4Table()"><option value="">Tất cả HUB</option></select>
+        <select id="fNCC" onchange="renderB4Table()"><option value="">Tất cả NCC</option></select>
+        <select id="fSKU" onchange="renderB4Table()"><option value="">Tất cả SKU</option></select>
+        <input type="text" id="fSearch" placeholder="Tìm Mã CH/Tên CH..." oninput="renderB4Table()" style="font-size:10px;width:140px;padding:4px 6px">
+        <label style="font-size:10px;display:flex;align-items:center;gap:3px;white-space:nowrap">
+          <input type="checkbox" id="fOnlyFC" onchange="renderB4Table()" style="width:13px;height:13px;accent-color:var(--blue)">Chỉ có FC
+        </label>
+      </div>
+      <div class="table-wrap" id="b4TableWrap">
+        <p class="text-center text-muted" style="padding:40px">Chưa có dữ liệu FC. Vui lòng chạy "Tính FC" ở B2 trước.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-row gap-8 mt-8" style="justify-content:flex-start">
+    <button class="btn btn-lg btn-outline" onclick="goToStep(3)">← B3: RECAP</button>
+  </div>
+</div>
+
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ============ CONSTANTS ============
+const GOOGLE_SHEET_ID = '1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk';
+const GID_STORE = '164583655';
+const MIEN_MAP = (()=>{
+  const bac=['TP. Hà Nội','TP. Hải Phòng','T. Bắc Ninh','T. Thái Nguyên','T. Phú Thọ','T. Hòa Bình','T. Sơn La','T. Điện Biên','T. Lào Cai','T. Yên Bái','T. Tuyên Quang','T. Hà Giang','T. Lạng Sơn','T. Cao Bằng','T. Bắc Kạn','T. Thái Bình','T. Nam Định','T. Hà Nam','T. Ninh Bình','T. Hải Dương','T. Hưng Yên','T. Vĩnh Phúc','T. Quảng Ninh','T. Bắc Giang'];
+  const trung=['T. Thanh Hóa','T. Nghệ An','T. Hà Tĩnh','T. Quảng Bình','T. Quảng Trị','T. Thừa Thiên Huế','TP. Đà Nẵng','T. Quảng Nam','T. Quảng Ngãi','T. Bình Định','T. Phú Yên','T. Khánh Hòa','T. Ninh Thuận','T. Bình Thuận','T. Kon Tum','T. Gia Lai','T. Đắk Lắk','T. Đắk Nông','T. Lâm Đồng'];
+  const nam=['TP. Hồ Chí Minh','T. Bình Dương','T. Bình Phước','T. Tây Ninh','T. Đồng Nai','T. Bà Rịa - Vũng Tàu','T. Long An','T. Tiền Giang','T. Bến Tre','T. Vĩnh Long','T. Trà Vinh','T. Đồng Tháp','T. An Giang','T. Kiên Giang','TP. Cần Thơ','T. Hậu Giang','T. Sóc Trăng','T. Bạc Liêu','T. Cà Mau'];
+  const map={};bac.forEach(t=>map[t]='BẮC');trung.forEach(t=>map[t]='TRUNG');nam.forEach(t=>map[t]='NAM');
+  return map;
+})();
+function getMien(tinh){return MIEN_MAP[tinh]||'KHÁC'}
+
+const FC_TYPES = {
+  ambient:{id:'ambient',name:'🌡 Ambient',dot:'#ef6c00'},
+  dongmat:{id:'dongmat',name:'❄️ Đông/Mát',dot:'#d71920'},
+  traicay:{id:'traicay',name:'🍎 Trái Cây',dot:'#c62828'},
+  rau:{id:'rau',name:'🥬 Rau',dot:'#2e7d32'},
+  are:{id:'are',name:'🏗 Dự án ARE',dot:'#6a1b9a'}
+};
+
+// ============ STATE ============
+let STATE = {
+  step: 1,
+  currentFC: 'ambient',
+  ngayKD: 30,
+  storeType: 'all',
+  storelist: {},        // mãCH → {tenCH, tinhTrang, khaiTruong, tinh, huyen, qlkv, gdv}
+  selectedTinh: new Set(),  // "gdv||tinh"
+  treeData: {},
+  saleData: {},         // "maCH|maSP" → {sale, ton, cg, huy}
+  skuCatalog: [],       // [{maSP, tenSP, dvt, qc, giaMua, giaThuong, giaKM, N1-N8, growth, block, plusStock, plusCG, lockMax, coverDay, rank, ncc}]
+  nccConfig: [],        // [{ncc, tinhMOV: {tinh→{mov1,mov2,mov3}}, pctMin, cachGomHUB}]
+  hubConfig: [],        // [{name, stores: [maCH, ...]}]
+  fcResults: [],        // [{maCH, maSP, tenSP, tenCH, tinh, gdv, qlkv, huyen, slBan, slTon, slCG, slHuy, min, qc, slFC, gtFC, movStatus, ncc, nhomN, ...}]
+  recapView: 'mien',    // mien, tinh, gdv, qlkv, hub
+  nhomNMap: {}          // maCH → N1-N8
+};
+
+// ============ UTILS ============
+function $(id){return document.getElementById(id)}
+function toast(msg, type='info'){
+  const el = $('toast'); el.textContent = msg; el.className = 'toast ' + type;
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+function fmt(n){return n != null ? Number(n).toLocaleString('vi-VN') : '0'}
+
+// ============ STEPS ============
+function goToStep(step){
+  STATE.step = step;
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  $('panelB' + step).classList.add('active');
+  document.querySelectorAll('.step').forEach(s => {
+    const sNum = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sNum === step) s.classList.add('active');
+    if (sNum < step) s.classList.add('done');
+  });
+  if (step === 3) { renderRecapB3(); }
+  if (step === 4) { populateB4Filters(); renderB4Table(); }
+  autoSave();
+}
+
+// ============ FC TYPE SELECTOR ============
+function buildFCTypeSelector(){
+  $('fcTypeSelector').innerHTML = Object.values(FC_TYPES).map(t =>
+    '<span class="fc-type-chip' + (t.id === STATE.currentFC ? ' active' : '') + '" onclick="switchFCType(\'' + t.id + '\')">' + t.name + '</span>'
+  ).join('');
+}
+function switchFCType(id){
+  STATE.currentFC = id;
+  buildFCTypeSelector();
+  // Copy SKU catalog to new FC type if empty
+  if (!STATE.skuCatalog.length) {
+    const saved = loadFromStorage();
+    if (saved && saved.skuCatalog) STATE.skuCatalog = saved.skuCatalog;
+  }
+  if (!STATE.nccConfig.length) {
+    const saved = loadFromStorage();
+    if (saved && saved.nccConfig) STATE.nccConfig = saved.nccConfig;
+  }
+  autoSave();
+  if (STATE.step === 2) renderSKUTable();
+}
+
+// ============ LOCAL STORAGE ============
+function autoSave(){
+  try {
+    const data = {
+      step: STATE.step, currentFC: STATE.currentFC, ngayKD: STATE.ngayKD,
+      storeType: STATE.storeType, selectedTinh: [...STATE.selectedTinh],
+      skuCatalog: STATE.skuCatalog, nccConfig: STATE.nccConfig,
+      hubConfig: STATE.hubConfig, saleData: STATE.saleData,
+      fcResults: STATE.fcResults, nhomNMap: STATE.nhomNMap, recapView: STATE.recapView
+    };
+    localStorage.setItem('FC_APP_V3', JSON.stringify(data));
+  } catch(e) {}
+}
+function loadFromStorage(){
+  try { const d = JSON.parse(localStorage.getItem('FC_APP_V3')); return d; } catch(e) { return null; }
+}
+function restoreState(){
+  const d = loadFromStorage();
+  if (!d) return false;
+  STATE.step = d.step || 1;
+  STATE.currentFC = d.currentFC || 'ambient';
+  STATE.ngayKD = d.ngayKD || 30;
+  STATE.storeType = d.storeType || 'all';
+  STATE.selectedTinh = new Set(d.selectedTinh || []);
+  STATE.skuCatalog = d.skuCatalog || [];
+  STATE.nccConfig = d.nccConfig || [];
+  STATE.hubConfig = d.hubConfig || [];
+  STATE.saleData = d.saleData || {};
+  STATE.fcResults = d.fcResults || [];
+  STATE.nhomNMap = d.nhomNMap || {};
+  STATE.recapView = d.recapView || 'mien';
+  $('ngayKD').value = STATE.ngayKD;
+  $('storeTypeFilterB1').value = STATE.storeType;
+  $('saleDataPaste').value = rebuildSalePaste();
+  return true;
+}
+
+function rebuildSalePaste(){
+  const lines = [];
+  Object.entries(STATE.saleData).forEach(([key, val]) => {
+    const [ch, sp] = key.split('|');
+    lines.push([ch, sp, val.sale, val.ton, val.cg, val.huy||0].join('\t'));
+  });
+  return lines.join('\n');
+}
+
+// ============ GOOGLE SHEETS FETCH ============
+async function fetchStorelist(){
+  $('storeLoading').classList.remove('hidden');
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + GOOGLE_SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + GID_STORE;
+    const r = await fetchWithTimeout(url, 8000);
+    const csv = await r.text();
+    parseStoreCSV(csv);
+    $('sheetStatus').innerHTML = '🟢 Live';
+    $('sheetStatus').style.color = 'var(--green)';
+  } catch(e) {
+    console.error('Storelist fetch failed:', e);
+    $('sheetStatus').innerHTML = '🔴 Offline';
+    $('sheetStatus').style.color = '#c62828';
+    toast('⚠️ Không kết nối được Storelist. Dùng dữ liệu đã lưu.', 'warn');
+  }
+  $('storeLoading').classList.add('hidden');
+  buildStoreTree();
+}
+
+async function fetchWithTimeout(url, ms){
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  try {
+    const r = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    if (r.ok) return r;
+    throw new Error('HTTP ' + r.status);
+  } finally { clearTimeout(timeout); }
+}
+
+function parseStoreCSV(csv){
+  const rows = [];
+  const lines = csv.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols = [], cur = [];
+    let q = false;
+    for (const c of line) {
+      if (c === '"') { q = !q; continue; }
+      if (c === ',' && !q) { cols.push(cur.join('').trim()); cur.length = 0; continue; }
+      cur.push(c);
+    }
+    cols.push(cur.join('').trim());
+    rows.push(cols);
+  }
+  // Header: Mã SAP(c), Tên CH(n), Tình Trạng, Khai Trương, ?, Tỉnh(t), Huyện(h), QLKV(q), GĐV(g), ...
+  // Column mapping from gviz output
+  STATE.storelist = {};
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (r.length < 9) continue;
+    const maCH = r[0] ? r[0].trim() : '';
+    if (!maCH) continue;
+    STATE.storelist[maCH] = {
+      tenCH: (r[1]||'').trim(),
+      tinhTrang: (r[2]||'').trim(),
+      khaiTruong: (r[3]||'').trim(),
+      tinh: (r[5]||'').trim(),
+      huyen: (r[6]||'').trim(),
+      qlkv: (r[7]||'').trim(),
+      gdv: (r[8]||'').trim()
+    };
+  }
+}
+
+// ============ STORE TREE ============
+function buildStoreTree(){
+  const tree = {}, st = STATE.storeType || 'all', cy = new Date().getFullYear();
+  let storeList = Object.values(STATE.storelist);
+
+  if (st === 'LFL') {
+    storeList = storeList.filter(s => s.tinhTrang === 'Đang hoạt động' && s.khaiTruong && new Date(s.khaiTruong).getFullYear() <= cy - 2);
+  } else if (st === 'STU') {
+    storeList = storeList.filter(s => s.tinhTrang === 'Đang hoạt động' && s.khaiTruong && new Date(s.khaiTruong).getFullYear() === cy - 1);
+  } else if (st === 'NSO') {
+    storeList = storeList.filter(s => s.tinhTrang === 'Đang hoạt động' && s.khaiTruong && new Date(s.khaiTruong).getFullYear() === cy);
+  } else if (st === 'all') {
+    storeList = storeList.filter(s => s.tinhTrang === 'Đang hoạt động' || s.tinhTrang === 'Sắp khai trương');
+  }
+
+  storeList.forEach(s => {
+    const mien = getMien(s.tinh), gdv = s.gdv || '(Không GĐV)', tinh = s.tinh || '(Khác)';
+    if (!tree[mien]) tree[mien] = {};
+    if (!tree[mien][gdv]) tree[mien][gdv] = {};
+    if (!tree[mien][gdv][tinh]) tree[mien][gdv][tinh] = 0;
+    tree[mien][gdv][tinh]++;
+  });
+  STATE.treeData = tree;
+
+  let totalCH = 0, totalSelected = 0;
+  const mienOrder = ['BẮC', 'TRUNG', 'NAM', 'KHÁC'];
+  let h = '';
+  for (const mien of mienOrder) {
+    if (!tree[mien]) continue;
+    const gdvs = tree[mien];
+    let mienTotal = 0, mienAllChecked = true;
+    for (const [gdv, tinhs] of Object.entries(gdvs)) {
+      for (const [tinh, cnt] of Object.entries(tinhs)) {
+        mienTotal += cnt;
+        totalCH += cnt;
+        if (!STATE.selectedTinh.has(gdv + '||' + tinh)) mienAllChecked = false;
+        if (STATE.selectedTinh.has(gdv + '||' + tinh)) totalSelected++;
+      }
+    }
+    h += '<div class="tree-mien open" onclick="toggleTreeNode(this)"><span class="arrow">▶</span>📍 ' + mien + ' (' + mienTotal + ' CH)</div>';
+    h += '<div class="tree-mien-children">';
+    for (const [gdv, tinhs] of Object.entries(gdvs).sort()) {
+      let gdvTotal = 0, gdvAllChecked = true;
+      for (const cnt of Object.values(tinhs)) gdvTotal += cnt;
+      for (const tinh of Object.keys(tinhs)) {
+        if (!STATE.selectedTinh.has(gdv + '||' + tinh)) gdvAllChecked = false;
+      }
+      h += '<div class="tree-gdv open" onclick="toggleTreeNode(this)"><span class="arrow">▶</span>👤 ' + gdv + ' (' + gdvTotal + ')</div>';
+      h += '<div class="tree-gdv-children">';
+      for (const [tinh, cnt] of Object.entries(tinhs).sort()) {
+        const key = gdv + '||' + tinh, checked = STATE.selectedTinh.has(key);
+        h += '<label class="tree-child' + (checked ? ' selected' : '') + '" onclick="event.stopPropagation()"><input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleStoreSelect(\'' + gdv.replace(/'/g,"\\'") + '\', \'' + tinh.replace(/'/g,"\\'") + '\', this.checked)">' + tinh + ' (' + cnt + ')</label>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  $('storeTree').innerHTML = h || '<div class="text-muted text-center text-sm" style="padding:20px">Đang tải Storelist...</div>';
+  $('storeCountB1').textContent = 'Đã chọn ' + totalSelected + ' tỉnh / ' + totalCH + ' CH';
+}
+
+function toggleTreeNode(el){
+  el.classList.toggle('open');
+}
+
+function toggleStoreSelect(gdv, tinh, on){
+  const key = gdv + '||' + tinh;
+  if (on) STATE.selectedTinh.add(key);
+  else STATE.selectedTinh.delete(key);
+  autoSave();
+  buildStoreTree();
+}
+
+function selectAllStores(){
+  Object.values(STATE.treeData).forEach(gdvs => {
+    Object.entries(gdvs).forEach(([gdv, tinhs]) => {
+      Object.keys(tinhs).forEach(tinh => STATE.selectedTinh.add(gdv + '||' + tinh));
+    });
+  });
+  autoSave();
+  buildStoreTree();
+}
+
+function clearAllStores(){
+  STATE.selectedTinh.clear();
+  autoSave();
+  buildStoreTree();
+}
+
+// ============ B1: PARSE SALE DATA ============
+function parseSaleData(){
+  const text = $('saleDataPaste').value.trim();
+  if (!text) { toast('Chưa có dữ liệu!', 'error'); return; }
+  const lines = text.split('\n');
+  STATE.saleData = {};
+  let count = 0, errCount = 0;
+  lines.forEach(line => {
+    if (!line.trim()) return;
+    const parts = line.trim().split(/[\t\s]+/);
+    if (parts.length < 5) { errCount++; return; }
+    const maCH = parts[0], maSP = parts[1];
+    if (!maCH || !maSP) { errCount++; return; }
+    STATE.saleData[maCH + '|' + maSP] = {
+      sale: parseFloat(parts[2]) || 0,
+      ton: parseFloat(parts[3]) || 0,
+      cg: parseFloat(parts[4]) || 0,
+      huy: parts.length >= 6 ? (parseFloat(parts[5]) || 0) : 0
+    };
+    count++;
+  });
+  const chSet = new Set(Object.keys(STATE.saleData).map(k => k.split('|')[0]));
+  $('parseResult').innerHTML = '✅ ' + count + ' dòng Sale · ' + chSet.size + ' CH · ' + (errCount ? '<span style="color:#ef6c00">' + errCount + ' lỗi</span>' : 'OK');
+  $('dataBadge').innerHTML = '✅ ' + chSet.size + ' CH · ' + count + ' dòng';
+  $('dataBadge').className = 'badge green';
+  autoSave();
+  toast('✅ Đã parse ' + count + ' dòng Sale!', 'success');
+}
+
+function downloadDataTemplate(){
+  const wb = XLSX.utils.book_new();
+  const header = ['Mã CH', 'Mã SP', 'Sale', 'Tồn', 'CG', 'Hủy'];
+  const sample = ['2797', '10006145', 87, 44, 0, 5];
+  const ws = XLSX.utils.aoa_to_sheet([header, sample]);
+  ws['!cols'] = header.map(h => ({ wch: Math.max(h.length + 2, 10) }));
+  XLSX.utils.book_append_sheet(wb, ws, 'Sale Data');
+  XLSX.writeFile(wb, 'FC_SaleData_Template.xlsx');
+  toast('📥 Đã tải Template Sale Data!', 'success');
+}
+
+// ============ B1: NCC CONFIG ============
+function addNCC(){
+  STATE.nccConfig.push({ ncc: 'NCC' + (STATE.nccConfig.length + 1), tinhMOV: {}, pctMin: 0.7, cachGomHUB: 'Value' });
+  renderNCCTable();
+  autoSave();
+}
+function removeNCC(idx){
+  STATE.nccConfig.splice(idx, 1);
+  renderNCCTable();
+  autoSave();
+}
+function addNCCTinh(nccIdx){
+  const tinh = prompt('Nhập tên tỉnh:');
+  if (!tinh) return;
+  STATE.nccConfig[nccIdx].tinhMOV[tinh] = { mov1: 0, mov2: 0, mov3: 0 };
+  renderNCCTable();
+  autoSave();
+}
+function removeNCCTinh(nccIdx, tinh){
+  delete STATE.nccConfig[nccIdx].tinhMOV[tinh];
+  renderNCCTable();
+  autoSave();
+}
+function renderNCCTable(){
+  const tb = $('nccTableBody');
+  if (!STATE.nccConfig.length) {
+    tb.innerHTML = '<tr><td colspan="8" class="text-center text-muted text-sm">Chưa có NCC. Bấm "+ Thêm NCC"</td></tr>';
+    $('nccCount').textContent = '0 NCC';
+    return;
+  }
+  let h = '', count = 0;
+  STATE.nccConfig.forEach((ncc, i) => {
+    const tinhs = Object.entries(ncc.tinhMOV);
+    if (!tinhs.length) {
+      tinhs.push(['(Tất cả)', { mov1: 0, mov2: 0, mov3: 0 }]);
+    }
+    const rowSpan = tinhs.length;
+    let firstRow = true;
+    tinhs.forEach(([tinh, mov]) => {
+      h += '<tr>';
+      if (firstRow) {
+        h += '<td rowspan="' + rowSpan + '" style="font-weight:600;vertical-align:top">' + ncc.ncc + '</td>';
+        firstRow = false;
+      }
+      h += '<td>' + (tinh === '(Tất cả)' ? '<span class="text-muted">Tất cả</span>' : tinh);
+      if (tinh !== '(Tất cả)') h += ' <button class="btn btn-xs" style="background:#c62828;color:#fff;padding:1px 4px;font-size:8px" onclick="removeNCCTinh(' + i + ',\'' + tinh.replace(/'/g,"\\'") + '\')">×</button>';
+      h += '</td>';
+      h += '<td><input type="number" value="' + (mov.mov1 || 0) + '" onchange="updateNCCTinhMov(' + i + ',\'' + tinh.replace(/'/g,"\\'") + '\',1,this.value)" style="width:70px;font-size:9px;padding:2px"></td>';
+      h += '<td><input type="number" value="' + (mov.mov2 || 0) + '" onchange="updateNCCTinhMov(' + i + ',\'' + tinh.replace(/'/g,"\\'") + '\',2,this.value)" style="width:70px;font-size:9px;padding:2px"></td>';
+      h += '<td><input type="number" value="' + (mov.mov3 || 0) + '" onchange="updateNCCTinhMov(' + i + ',\'' + tinh.replace(/'/g,"\\'") + '\',3,this.value)" style="width:70px;font-size:9px;padding:2px"></td>';
+      if (firstRow || tinhs.length === 1) {
+        // %Biên shared
+      }
+      h += '<td><input type="number" value="' + (ncc.pctMin * 100).toFixed(0) + '" onchange="updateNCCPct(' + i + ',this.value)" style="width:50px;font-size:9px;padding:2px" min="1" max="100">%</td>';
+      h += '<td><select onchange="updateNCCGomHUB(' + i + ',this.value)" style="font-size:9px;padding:2px">'
+        + '<option value="Value"' + (ncc.cachGomHUB === 'Value' ? ' selected' : '') + '>Value</option>'
+        + '<option value="Pcs"' + (ncc.cachGomHUB === 'Pcs' ? ' selected' : '') + '>Pcs</option>'
+        + '</select></td>';
+      h += '<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="removeNCC(' + i + ')">×</button>';
+      if (tinh === '(Tất cả)') h += ' <button class="btn btn-xs btn-outline" onclick="addNCCTinh(' + i + ')" style="font-size:8px;padding:2px 4px">+Tỉnh</button>';
+      h += '</td>';
+      h += '</tr>';
+      count++;
+    });
+  });
+  tb.innerHTML = h;
+  $('nccCount').textContent = STATE.nccConfig.length + ' NCC · ' + count + ' tỉnh';
+}
+
+function updateNCCTinhMov(nccIdx, tinh, movNum, val){
+  if (!STATE.nccConfig[nccIdx].tinhMOV[tinh]) STATE.nccConfig[nccIdx].tinhMOV[tinh] = { mov1: 0, mov2: 0, mov3: 0 };
+  STATE.nccConfig[nccIdx].tinhMOV[tinh]['mov' + movNum] = parseFloat(val) || 0;
+  autoSave();
+}
+
+function updateNCCPct(nccIdx, val){
+  STATE.nccConfig[nccIdx].pctMin = (parseFloat(val) || 70) / 100;
+  autoSave();
+}
+
+function updateNCCGomHUB(nccIdx, val){
+  STATE.nccConfig[nccIdx].cachGomHUB = val;
+  autoSave();
+}
+
+// ============ B1: HUB CONFIG ============
+function addHUB(){
+  STATE.hubConfig.push({ name: 'HUB' + (STATE.hubConfig.length + 1), stores: [] });
+  renderHUBTable();
+  autoSave();
+}
+function removeHUB(idx){
+  STATE.hubConfig.splice(idx, 1);
+  renderHUBTable();
+  autoSave();
+}
+function addStoreToHUB(hubIdx){
+  const storeList = getSelectedStores().map(s => s.maCH + ' - ' + s.tenCH);
+  if (!storeList.length) { toast('Chưa chọn cửa hàng ở B1!', 'error'); return; }
+  const selected = prompt('Chọn mã CH từ danh sách:\n' + storeList.join('\n') + '\n\nNhập Mã CH:');
+  if (!selected) return;
+  const maCH = selected.trim();
+  if (!STATE.hubConfig[hubIdx].stores.includes(maCH)) {
+    STATE.hubConfig[hubIdx].stores.push(maCH);
+  }
+  renderHUBTable();
+  autoSave();
+}
+function removeStoreFromHUB(hubIdx, storeIdx){
+  STATE.hubConfig[hubIdx].stores.splice(storeIdx, 1);
+  renderHUBTable();
+  autoSave();
+}
+function renderHUBTable(){
+  const tb = $('hubTableBody');
+  if (!STATE.hubConfig.length) {
+    tb.innerHTML = '<tr><td colspan="3" class="text-center text-muted text-sm">Chưa có HUB</td></tr>';
+    $('hubCount').textContent = '0 HUB';
+    return;
+  }
+  let h = '';
+  STATE.hubConfig.forEach((hub, i) => {
+    const stores = hub.stores.length ? hub.stores.join(', ') : '<span class="text-muted">(Chưa có store)</span>';
+    h += '<tr><td style="font-weight:600"><input value="' + hub.name + '" onchange="updateHUBName(' + i + ',this.value)" style="width:100px;font-size:10px;padding:3px"></td>';
+    h += '<td style="font-size:10px">' + stores + ' <button class="btn btn-xs btn-outline" onclick="addStoreToHUB(' + i + ')" style="font-size:8px;padding:2px 4px">+Store</button>';
+    if (hub.stores.length) {
+      h += '<div style="margin-top:4px">';
+      hub.stores.forEach((s, si) => {
+        h += '<span style="display:inline-block;background:#e3f2fd;padding:1px 6px;border-radius:10px;margin:2px;font-size:9px">' + s + ' <span onclick="removeStoreFromHUB(' + i + ',' + si + ')" style="cursor:pointer;color:#c62828;font-weight:700">×</span></span>';
+      });
+      h += '</div>';
+    }
+    h += '</td>';
+    h += '<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="removeHUB(' + i + ')">×</button></td></tr>';
+  });
+  tb.innerHTML = h;
+  $('hubCount').textContent = STATE.hubConfig.length + ' HUB';
+}
+function updateHUBName(idx, val){ STATE.hubConfig[idx].name = val; autoSave(); }
+
+// ============ STORE HELPERS ============
+function getSelectedStores(){
+  let stores = Object.entries(STATE.storelist);
+  if (STATE.selectedTinh.size > 0) {
+    stores = stores.filter(([maCH, s]) => STATE.selectedTinh.has(s.gdv + '||' + s.tinh));
+  }
+  return stores.map(([maCH, s]) => ({ maCH, ...s }));
+}
+
+function getStoreByMaCH(maCH){
+  const s = STATE.storelist[maCH];
+  return s ? { maCH, ...s } : null;
+}
+
+// ============ B2: SKU CATALOG ============
+function addSKURow(){
+  STATE.skuCatalog.push({
+    maSP: 'SP' + (STATE.skuCatalog.length + 1), tenSP: '', dvt: 'G1', qc: 1,
+    giaMua: 0, giaThuong: 0, giaKM: 0,
+    N1: 0, N2: 0, N3: 0, N4: 0, N5: 0, N6: 0, N7: 0, N8: 0,
+    growth: 0, block: true, plusStock: true, plusCG: true,
+    lockMax: 2, coverDay: 14, rank: 1, ncc: ''
+  });
+  renderSKUTable();
+  autoSave();
+}
+function removeSKU(idx){
+  STATE.skuCatalog.splice(idx, 1);
+  renderSKUTable();
+  autoSave();
+}
+function updateSKUField(idx, field, val, isNum, isBool){
+  if (isBool) STATE.skuCatalog[idx][field] = val;
+  else if (isNum) STATE.skuCatalog[idx][field] = parseFloat(val) || 0;
+  else STATE.skuCatalog[idx][field] = val;
+  autoSave();
+}
+
+function renderSKUTable(){
+  const tb = $('skuTableBody');
+  const searchText = ($('skuSearch')?.value || '').toLowerCase();
+  const filterNCC = ($('skuFilterNCC')?.value || '');
+
+  // Populate NCC filter dropdown
+  const nccSet = new Set(STATE.nccConfig.map(n => n.ncc));
+  STATE.skuCatalog.forEach(s => { if (s.ncc) nccSet.add(s.ncc); });
+  $('skuFilterNCC').innerHTML = '<option value="">Tất cả NCC</option>' + [...nccSet].sort().map(n => '<option value="' + n + '"' + (n === filterNCC ? ' selected' : '') + '>' + n + '</option>').join('');
+
+  if (!STATE.skuCatalog.length) {
+    tb.innerHTML = '<tr><td colspan="24" class="text-center text-muted text-sm">Chưa có SKU. Bấm "+ Thêm SKU" hoặc import template.</td></tr>';
+    $('skuCount').textContent = '0 SKU';
+    return;
+  }
+
+  let h = '', count = 0;
+  STATE.skuCatalog.forEach((sku, i) => {
+    if (searchText && (sku.maSP + ' ' + sku.tenSP).toLowerCase().indexOf(searchText) < 0) return;
+    if (filterNCC && sku.ncc !== filterNCC) return;
+    count++;
+    h += '<tr>';
+    h += '<td><input value="' + (sku.maSP||'') + '" onchange="updateSKUField(' + i + ',\'maSP\',this.value)" style="width:70px;font-size:9px;padding:2px"></td>';
+    h += '<td><input value="' + (sku.tenSP||'') + '" onchange="updateSKUField(' + i + ',\'tenSP\',this.value)" style="width:120px;font-size:9px;padding:2px"></td>';
+    h += '<td><input value="' + (sku.dvt||'G1') + '" onchange="updateSKUField(' + i + ',\'dvt\',this.value)" style="width:40px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.qc||1) + '" onchange="updateSKUField(' + i + ',\'qc\',this.value,true)" style="width:50px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.giaMua||0) + '" onchange="updateSKUField(' + i + ',\'giaMua\',this.value,true)" style="width:70px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.giaThuong||0) + '" onchange="updateSKUField(' + i + ',\'giaThuong\',this.value,true)" style="width:70px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.giaKM||0) + '" onchange="updateSKUField(' + i + ',\'giaKM\',this.value,true)" style="width:70px;font-size:9px;padding:2px"></td>';
+
+    for (let n = 1; n <= 8; n++) {
+      const val = sku['N' + n] || 0;
+      h += '<td><input type="number" value="' + val + '" onchange="updateSKUField(' + i + ',\'N' + n + '\',this.value,true)" style="width:45px;font-size:9px;padding:2px;' + ((n===1||n===8)?'background:#fff8e1':'') + '"></td>';
+    }
+
+    h += '<td><input type="number" value="' + (sku.growth||0) + '" onchange="updateSKUField(' + i + ',\'growth\',this.value,true)" style="width:50px;font-size:9px;padding:2px;background:#e8f5e9">%</td>';
+    h += '<td style="text-align:center"><input type="checkbox" ' + (sku.block ? 'checked' : '') + ' onchange="updateSKUField(' + i + ',\'block\',this.checked,false,true)" style="width:14px;height:14px;accent-color:var(--blue)"></td>';
+    h += '<td style="text-align:center"><input type="checkbox" ' + (sku.plusStock ? 'checked' : '') + ' onchange="updateSKUField(' + i + ',\'plusStock\',this.checked,false,true)" style="width:14px;height:14px;accent-color:var(--blue)"></td>';
+    h += '<td style="text-align:center"><input type="checkbox" ' + (sku.plusCG ? 'checked' : '') + ' onchange="updateSKUField(' + i + ',\'plusCG\',this.checked,false,true)" style="width:14px;height:14px;accent-color:var(--blue)"></td>';
+    h += '<td><input type="number" value="' + (sku.lockMax||2) + '" onchange="updateSKUField(' + i + ',\'lockMax\',this.value,true)" style="width:45px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.coverDay||14) + '" onchange="updateSKUField(' + i + ',\'coverDay\',this.value,true)" style="width:45px;font-size:9px;padding:2px"></td>';
+    h += '<td><input type="number" value="' + (sku.rank||1) + '" onchange="updateSKUField(' + i + ',\'rank\',this.value,true)" style="width:40px;font-size:9px;padding:2px"></td>';
+    h += '<td><input value="' + (sku.ncc||'') + '" onchange="updateSKUField(' + i + ',\'ncc\',this.value)" style="width:90px;font-size:9px;padding:2px" placeholder="NCC"></td>';
+    h += '<td><button class="btn btn-xs" style="background:#c62828;color:#fff" onclick="removeSKU(' + i + ')">×</button></td>';
+    h += '</tr>';
+  });
+  tb.innerHTML = h;
+  $('skuCount').textContent = count + ' SKU';
+}
+
+// ============ B2: SKU IMPORT ============
+function importSKUTemplate(){
+  const text = $('skuTemplatePaste').value.trim();
+  if (!text) { toast('Chưa có dữ liệu!', 'error'); return; }
+  const lines = text.split('\n');
+  let count = 0;
+  lines.forEach(line => {
+    const c = line.split('\t');
+    if (c.length < 4 || !c[0].trim()) return;
+    const maSP = c[0].trim();
+    const existing = STATE.skuCatalog.findIndex(s => s.maSP === maSP);
+    const sku = {
+      maSP, tenSP: (c[1]||'').trim(), dvt: (c[2]||'G1').trim(), qc: parseInt(c[3]) || 1,
+      giaMua: parseFloat(c[4]) || 0, giaThuong: parseFloat(c[5]) || 0, giaKM: parseFloat(c[6]) || 0,
+      ncc: (c[7]||'').trim(), N1: 0, N2: 0, N3: 0, N4: 0, N5: 0, N6: 0, N7: 0, N8: 0,
+      growth: 0, block: true, plusStock: true, plusCG: true, lockMax: 2, coverDay: 14, rank: 1
+    };
+    if (existing >= 0) {
+      STATE.skuCatalog[existing] = { ...STATE.skuCatalog[existing], ...sku };
+    } else {
+      STATE.skuCatalog.push(sku);
+    }
+    count++;
+  });
+  renderSKUTable();
+  autoSave();
+  $('skuImportResult').innerHTML = '<span style="color:#2e7d32;font-weight:600">✅ Đã import ' + count + ' SKU</span>';
+  toast('✅ Import ' + count + ' SKU thành công!', 'success');
+}
+
+function downloadSKUTemplate(){
+  const wb = XLSX.utils.book_new();
+  const header = ['Mã SP', 'Tên SP', 'ĐVT', 'QC', 'Giá mua', 'Giá thường', 'Giá KM', 'NCC'];
+  const sample = ['10007893', 'HẢO HẢO Mì tôm chua cay 75g', 'G1', 30, 3580, 43000, 64900, 'Chia hàng'];
+  const ws = XLSX.utils.aoa_to_sheet([header, sample]);
+  ws['!cols'] = header.map(h => ({ wch: Math.max(h.length + 2, 12) }));
+  XLSX.utils.book_append_sheet(wb, ws, 'SKU Template');
+  XLSX.writeFile(wb, 'FC_SKU_Template.xlsx');
+  toast('📥 Đã tải Template SKU!', 'success');
+}
+
+function handleSKUFileUpload(inp){
+  const f = inp.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const lines = [];
+      for (let i = 1; i < data.length; i++) {
+        const r = data[i];
+        if (!r || !r[0]) continue;
+        lines.push(r.slice(0, 8).map(c => c != null ? String(c).trim() : '').join('\t'));
+      }
+      $('skuTemplatePaste').value = lines.join('\n');
+      importSKUTemplate();
+    } catch(err) { toast('❌ Lỗi đọc Excel: ' + err.message, 'error'); }
+  };
+  reader.readAsArrayBuffer(f);
+  inp.value = '';
+}
+
+// ============ B2: AUTO CALC MIN ============
+function autoCalcMinB2(){
+  if (!STATE.skuCatalog.length) { toast('Chưa có SKU!', 'error'); return; }
+  let count = 0;
+  STATE.skuCatalog.forEach(sku => {
+    const N = [sku.N1, sku.N2, sku.N3, sku.N4, sku.N5, sku.N6, sku.N7, sku.N8];
+    const qc = sku.qc || 1;
+    let i1 = -1, i8 = -1;
+    for (let i = 0; i < 8; i++) { if (N[i] !== 0) { if (i1 < 0) i1 = i; i8 = i; } }
+    if (i1 < 0 || i8 < 0 || i8 <= i1 + 1) return;
+    const v1 = N[i1], v8 = N[i8], gap = i8 - i1, step = (v8 - v1) / gap;
+    const roundUnit = Math.abs(step) >= qc ? qc : (() => {
+      let u = 1;
+      for (let d = 1; d <= qc && d <= Math.abs(step); d++) { if (qc % d === 0) u = d; }
+      return u;
+    })();
+    for (let i = i1 + 1; i < i8; i++) {
+      N[i] = roundUnit * Math.round((v1 + (i - i1) * step) / roundUnit);
+    }
+    sku.N1 = N[0]; sku.N2 = N[1]; sku.N3 = N[2]; sku.N4 = N[3];
+    sku.N5 = N[4]; sku.N6 = N[5]; sku.N7 = N[6]; sku.N8 = N[7];
+    count++;
+  });
+  if (!count) { toast('⚠️ Cần set ít nhất 2 mốc N (có gap)!', 'warn'); return; }
+  renderSKUTable();
+  autoSave();
+  toast('✅ Đã tính Min cho ' + count + ' SKU', 'success');
+}
+
+// ============ RENDER NHOM N TABLE ============
+function renderNhomNTable(){
+  const stores = getSelectedStores();
+  const tb = $('nhomNTableBody');
+  if (!stores.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="text-center text-muted text-sm">Chưa có dữ liệu. Vào B1 chọn store + paste data.</td></tr>';
+    return;
+  }
+  // Compute sale BQ per store from sale data
+  const storeSales = {};
+  Object.entries(STATE.saleData).forEach(([key, val]) => {
+    const maCH = key.split('|')[0];
+    if (!storeSales[maCH]) storeSales[maCH] = { total: 0, count: 0 };
+    storeSales[maCH].total += val.sale;
+    storeSales[maCH].count++;
+  });
+  // Default N group assignment: based on sale BQ
+  let h = '';
+  stores.forEach(s => {
+    const saleInfo = storeSales[s.maCH] || { total: 0, count: 1 };
+    const saleBQ = Math.round(saleInfo.total / saleInfo.count);
+    // Auto-assign N group based on sale BQ
+    let nhomN = STATE.nhomNMap[s.maCH] || 'N6';
+    if (saleBQ >= 1000) nhomN = STATE.nhomNMap[s.maCH] || 'N1';
+    else if (saleBQ >= 500) nhomN = STATE.nhomNMap[s.maCH] || 'N2';
+    else if (saleBQ >= 200) nhomN = STATE.nhomNMap[s.maCH] || 'N3';
+    else if (saleBQ >= 100) nhomN = STATE.nhomNMap[s.maCH] || 'N4';
+    else if (saleBQ >= 50) nhomN = STATE.nhomNMap[s.maCH] || 'N5';
+    else if (saleBQ >= 20) nhomN = STATE.nhomNMap[s.maCH] || 'N6';
+    else if (saleBQ >= 5) nhomN = STATE.nhomNMap[s.maCH] || 'N7';
+    else nhomN = STATE.nhomNMap[s.maCH] || 'N8';
+
+    h += '<tr><td>' + s.maCH + '</td><td>' + s.tenCH + '</td><td>' + s.tinh + '</td><td>' + s.gdv + '</td>';
+    h += '<td><select onchange="updateNhomN(\'' + s.maCH + '\',this.value)" style="font-size:10px;padding:2px">';
+    ['N1','N2','N3','N4','N5','N6','N7','N8'].forEach(n => {
+      h += '<option value="' + n + '"' + (nhomN === n ? ' selected' : '') + '>' + n + '</option>';
+    });
+    h += '</select></td>';
+    h += '<td style="text-align:right">' + fmt(saleBQ) + '</td>';
+    h += '</tr>';
+  });
+  tb.innerHTML = h;
+}
+
+function updateNhomN(maCH, nhomN){
+  STATE.nhomNMap[maCH] = nhomN;
+  autoSave();
+}
+
+// ============ B3: TINH FC ============
+function tinhFC(){
+  if (!STATE.skuCatalog.length) { toast('Chưa có Danh mục SKU! Vào B2 nhập SKU.', 'error'); return; }
+  const stores = getSelectedStores();
+  if (!stores.length) { toast('Chưa chọn cửa hàng! Vào B1 chọn store.', 'error'); return; }
+
+  STATE.ngayKD = parseInt($('ngayKD').value) || 30;
+  STATE.fcResults = [];
+
+  // Build SKU lookup
+  const skuMap = {};
+  STATE.skuCatalog.forEach(s => { skuMap[s.maSP] = s; });
+
+  // Build NCC lookup
+  const nccMap = {};
+  STATE.nccConfig.forEach(n => { nccMap[n.ncc] = n; });
+
+  // Build HUB lookup
+  const hubMap = {}; // maCH → hubName
+  STATE.hubConfig.forEach(hub => {
+    hub.stores.forEach(maCH => { hubMap[maCH] = hub.name; });
+  });
+
+  // For each selected store × each SKU in catalog
+  stores.forEach(store => {
+    const nhomN = STATE.nhomNMap[store.maCH] || 'N6';
+    STATE.skuCatalog.forEach(sku => {
+      if (!sku.maSP) return;
+      const key = store.maCH + '|' + sku.maSP;
+      const sd = STATE.saleData[key] || { sale: 0, ton: 0, cg: 0, huy: 0 };
+
+      // FC Formula
+      const J = sku.qc || 1;
+      const Q = sd.sale || 0;
+      const growth = (sku.growth || 0) / 100;
+      const Qadj = Q * (1 + growth);
+      const nd = STATE.ngayKD || 30;
+      const AC = sku.coverDay || 14;
+      const N = sku['N' + nhomN.replace('N', '')] || 0;
+      const O = sd.ton || 0;
+      const Z = sku.plusStock ? 1 : 0;
+      const S = sd.cg || 0;
+      const AA = sku.plusCG ? 1 : 0;
+      const AB = sku.lockMax || 2;
+      const checkDR = O > 0 ? 1 : 0;
+
+      // Core FC formula with QC rounding
+      const rawFC = Math.max(0, Math.min(Qadj / nd * AC + N - O * Z - S * AA, AB * N));
+      const slFC = checkDR === 0 ? 0 : Math.max(0, J * Math.round(rawFC / J));
+      const cogs = sku.giaMua || 0;
+      const gtFC = slFC * cogs;
+
+      STATE.fcResults.push({
+        maCH: store.maCH, tenCH: store.tenCH, maSP: sku.maSP, tenSP: sku.tenSP,
+        dvt: sku.dvt, qc: J, cogs, tinh: store.tinh, gdv: store.gdv,
+        qlkv: store.qlkv, huyen: store.huyen,
+        mien: getMien(store.tinh),
+        slBan: Q, slTon: O, slCG: S, slHuy: sd.huy || 0,
+        nhomN, min: N, slFC, gtFC, checkDR,
+        ncc: sku.ncc || '(Không NCC)', block: sku.block,
+        plusStock: sku.plusStock, plusCG: sku.plusCG,
+        lockMax: sku.lockMax, coverDay: sku.coverDay,
+        growth: sku.growth, growthPct: growth,
+        hub: hubMap[store.maCH] || '(Không HUB)',
+        movStatus: '', movNCCtinh: 0
+      });
+    });
+  });
+
+  // MOV Check per NCC × Tỉnh
+  const movGroups = {};
+  STATE.fcResults.forEach((r, i) => {
+    const gKey = r.ncc + '||' + r.tinh;
+    if (!movGroups[gKey]) movGroups[gKey] = [];
+    movGroups[gKey].push(i);
+  });
+
+  Object.entries(movGroups).forEach(([gKey, indices]) => {
+    const [ncc, tinh] = gKey.split('||');
+    const nccCfg = nccMap[ncc];
+    if (!nccCfg) return;
+    const tinhMov = nccCfg.tinhMOV[tinh] || nccCfg.tinhMOV['(Tất cả)'];
+    if (!tinhMov) {
+      indices.forEach(i => { STATE.fcResults[i].movStatus = '✅ Đủ MOV'; STATE.fcResults[i].movNCCtinh = 0; });
+      return;
+    }
+
+    // Use highest MOV among MOV1, MOV2, MOV3 (or any logic)
+    const movVals = [tinhMov.mov1 || 0, tinhMov.mov2 || 0, tinhMov.mov3 || 0];
+    const MOV = Math.max(...movVals);
+    const MOVmin = MOV * (nccCfg.pctMin || 0.7);
+
+    const totalGT = indices.reduce((sum, i) => sum + STATE.fcResults[i].gtFC, 0);
+
+    if (totalGT >= MOV) {
+      indices.forEach(i => {
+        STATE.fcResults[i].movStatus = '✅ Đủ MOV';
+        STATE.fcResults[i].movNCCtinh = MOV;
+      });
+    } else if (totalGT >= MOVmin) {
+      const scale = MOV / totalGT;
+      indices.forEach(i => {
+        const oldFC = STATE.fcResults[i].slFC;
+        const newFC = Math.ceil(oldFC * scale / STATE.fcResults[i].qc) * STATE.fcResults[i].qc;
+        STATE.fcResults[i].slFC = newFC;
+        STATE.fcResults[i].gtFC = newFC * STATE.fcResults[i].cogs;
+        STATE.fcResults[i].movStatus = '⚠️ Thiếu MOV (×' + scale.toFixed(1) + ')';
+        STATE.fcResults[i].movNCCtinh = MOV;
+      });
+    } else {
+      indices.forEach(i => {
+        STATE.fcResults[i].slFC = 0;
+        STATE.fcResults[i].gtFC = 0;
+        STATE.fcResults[i].movStatus = '❌ Loại FC';
+        STATE.fcResults[i].movNCCtinh = MOV;
+      });
+    }
+  });
+
+  // HUB Aggregation (for RECAP)
+  const hubAgg = {};
+  STATE.fcResults.forEach(r => {
+    const hKey = r.hub;
+    if (!hubAgg[hKey]) hubAgg[hKey] = { slFC: 0, gtFC: 0, ch: new Set(), sku: new Set() };
+    hubAgg[hKey].slFC += r.slFC;
+    hubAgg[hKey].gtFC += r.gtFC;
+    hubAgg[hKey].ch.add(r.maCH);
+    hubAgg[hKey].sku.add(r.maSP);
+  });
+
+  autoSave();
+  renderRecapB3();
+  goToStep(3);
+  toast('✅ Đã tính FC: ' + STATE.fcResults.length + ' dòng FC cho ' + stores.length + ' CH', 'success');
+}
+
+// ============ B3: RECAP ============
+let RECAP_VIEW = 'mien';
+function switchRecapView(view){
+  RECAP_VIEW = view;
+  STATE.recapView = view;
+  document.querySelectorAll('#recapTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderRecapB3();
+  autoSave();
+}
+
+function renderRecapB3(){
+  if (!STATE.fcResults.length) {
+    $('recapTableWrap').innerHTML = '<div style="padding:60px;text-align:center;color:#999"><div style="font-size:48px;margin-bottom:12px">📊</div><div>Chưa có dữ liệu FC. Vào B2 → "Tính FC"</div></div>';
+    return;
+  }
+
+  // Update KPIs
+  const chSet = new Set(STATE.fcResults.map(r => r.maCH));
+  const skuSet = new Set(STATE.fcResults.map(r => r.maSP));
+  let slTotal = 0, gtTotal = 0, du = 0, thieu = 0, loai = 0;
+  STATE.fcResults.forEach(r => {
+    slTotal += r.slFC; gtTotal += r.gtFC;
+    if (r.movStatus.startsWith('✅')) du++;
+    else if (r.movStatus.startsWith('⚠️')) thieu++;
+    else if (r.movStatus.startsWith('❌')) loai++;
+  });
+
+  $('rkpiCH').textContent = fmt(chSet.size);
+  $('rkpiSKU').textContent = fmt(skuSet.size);
+  $('rkpiSL').textContent = fmt(Math.round(slTotal));
+  $('rkpiGT').textContent = fmt(Math.round(gtTotal));
+  $('rkpiDu').textContent = du;
+  $('rkpiThieu').textContent = thieu;
+  $('rkpiLoai').textContent = loai;
+
+  // Group by selected dimension
+  const groups = {};
+  STATE.fcResults.forEach(r => {
+    let key;
+    if (RECAP_VIEW === 'mien') key = r.mien;
+    else if (RECAP_VIEW === 'tinh') key = r.tinh;
+    else if (RECAP_VIEW === 'gdv') key = r.gdv;
+    else if (RECAP_VIEW === 'qlkv') key = r.qlkv;
+    else if (RECAP_VIEW === 'hub') key = r.hub;
+    if (!key) key = '(Khác)';
+    if (!groups[key]) groups[key] = { items: [], ch: new Set(), sku: new Set(), slFC: 0, gtFC: 0, duMOV: 0, thieuMOV: 0, loaiMOV: 0 };
+    const g = groups[key];
+    g.items.push(r); g.ch.add(r.maCH); g.sku.add(r.maSP);
+    g.slFC += r.slFC; g.gtFC += r.gtFC;
+    if (r.movStatus.startsWith('✅')) g.duMOV++;
+    else if (r.movStatus.startsWith('⚠️')) g.thieuMOV++;
+    else if (r.movStatus.startsWith('❌')) g.loaiMOV++;
+  });
+
+  const headLabels = { mien: 'Vùng/Miền', tinh: 'Tỉnh', gdv: 'GĐV', qlkv: 'QLKV', hub: 'HUB' };
+  $('recapTableHead').innerHTML = '<tr><th>' + (headLabels[RECAP_VIEW] || '') + '</th><th># CH</th><th>Tổng SL FC</th><th>Tổng GT FC</th><th># SKU</th><th>Đủ MOV</th><th>Thiếu MOV</th><th>Loại FC</th><th>MOV Status</th></tr>';
+
+  let h = '', gd = { ch: 0, slFC: 0, gtFC: 0, sku: 0, duMOV: 0, thieuMOV: 0, loaiMOV: 0 };
+  for (const key of Object.keys(groups).sort()) {
+    const g = groups[key];
+    const movStatus = g.loaiMOV > 0 ? '❌ Có loại' : g.thieuMOV > 0 ? '⚠️ Có thiếu' : '✅ Đủ hết';
+    h += '<tr class="row-section" onclick="drillRecap(\'' + key.replace(/'/g,"\\'") + '\')"><td>▶ ' + key + '</td><td>' + g.ch.size + '</td><td>' + fmt(Math.round(g.slFC)) + '</td><td>' + fmt(Math.round(g.gtFC)) + '</td><td>' + g.sku.size + '</td><td>' + g.duMOV + '</td><td>' + g.thieuMOV + '</td><td>' + g.loaiMOV + '</td><td>' + movStatus + '</td></tr>';
+
+    // Detail rows (initially hidden)
+    g.items.forEach(r => {
+      h += '<tr class="drill-row" data-drill="' + key.replace(/'/g,"\\'") + '" style="display:none;font-size:10px;color:#666"><td style="padding-left:20px">↳ ' + r.maCH + ' - ' + r.maSP + '</td><td>' + r.maCH + '</td><td>' + fmt(Math.round(r.slFC)) + '</td><td>' + fmt(Math.round(r.gtFC)) + '</td><td>' + r.maSP + '</td><td colspan="3">' + r.movStatus + '</td><td>' + r.ncc + '</td></tr>';
+    });
+
+    gd.ch += g.ch.size; gd.slFC += g.slFC; gd.gtFC += g.gtFC;
+    gd.sku += g.sku.size; gd.duMOV += g.duMOV; gd.thieuMOV += g.thieuMOV; gd.loaiMOV += g.loaiMOV;
+  }
+
+  const gdMovStatus = gd.loaiMOV > 0 ? '❌ Có loại' : gd.thieuMOV > 0 ? '⚠️ Có thiếu' : '✅ Đủ hết';
+  h += '<tr class="row-subtotal"><td><b>TỔNG</b></td><td>' + gd.ch + '</td><td><b>' + fmt(Math.round(gd.slFC)) + '</b></td><td><b>' + fmt(Math.round(gd.gtFC)) + '</b></td><td>' + gd.sku + '</td><td>' + gd.duMOV + '</td><td>' + gd.thieuMOV + '</td><td>' + gd.loaiMOV + '</td><td>' + gdMovStatus + '</td></tr>';
+
+  $('recapTableBody').innerHTML = h;
+}
+
+function drillRecap(key){
+  const rows = document.querySelectorAll('.drill-row[data-drill="' + CSS.escape(key) + '"]');
+  const firstRow = rows[0];
+  const isHidden = firstRow && firstRow.style.display === 'none';
+  rows.forEach(r => r.style.display = isHidden ? '' : 'none');
+}
+
+// ============ B4: CHI TIET FC ============
+function populateB4Filters(){
+  const results = STATE.fcResults;
+  if (!results.length) return;
+
+  const tinhs = [...new Set(results.map(r => r.tinh))].sort();
+  const gdvs = [...new Set(results.map(r => r.gdv))].sort();
+  const qlkvs = [...new Set(results.map(r => r.qlkv))].sort();
+  const hubs = [...new Set(results.map(r => r.hub))].sort();
+  const nccs = [...new Set(results.map(r => r.ncc))].sort();
+  const skus = [...new Set(results.map(r => r.maSP + ' - ' + r.tenSP))].sort();
+
+  const fill = (id, items) => {
+    const sel = $(id); if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Tất cả</option>' + items.map(v => '<option value="' + v.split(' - ')[0] + '">' + v + '</option>').join('');
+    sel.value = cur;
+  };
+  fill('fTinh', tinhs);
+  fill('fGDV', gdvs);
+  fill('fQLKV', qlkvs);
+  fill('fHUB', hubs);
+  fill('fNCC', nccs);
+  fill('fSKU', skus);
+}
+
+function renderB4Table(){
+  const results = STATE.fcResults;
+  if (!results.length) {
+    $('b4TableWrap').innerHTML = '<p class="text-center text-muted" style="padding:40px">Chưa có dữ liệu FC. Vui lòng chạy "Tính FC" ở B2 trước.</p>';
+    return;
+  }
+
+  // Apply filters
+  let data = [...results];
+  const fTinh = $('fTinh')?.value || '';
+  const fGDV = $('fGDV')?.value || '';
+  const fQLKV = $('fQLKV')?.value || '';
+  const fHUB = $('fHUB')?.value || '';
+  const fNCC = $('fNCC')?.value || '';
+  const fSKU = $('fSKU')?.value || '';
+  const fSearch = ($('fSearch')?.value || '').toLowerCase();
+  const fOnlyFC = $('fOnlyFC')?.checked || false;
+
+  if (fTinh) data = data.filter(r => r.tinh === fTinh);
+  if (fGDV) data = data.filter(r => r.gdv === fGDV);
+  if (fQLKV) data = data.filter(r => r.qlkv === fQLKV);
+  if (fHUB) data = data.filter(r => r.hub === fHUB);
+  if (fNCC) data = data.filter(r => r.ncc === fNCC);
+  if (fSKU) data = data.filter(r => r.maSP === fSKU);
+  if (fSearch) data = data.filter(r => (r.maCH + ' ' + r.tenCH).toLowerCase().includes(fSearch));
+  if (fOnlyFC) data = data.filter(r => r.slFC > 0);
+
+  $('b4RowCount').textContent = data.length + ' dòng';
+
+  if (!data.length) {
+    $('b4TableWrap').innerHTML = '<p class="text-center text-muted" style="padding:40px">Không có dữ liệu phù hợp với bộ lọc.</p>';
+    return;
+  }
+
+  // Build table
+  let h = '<table><thead><tr>';
+  const cols = ['Mã CH', 'Tên CH', 'Tỉnh', 'GĐV', 'QLKV', 'HUB', 'Nhóm N', 'Mã SP', 'Tên SP', 'ĐVT', 'QC', 'Sale', 'Tồn', 'CG', 'Hủy', 'Min', 'SL FC', 'GT FC', 'MOV', 'NCC'];
+  cols.forEach(c => h += '<th>' + c + '</th>');
+  h += '</tr></thead><tbody>';
+
+  data.forEach(r => {
+    h += '<tr>';
+    h += '<td>' + r.maCH + '</td>';
+    h += '<td>' + r.tenCH + '</td>';
+    h += '<td>' + r.tinh + '</td>';
+    h += '<td>' + r.gdv + '</td>';
+    h += '<td>' + r.qlkv + '</td>';
+    h += '<td>' + r.hub + '</td>';
+    h += '<td>' + r.nhomN + '</td>';
+    h += '<td style="font-weight:500">' + r.maSP + '</td>';
+    h += '<td style="font-size:10px">' + r.tenSP + '</td>';
+    h += '<td>' + r.dvt + '</td>';
+    h += '<td style="text-align:center">' + r.qc + '</td>';
+    h += '<td style="text-align:right">' + fmt(Math.round(r.slBan)) + '</td>';
+    h += '<td style="text-align:right">' + fmt(Math.round(r.slTon)) + '</td>';
+    h += '<td style="text-align:right">' + fmt(Math.round(r.slCG)) + '</td>';
+    h += '<td style="text-align:right">' + fmt(Math.round(r.slHuy)) + '</td>';
+    h += '<td style="text-align:right">' + fmt(r.min) + '</td>';
+    h += '<td style="text-align:right;font-weight:700;color:var(--blue)">' + fmt(Math.round(r.slFC)) + '</td>';
+    h += '<td style="text-align:right;font-weight:700">' + fmt(Math.round(r.gtFC)) + '</td>';
+    h += '<td style="font-size:9px">' + r.movStatus + '</td>';
+    h += '<td style="font-size:9px">' + r.ncc + '</td>';
+    h += '</tr>';
+  });
+  h += '</tbody></table>';
+  $('b4TableWrap').innerHTML = '<div class="table-wrap" style="max-height:600px">' + h + '</div>';
+}
+
+// ============ EXPORT B4 ============
+function exportB4Excel(){
+  if (!STATE.fcResults.length) { toast('Chưa có dữ liệu!', 'error'); return; }
+
+  // Apply same filters
+  let data = [...STATE.fcResults];
+  const fTinh = $('fTinh')?.value || '', fGDV = $('fGDV')?.value || '', fQLKV = $('fQLKV')?.value || '';
+  const fHUB = $('fHUB')?.value || '', fNCC = $('fNCC')?.value || '', fSKU = $('fSKU')?.value || '';
+  const fOnlyFC = $('fOnlyFC')?.checked || false;
+  if (fTinh) data = data.filter(r => r.tinh === fTinh);
+  if (fGDV) data = data.filter(r => r.gdv === fGDV);
+  if (fQLKV) data = data.filter(r => r.qlkv === fQLKV);
+  if (fHUB) data = data.filter(r => r.hub === fHUB);
+  if (fNCC) data = data.filter(r => r.ncc === fNCC);
+  if (fSKU) data = data.filter(r => r.maSP === fSKU);
+  if (fOnlyFC) data = data.filter(r => r.slFC > 0);
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Chi tiết FC
+  const cols = ['Mã CH', 'Tên CH', 'Tỉnh', 'GĐV', 'QLKV', 'HUB', 'Nhóm N', 'Mã SP', 'Tên SP', 'ĐVT', 'QC', 'Sale', 'Tồn', 'CG', 'Hủy', 'Min', 'SL FC', 'GT FC', 'MOV', 'NCC'];
+  const keys = ['maCH', 'tenCH', 'tinh', 'gdv', 'qlkv', 'hub', 'nhomN', 'maSP', 'tenSP', 'dvt', 'qc', 'slBan', 'slTon', 'slCG', 'slHuy', 'min', 'slFC', 'gtFC', 'movStatus', 'ncc'];
+  const ws1 = XLSX.utils.aoa_to_sheet([cols].concat(data.map(r => keys.map(k => r[k] != null ? r[k] : ''))));
+  ws1['!cols'] = cols.map(c => ({ wch: Math.min(Math.max(String(c).length + 2, 6), 16) }));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Chi tiết FC');
+
+  // Sheet 2: RECAP
+  const groups = {};
+  STATE.fcResults.forEach(r => {
+    const key = r.mien;
+    if (!groups[key]) groups[key] = { ch: new Set(), sku: new Set(), slFC: 0, gtFC: 0 };
+    const g = groups[key]; g.ch.add(r.maCH); g.sku.add(r.maSP); g.slFC += r.slFC; g.gtFC += r.gtFC;
+  });
+  const recapRows = [['Vùng/Miền', '# CH', 'Tổng SL FC', 'Tổng GT FC', '# SKU']];
+  Object.entries(groups).sort().forEach(([k, g]) => {
+    recapRows.push([k, g.ch.size, Math.round(g.slFC), Math.round(g.gtFC), g.sku.size]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(recapRows);
+  ws2['!cols'] = [{ wch: 16 }, { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 8 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'RECAP');
+
+  // Sheet 3: Danh mục SKU
+  const skuCols = ['Mã SP', 'Tên SP', 'ĐVT', 'QC', 'Giá mua', 'Giá thường', 'Giá KM', 'N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8', 'Growth%', 'NCC'];
+  const skuKeys = ['maSP', 'tenSP', 'dvt', 'qc', 'giaMua', 'giaThuong', 'giaKM', 'N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8', 'growth', 'ncc'];
+  const ws3 = XLSX.utils.aoa_to_sheet([skuCols].concat(STATE.skuCatalog.map(s => skuKeys.map(k => s[k] != null ? s[k] : ''))));
+  XLSX.utils.book_append_sheet(wb, ws3, 'Danh mục SKU');
+
+  const d = new Date();
+  const fn = 'FC_' + FC_TYPES[STATE.currentFC].id + '_' + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '.xlsx';
+  XLSX.writeFile(wb, fn);
+  toast('✅ Đã xuất Excel (3 sheet)!', 'success');
+}
+
+// ============ CONFIG IMPORT/EXPORT ============
+function exportConfig(){
+  try {
+    const config = {
+      app: 'FC-Hang-Hoa-V3',
+      version: '3.0',
+      exportedAt: new Date().toISOString(),
+      data: {
+        step: STATE.step, currentFC: STATE.currentFC, ngayKD: STATE.ngayKD,
+        storeType: STATE.storeType, selectedTinh: [...STATE.selectedTinh],
+        skuCatalog: STATE.skuCatalog, nccConfig: STATE.nccConfig,
+        hubConfig: STATE.hubConfig, saleData: STATE.saleData,
+        fcResults: STATE.fcResults, nhomNMap: STATE.nhomNMap, recapView: STATE.recapView
+      }
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'FC_V3_Backup_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('💾 Đã export config!', 'success');
+  } catch(e) { toast('❌ Lỗi export: ' + e.message, 'error'); }
+}
+
+function importConfigFile(){
+  $('configFileInput').click();
+}
+
+function handleConfigImport(input){
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const json = JSON.parse(e.target.result);
+      if (json.app !== 'FC-Hang-Hoa-V3') { toast('⚠️ File không đúng định dạng FC V3', 'error'); return; }
+      const d = json.data;
+      STATE.step = d.step || 1;
+      STATE.currentFC = d.currentFC || 'ambient';
+      STATE.ngayKD = d.ngayKD || 30;
+      STATE.storeType = d.storeType || 'all';
+      STATE.selectedTinh = new Set(d.selectedTinh || []);
+      STATE.skuCatalog = d.skuCatalog || [];
+      STATE.nccConfig = d.nccConfig || [];
+      STATE.hubConfig = d.hubConfig || [];
+      STATE.saleData = d.saleData || {};
+      STATE.fcResults = d.fcResults || [];
+      STATE.nhomNMap = d.nhomNMap || {};
+      STATE.recapView = d.recapView || 'mien';
+
+      $('ngayKD').value = STATE.ngayKD;
+      $('storeTypeFilterB1').value = STATE.storeType;
+      $('saleDataPaste').value = rebuildSalePaste();
+
+      buildStoreTree();
+      buildFCTypeSelector();
+      renderNCCTable();
+      renderHUBTable();
+      renderSKUTable();
+      renderNhomNTable();
+      renderRecapB3();
+      populateB4Filters();
+      renderB4Table();
+      goToStep(STATE.step);
+
+      toast('📂 Đã restore config!', 'success');
+    } catch(err) { toast('❌ Lỗi đọc file: ' + err.message, 'error'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ============ INIT ============
+async function init(){
+  const restored = restoreState();
+  buildFCTypeSelector();
+  await fetchStorelist();
+
+  if (restored) {
+    $('ngayKD').value = STATE.ngayKD;
+    $('storeTypeFilterB1').value = STATE.storeType;
+    $('saleDataPaste').value = rebuildSalePaste();
+    buildStoreTree();
+    renderNCCTable();
+    renderHUBTable();
+    renderSKUTable();
+    renderNhomNTable();
+    if (STATE.fcResults.length) {
+      renderRecapB3();
+      populateB4Filters();
+      renderB4Table();
+    }
+  }
+
+  goToStep(STATE.step);
+}
+
+init();
+</script>
+</body>
+</html>
