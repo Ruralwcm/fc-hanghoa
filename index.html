@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC Hàng Hóa by HaoDT v9.2.7</title>
+<title>FC Hàng Hóa by HaoDT v9.2.8</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -202,18 +202,18 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
 
 <!-- SIDEBAR — Chỉ FC types -->
 <div class="sidebar">
-  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.7</small></div>
+  <div class="logo">📦 FC <span>Hàng Hóa</span><small> by HaoDT v9.2.8</small></div>
   <ul class="fc-type-list" id="fcTypeList"></ul>
   <div class="sidebar-actions" style="font-size:10px;color:#90a4ae;text-align:center;padding:6px">
     <small>Chọn loại FC bên trên</small>
   </div>
-  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.7</div>
+  <div class="sidebar-footer">FC Hàng Hóa by HaoDT v9.2.8</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="currentFCLabel" title="v9.2.7">🌡 FC Ambient</h2>
+    <h2 id="currentFCLabel" title="v9.2.8">🌡 FC Ambient</h2>
     <div class="meta">
       <span id="metaAmbient">
         <span>🏪 <b id="metaCH">—</b></span>
@@ -425,7 +425,7 @@ select:focus,input:focus{border-color:#1a3c6e;outline:none}
       <div class="card-body" style="padding:4px 8px">
         <div class="table-wrap" style="max-height:200px;overflow-y:auto">
           <table style="font-size:9px;width:100%">
-            <thead><tr><th>#</th><th>Mã NCC</th><th>MOV 1</th><th>MOV 2</th><th>MOV 3</th><th>%Biên</th><th title="Tỉnh áp dụng & MOV">🗺 Tỉnh</th></tr></thead>
+            <thead><tr><th>#</th><th>Mã NCC</th><th>MOV 1</th><th>MOV 2</th><th>MOV 3</th><th>Cách gom HUB</th><th>%Biên</th><th title="Tỉnh áp dụng & MOV">🗺 Tỉnh</th></tr></thead>
             <tbody id="cahoiNCCList"></tbody>
           </table>
         </div>
@@ -856,7 +856,7 @@ function importTemplateSilent(){
     const maSP=c[0].trim();
     // RECAP columns: 0=Mã SP, 1=Tên SP, 2=ĐVT, 3=QC, 4=Giá mua, 5=Giá thường, 6=Giá KM, 7=NCC
     const existing=fc.recapTable.findIndex(r=>r.maSP===maSP);
-    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,dienGiai:c[7]||'',ncc:c[9]||c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1};
+    const row={maSP,tenSP:c[1]||'',dvt:c[2]||'G1',qc:parseInt(c[3])||1,giaMua:parseFloat(c[4])||0,giaThuong:parseFloat(c[5])||0,giaKM:parseFloat(c[6])||0,dienGiai:c[7]||'',ncc:c[9]||c[7]||'Chia hàng',N1:0,N2:0,N3:0,N4:0,N5:0,N6:0,N7:0,N8:0,block:1,plusStock:1,plusCG:1,lockMax:2,coverDay:14,rank:1,growth:0};
     if(existing>=0) fc.recapTable[existing]=row;
     else fc.recapTable.push(row);
     count++;
@@ -1109,7 +1109,8 @@ function runConfigSilent(){
     r.block=c.block||1;r.plusStock=c.plusStock||1;r.plusCG=c.plusCG||1;r.lockMax=c.lockMax||2;r.coverDay=c.coverDay||14;r.nccCTKM=c.ncc||'Chia hàng';
     r.checkDR=r.slTon>0?1:0;
     const J=r.qc||1,Q=r.slBan,AC=r.coverDay,N=c[r.nhomN]||0,O=r.slTon,Z=r.plusCG,S=r.slCG,AA=r.plusStock,AB=r.lockMax;r.min=N;
-    r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Q/nd*AC+N-O*Z-S*AA,AB*N))/J));
+    const growth=(c.growth||0)/100, Qadj=Q*(1+growth);
+    r.slFC=r.checkDR===0?0:Math.max(0,J*Math.round(Math.max(0,Math.min(Qadj/nd*AC+N-O*Z-S*AA,AB*N))/J));
     r.gtFC=r.slFC*r.cogs;r.slFCRound=r.slFC;r.gtFCRound=r.gtFC;
   });
   fc.recapTable.forEach(rc=>{
@@ -1153,7 +1154,7 @@ function renderRecapTable(){
   th+='<th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>QC</th><th>Giá mua</th><th>Giá thường</th><th>Giá KM</th><th>Diễn giải</th><th>NCC</th>';
   th+='<th colspan="'+Ncols.length+'">📊 Sale BQ/CH</th>';
   Ncols.forEach(n=>th+='<th'+(n==='N1'||n==='N8'?' style="background:#ffe0b2;color:#e65100"':'')+'>'+(n==='N1'||n==='N8'?'🔸 ':'')+n+'</th>');
-  if(!coll) th+='<th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Rank</th>';
+  if(!coll) th+='<th>Block</th><th>+Stock</th><th>+CG</th><th>Lock</th><th>Cover</th><th>Growth%</th><th>Rank</th>';
   th+='<th></th>';
   th+='</tr>';
   head.innerHTML=th;
@@ -1187,6 +1188,7 @@ function renderRecapTable(){
         h+='<td style="text-align:center"><input type="checkbox" '+(r.plusCG?'checked':'')+' onchange="current().recapTable['+i+'].plusCG=this.checked?1:0" style="width:14px;height:14px;accent-color:#1a3c6e"></td>';
         h+='<td><input value="'+r.lockMax+'" size="3" onchange="current().recapTable['+i+'].lockMax=parseInt(this.value)||2"></td>';
         h+='<td><input value="'+r.coverDay+'" size="3" onchange="current().recapTable['+i+'].coverDay=parseInt(this.value)||14"></td>';
+        h+='<td><input value="'+r.growth+'" size="3" onchange="current().recapTable['+i+'].growth=parseInt(this.value)||0" style="background:#e8f5e9">%</td>';
         h+='<td><input value="'+r.rank+'" size="3" onchange="current().recapTable['+i+'].rank=parseInt(this.value)||1"></td>';
       } else {
         h+='<td style="text-align:center">'+(r.block?'☑':'☐')+'</td>';
@@ -1194,6 +1196,7 @@ function renderRecapTable(){
         h+='<td style="text-align:center">'+(r.plusCG?'☑':'☐')+'</td>';
         h+='<td style="text-align:center">'+r.lockMax+'</td>';
         h+='<td style="text-align:center">'+r.coverDay+'</td>';
+        h+='<td style="text-align:center;color:#2e7d32;font-weight:500">'+r.growth+'%</td>';
         h+='<td style="text-align:center">'+r.rank+'</td>';
       }
     }
@@ -1473,8 +1476,8 @@ function exportFC(){
     XLSX.utils.book_append_sheet(wb,ws1,'FC chi tiết');
 
     // Sheet 2: Thông số FC (RECAP)
-    const rcols=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải','NCC','N1','N2','N3','N4','N5','N6','N7','N8','Block','+Stock','+CG','Lock','Cover','Rank'];
-    const rkeys=['maSP','tenSP','dvt','qc','giaMua','giaThuong','giaKM','dienGiai','ncc','N1','N2','N3','N4','N5','N6','N7','N8','block','plusStock','plusCG','lockMax','coverDay','rank'];
+    const rcols=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải','NCC','N1','N2','N3','N4','N5','N6','N7','N8','Block','+Stock','+CG','Lock','Cover','Growth%','Rank'];
+    const rkeys=['maSP','tenSP','dvt','qc','giaMua','giaThuong','giaKM','dienGiai','ncc','N1','N2','N3','N4','N5','N6','N7','N8','block','plusStock','plusCG','lockMax','coverDay','growth','rank'];
     const ws2=XLSX.utils.aoa_to_sheet([rcols].concat(fc.recapTable.map(r=>rkeys.map(k=>r[k]!=null?r[k]:''))));
     ws2['!cols']=rcols.map(c=>({wch:Math.min(Math.max(String(c).length+2,5),12)}));
     XLSX.utils.book_append_sheet(wb,ws2,'Thông số FC');
@@ -1939,23 +1942,35 @@ function cahoiHandleFile(e){
 function renderCahoiNCCConfig(){
   if(!CAHOI.nccMov||Object.keys(CAHOI.nccMov).length===0){
     CAHOI.nccMov={};
-    CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov1:100,mov2:200,mov3:300,pctMin:80}; });
+    CAHOI_NCC.forEach(ncc=>{ CAHOI.nccMov[ncc.n]={mov1:100,mov2:200,mov3:300,pctMin:80,gomHub:'Value'}; });
   }
+  // Ensure gomHub default for existing configs
+  CAHOI_NCC.forEach(ncc=>{ if(!CAHOI.nccMov[ncc.n]?.gomHub) CAHOI.nccMov[ncc.n].gomHub='Value'; });
   let h='';
   CAHOI_NCC.forEach((ncc,i)=>{
-    const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80};
+    const cfg=CAHOI.nccMov[ncc.n]||{mov1:100,mov2:200,mov3:300,pctMin:80,gomHub:'Value'};
+    const gomHub=cfg.gomHub||'Value';
     const tinhList=ncc.t.map(t=>t+': <b>'+cfg.mov3+'</b> kg').join(', ');
     h+='<tr>';
     h+='<td style="text-align:center;font-size:9px;color:#888">'+(i+1)+'</td>';
-    h+='<td style="font-weight:600;color:#1e3a5f;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+ncc.n+'">'+ncc.n+'</td>';
+    h+='<td style="font-weight:600;color:#1e3a5f;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+ncc.n+'">'+ncc.n+'</td>';
     h+='<td style="text-align:center;font-weight:500">'+fmt(cfg.mov1)+'</td>';
     h+='<td style="text-align:center;font-weight:500">'+fmt(cfg.mov2)+'</td>';
     h+='<td style="text-align:center;font-weight:700;color:#1e3a5f">'+fmt(cfg.mov3)+'</td>';
+    h+='<td style="text-align:center"><select onchange="cahoiUpdateGomHub(\''+ncc.n.replace(/'/g,"\\'")+'\',this.value)" style="font-size:9px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;background:'+(gomHub==='Value'?'#e3f2fd':'#fff3e0')+'">'
+      +'<option value="Value"'+(gomHub==='Value'?' selected':'')+'>💰 Value</option>'
+      +'<option value="Pcs"'+(gomHub==='Pcs'?' selected':'')+'>📦 Pcs</option>'
+      +'</select></td>';
     h+='<td style="text-align:center;color:#2e7d32">'+(cfg.pctMin||80)+'%</td>';
-    h+='<td style="font-size:8px;color:#666;max-width:180px;cursor:help" title="'+tinhList.replace(/<[^>]*>/g,'')+'">🗺 <b>'+ncc.t.length+'</b> tỉnh <span style="font-size:7px;color:#aaa">(hover)</span></td>';
+    h+='<td style="font-size:8px;color:#666;max-width:160px;cursor:help" title="'+tinhList.replace(/<[^>]*>/g,'')+'">🗺 <b>'+ncc.t.length+'</b> tỉnh <span style="font-size:7px;color:#aaa">(hover)</span></td>';
     h+='</tr>';
   });
   $('cahoiNCCList').innerHTML=h;
+}
+
+function cahoiUpdateGomHub(nccName,val){
+  if(CAHOI.nccMov[nccName]) CAHOI.nccMov[nccName].gomHub=val;
+  toast('✅ '+nccName.split(' - ')[0]+' → '+(val==='Value'?'💰 Value':'📦 Pcs'),'info');
 }
 
 function cahoiImportMOVExcel(){
@@ -2145,8 +2160,9 @@ function cahoiStep2LoadMin(){
       const pctHuy=sd.sale+sd.huy>0?sd.huy/(sd.sale+sd.huy):0;
       const forecast=sd.sale*(1+growth);
       const cap=Math.round(forecast*(1-pctHuy)*0.85);
-      const dh=Math.max(0,Math.round(forecast+min-sd.huy));
-      const kg=Math.round(dh*sku.q*100)/100;
+      const qcRound=sku.q||1;
+      const dh=Math.max(0,Math.ceil((forecast+min-sd.huy)/qcRound)*qcRound);
+      const kg=Math.round(dh*100)/100;
       const ncc=assigned[s.c]||'';
       const block=pctHuy>0.3;
       const tRisk=tonRisk(sd.ton,sd.sale);
