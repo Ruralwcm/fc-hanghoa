@@ -372,7 +372,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <aside class="left">
   <div class="colh">Cấu hình & dữ liệu</div>
 <details class="sec" id="s-sale" open><summary><span class="chev">▶</span><span class="num">A</span><h3>Data Sale · Tồn · <span data-only="rcq">Chờ giao</span><span data-only="ch">Hủy</span></h3><span class="sum" id="sum-sale"></span></summary>
-    <div class="body"><p class="hint" data-only="ch">Sheet "3. Data Sale" theo CH × Article, 3 khối (không cần LY): <b>HỦY L2W</b> (A–C: Store · Article · Shrinkage Q.ty) · <b>SALE L2W</b> (E–H: Store · Article · Closing Quantity = Tồn · Sales Quantity) · <b>CHỜ GIAO</b> (J–L: Store · Article · SL giao). Bấm Template ở mục Sale để tải file mẫu.</p><p class="hint" data-only="rcq">Sheet "3. Data Sale": Hủy & Sale L2W + Tồn · Hủy & Sale LY2W · Chờ giao (cột S–U).</p>
+    <div class="body">
       <label class="drop2" id="dropSale" for="inSale"><span>⇪ Kéo thả / bấm chọn file Data Sale</span><b class="fn" id="fnSale"></b></label>
       <div class="note2" id="masterOffer" hidden></div>
       <div class="kpis" id="saleKpi"></div>
@@ -1241,7 +1241,7 @@ const PERF=[];
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3800)}
 function busy(on,msg){$('#busy').hidden=!on;if(msg)$('#busyMsg').textContent=msg}
 const tick=()=>new Promise(r=>setTimeout(r,20));
-function perf(what,ms,extra){PERF.push({what,ms,extra});$('#perf').innerHTML=PERF.slice(-16).map(p=>`<div class="ok">${esc(p.what)}: <b>${nf(p.ms/1000,2)} s</b>${p.extra?' · '+esc(p.extra):''}</div>`).join('')}
+function perf(what,ms,extra){PERF.push({what,ms,extra});const pe=$('#perf');if(pe)pe.innerHTML='';if(0)PERF.slice(-16).map(p=>`<div class="ok">${esc(p.what)}: <b>${nf(p.ms/1000,2)} s</b>${p.extra?' · '+esc(p.extra):''}</div>`).join('')}
 
 // ---------- ROUTING ----------
 const SECMAP={sale:'s-sale',lichve:'s-growth',danhmuc:'s-dm',phannhom:'s-pn',quydoi:'s-qd','tong-quan':'s-ov','canh-bao':'s-cb','du-thua':'s-cb','data-fc':'s-fc',logic:'s-logic'};
@@ -1386,7 +1386,7 @@ function renderSale(){
   const um=[...RES.issues.unmappedArt.values()],nd=[...RES.issues.notInDM.values()];
   $('#fnSale').textContent=SALEFILE;
   $('#saleKpi').innerHTML=[k('File tuần',esc(SA?ni(SA.lines)+' dòng':'—'),esc(SALEFILE)),k('Sale 1W (danh mục)',nf(sale,0)+' kg',`${ni(S.length)} CH trong phạm vi`),k('Hủy 1W',pf(sale?huy/sale:0,1),nf(huy,0)+' kg',sale&&huy/sale>=0.4?'bad':''),(CH?'':k('Sale LY2W/2',nf(ly,0)+' kg',`${lyS} CH có số năm trước`)),(()=>{let t=0,c=0;RES.stores.forEach(s=>s.rows.forEach(r=>{t+=r.ton||0;c+=r.cg||0}));return k('Tồn (Closing L2W)',nf(t,0)+' kg','tham khảo, chưa trừ vào FC')+k('Chờ giao',SA&&SA.hasCG?nf(c,0)+' kg':'—',SA&&SA.hasCG?'tham khảo, chưa trừ vào FC':'file chưa có khối CHỜ GIAO',SA&&SA.hasCG?'':'warn')})(),k('Article chưa quy đổi',ni(um.length),'bị bỏ qua',um.length?'warn':''),k('Mã WEC ngoài danh mục',ni(nd.length),nf(nd.reduce((a,x)=>a+x.kg,0),1)+' kg bán',nd.length?'warn':'')].join('');
-  $('#log-sale').innerHTML=[...SALELOG,...MLOG].map(l=>`<div class="${l.lvl}">${l.lvl==='ok'?'✓':'!'} ${esc(l.msg)}</div>`).join('')+([...RES.issues.saleNoStore.keys()].length?`<div class="warn">! CH có bán nhưng không có trong Phân nhóm: ${esc([...RES.issues.saleNoStore.keys()].join(', '))}</div>`:'');
+  $('#log-sale').innerHTML=[...SALELOG,...MLOG].filter(l=>l.lvl!=='ok').map(l=>`<div class="${l.lvl}">${l.lvl==='ok'?'✓':'!'} ${esc(l.msg)}</div>`).join('')+([...RES.issues.saleNoStore.keys()].length?`<div class="warn">! CH có bán nhưng không có trong Phân nhóm: ${esc([...RES.issues.saleNoStore.keys()].join(', '))}</div>`:'');
   $('#tUnmap').innerHTML='<tr><th>Article</th><th>Tên</th><th class="n">SL bán L2W</th></tr>'+(um.sort((a,b)=>b.qty-a.qty).slice(0,200).map(x=>`<tr><td class="mono">${esc(x.art)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.qty,1)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
   $('#tNotDM').innerHTML='<tr><th>Mã WEC</th><th>Tên</th><th class="n">KG bán L2W</th></tr>'+(nd.sort((a,b)=>b.kg-a.kg).map(x=>`<tr><td class="mono">${esc(x.wec)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.kg,2)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
 }
