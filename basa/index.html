@@ -358,6 +358,33 @@ html[data-app="cahoi"] #tGSku th:first-child{z-index:2}
 #s-growth .card.off>:not(.row){display:none!important}#s-growth .card.off{padding-bottom:0!important}
 #s-cfg .cfg4 label.chk{order:2}#s-cfg .cfg4 label.f{order:1}#s-cfg .cfg4>*:not(label){order:3}
 details.sec.cur{border-color:var(--leaf);box-shadow:0 0 0 2px var(--leaf-soft)}details.sec.cur>summary{background:var(--leaf-soft)}details.sec.cur>summary h3{color:var(--leaf)}
+/*BRAND WinMart+: đỏ thương hiệu + vàng nhấn; xanh chỉ dùng cho trạng thái "đạt"*/
+:root{--brand:#d7282f;--brand-dk:#b01d23;--brand-soft:#fde4e3;--yel:#ffd200;--yel-soft:#fff5c2;--yel-ink:#7a5a00;
+  --bg:#f7f3f1;--panel:#ffffff;--ink:#231b1b;--muted:#6e605d;--line:#eadfdb;--soft:#f6eeea;
+  --leaf:var(--brand);--leaf-soft:var(--brand-soft);--okc:#13834a;--ok-soft:#dcf2e5;--ok:var(--okc);
+  --crit:#a8161c;--crit-soft:#fbe0de;--high:#c25a00;--high-soft:#ffecd1;--med:#1f4fa8;--med-soft:#e1eafb;--soil:#8a4b10}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--brand:#ff5a5f;--brand-dk:#ff7b7f;--brand-soft:#3d1a1c;--yel:#ffd84d;--yel-soft:#3a3214;--yel-ink:#ffe27a;
+  --bg:#151112;--panel:#1e1819;--ink:#f1e9e8;--muted:#b0a2a0;--line:#3a2f30;--soft:#2a2223;--leaf:var(--brand);--leaf-soft:var(--brand-soft);--okc:#5fd08f;--ok-soft:#173226;--ok:var(--okc);
+  --crit:#ff8a80;--crit-soft:#3d1f1c;--high:#ffb35c;--high-soft:#3a2a14;--med:#9db4ff;--med-soft:#1f2740}}
+:root[data-theme="dark"]{--brand:#ff5a5f;--brand-dk:#ff7b7f;--brand-soft:#3d1a1c;--yel:#ffd84d;--yel-soft:#3a3214;--yel-ink:#ffe27a;--bg:#151112;--panel:#1e1819;--ink:#f1e9e8;--muted:#b0a2a0;--line:#3a2f30;--soft:#2a2223;--leaf:var(--brand);--leaf-soft:var(--brand-soft);--okc:#5fd08f;--ok-soft:#173226;--ok:var(--okc)}
+body{background:var(--bg)!important}
+/* trạng thái đạt giữ màu xanh */
+.dot.ok{background:var(--okc)!important}.pill.leaf,.pill.stt-du{background:var(--ok-soft)!important;color:var(--okc)!important}
+th.stt-h-du,td.stt-t-du{color:var(--okc)!important}.btn.sav:disabled{background:var(--ok-soft)!important;color:var(--okc)!important}
+.log .ok{color:var(--okc)}
+/* khung nhận diện */
+.top1{border-bottom:3px solid var(--brand)!important;box-shadow:0 2px 0 var(--yel)}
+.btn.pri,.btn.sav:not(:disabled),.seg button[aria-pressed="true"]{background:var(--brand)!important;border-color:var(--brand)!important;color:#fff!important}
+.btn.pri:hover,.btn.sav:not(:disabled):hover{background:var(--brand-dk)!important;border-color:var(--brand-dk)!important}
+.btn.imp{background:var(--yel-soft)!important;color:var(--yel-ink)!important;border-color:color-mix(in srgb,var(--yel) 70%,transparent)!important}
+.btn.imp:hover{background:color-mix(in srgb,var(--yel) 45%,var(--panel))!important}
+.btn.tpl{background:var(--panel)!important;color:var(--brand)!important;border-color:color-mix(in srgb,var(--brand) 45%,transparent)!important}
+.btn.tpl:hover{background:var(--brand-soft)!important}
+details.sec>summary .num{background:var(--yel)!important;color:#3a2a00!important;font-weight:700}
+.colh,.gh h2{color:var(--brand)!important}.gh .ln{background:color-mix(in srgb,var(--brand) 30%,var(--line))!important}
+.jump a.on{background:var(--brand)!important;border-color:var(--brand)!important;color:#fff!important}.jump a.on .dot{box-shadow:0 0 0 2px #fff}
+th{background:color-mix(in srgb,var(--brand) 7%,var(--panel))!important;color:color-mix(in srgb,var(--brand) 50%,var(--ink))!important}
+.ver b{color:var(--brand)!important}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
