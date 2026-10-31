@@ -748,9 +748,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   const r4 = v => Math.round(v * 1e4) / 1e4;
   function dataFcAoa(res, withFlags) {
     const HS = ['Giao thẳng', 'Gom HUB cấp 1', 'Gom HUB cấp 2', 'Tăng FC đủ MOQ', 'Thiếu MOQ']; const hasH = !!res.mod;
-    const aoa = [[...(withFlags ? [...FC_COLS, 'Cảnh báo'] : FC_COLS.slice()), ...(hasH ? ['Gom HUB', 'Giao tới HUB'] : [])]];
+    const noMix = !!res.mod; const COLS = noMix ? FC_COLS.filter(c => c !== 'Sale Mix') : FC_COLS;
+    const aoa = [[...(withFlags ? [...COLS, 'Cảnh báo'] : COLS.slice()), ...(hasH ? ['Gom HUB', 'Giao tới HUB'] : [])]];
     for (const S of res.stores) for (const r of S.rows) { const x = r.sku;
-      const row = [S.code, S.name, S.qlkv, S.gdv, S.tinh, S.nhomSPD, S.N, r4(S.totalFC), S.lich, x.grp, x.wec, x.name, x.dvt, x.qc, r.minEff != null ? r.minEff : x.min, x.block, r4(r.sale1w), r4(r.huy1w), r4(r.ton), r4(r.cg || 0), r4(r.mix), r4(r.growth), r4(r.kg), r4(r.pcs), ...r.days.map(r4), r4(r.kg - r.sale1w)];
+      const row = [S.code, S.name, S.qlkv, S.gdv, S.tinh, S.nhomSPD, S.N, r4(S.totalFC), S.lich, x.grp, x.wec, x.name, x.dvt, x.qc, r.minEff != null ? r.minEff : x.min, x.block, r4(r.sale1w), r4(r.huy1w), r4(r.ton), r4(r.cg || 0), ...(noMix ? [] : [r4(r.mix)]), r4(r.growth), r4(r.kg), r4(r.pcs), ...r.days.map(r4), r4(r.kg - r.sale1w)];
       if (withFlags) row.push([...S.flags.map(f => f[2]), ...r.flags.map(f => f[2])].join(' | '));
       if (hasH) row.push(r.hst ? [...r.hst].sort().map(i => HS[i]).join(', ') : '', r.hdest ? [...r.hdest].join(', ') : '');
       aoa.push(row); }
@@ -1071,9 +1072,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   const r4 = v => Math.round(v * 1e4) / 1e4;
   function dataFcAoa(res, withFlags) {
     const HS = ['Giao thẳng', 'Gom HUB cấp 1', 'Gom HUB cấp 2', 'Tăng FC đủ MOQ', 'Thiếu MOQ']; const hasH = !!res.mod;
-    const aoa = [[...(withFlags ? [...FC_COLS, 'Cảnh báo'] : FC_COLS.slice()), ...(hasH ? ['Gom HUB', 'Giao tới HUB'] : [])]];
+    const noMix = !!res.mod; const COLS = noMix ? FC_COLS.filter(c => c !== 'Sale Mix') : FC_COLS;
+    const aoa = [[...(withFlags ? [...COLS, 'Cảnh báo'] : COLS.slice()), ...(hasH ? ['Gom HUB', 'Giao tới HUB'] : [])]];
     for (const S of res.stores) for (const r of S.rows) { const x = r.sku;
-      const row = [S.code, S.name, S.qlkv, S.gdv, S.tinh, S.nhomSPD, S.N, r4(S.totalFC), S.lich, x.grp, x.wec, x.name, x.dvt, x.qc, r.minEff != null ? r.minEff : x.min, x.block, r4(r.sale1w), r4(r.huy1w), r4(r.ton), r4(r.cg || 0), r4(r.mix), r4(r.growth), r4(r.kg), r4(r.pcs), ...r.days.map(r4), r4(r.kg - r.sale1w)];
+      const row = [S.code, S.name, S.qlkv, S.gdv, S.tinh, S.nhomSPD, S.N, r4(S.totalFC), S.lich, x.grp, x.wec, x.name, x.dvt, x.qc, r.minEff != null ? r.minEff : x.min, x.block, r4(r.sale1w), r4(r.huy1w), r4(r.ton), r4(r.cg || 0), ...(noMix ? [] : [r4(r.mix)]), r4(r.growth), r4(r.kg), r4(r.pcs), ...r.days.map(r4), r4(r.kg - r.sale1w)];
       if (withFlags) row.push([...S.flags.map(f => f[2]), ...r.flags.map(f => f[2])].join(' | '));
       if (hasH) row.push(r.hst ? [...r.hst].sort().map(i => HS[i]).join(', ') : '', r.hdest ? [...r.hdest].join(', ') : '');
       aoa.push(row); }
@@ -1621,10 +1623,10 @@ function fillFilters(){const s=$('#fStore'),g=$('#fGrp'),f=$('#fFlag'),cs=s.valu
 function renderFc(){
   const s=$('#fStore').value,g=$('#fGrp').value,f=$('#fFlag').value,q=$('#fQ').value.trim().toLowerCase(),pos=$('#fPos').checked,P=150,qv=$('#fQlkv').value,gv=$('#fGdv').value;
   const idx=[];ROWS.forEach((x,i)=>{if(qv&&x.S.qlkv!==qv)return;if(gv&&x.S.gdv!==gv)return;if(s&&x.S.code!==s)return;if(g&&x.r.sku.grp!==g)return;if(f&&!(f==='any'?x.r.flags.length:x.r.flags.some(y=>y[0]===f)))return;if(q&&!(x.r.sku.wec+' '+x.r.sku.name).toLowerCase().includes(q))return;if(pos&&!(x.r.pcs>0))return;idx.push(i)});
-  const RS=i=>ROWS[i].S,RR=i=>ROWS[i].r;GET['#tFc']=[i=>RS(i).code,i=>RS(i).N,i=>RS(i).totalFC,i=>RS(i).lich,i=>RR(i).sku.wec,i=>RR(i).sku.dvt,i=>RR(i).sku.qc,i=>RR(i).sku.min,i=>RR(i).sale1w,i=>RR(i).huy1w,i=>RR(i).ton,i=>RR(i).cg||0,i=>RR(i).mix,i=>RR(i).growth,i=>RR(i).kg,i=>RR(i).kg-RR(i).sale1w,i=>RR(i).pcs,...[0,1,2,3,4,5,6].map(d=>i=>RR(i).days[d]),i=>RR(i).flags.length];const idxS=sortArr('#tFc',idx);
-  $('#tFc').innerHTML='<tr><th>CH</th><th>Nhóm</th><th class="n">Total FC KG</th><th>Lịch giao</th><th>SKU</th><th>ĐVT</th><th class="n">QC</th><th class="n">Min</th><th class="n">Sale 1W</th><th class="n">Hủy 1W</th><th class="n">Tồn</th><th class="n">Chờ giao</th><th class="n">Sale Mix</th><th class="n">Growth</th><th class="n">FC KG</th><th class="n">SL vượt (+/-) KG</th><th class="n">FC Pcs</th>'+E.DAYVN.map(d=>`<th class="n">${d}</th>`).join('')+'<th></th></tr>'+
+  const RS=i=>ROWS[i].S,RR=i=>ROWS[i].r;GET['#tFc']=[i=>RS(i).code,i=>RS(i).N,i=>RS(i).totalFC,i=>RS(i).lich,i=>RR(i).sku.wec,i=>RR(i).sku.dvt,i=>RR(i).sku.qc,i=>RR(i).minEff!=null?RR(i).minEff:RR(i).sku.min,i=>RR(i).sale1w,i=>RR(i).huy1w,i=>RR(i).ton,i=>RR(i).cg||0,...(CH?[]:[i=>RR(i).mix]),i=>RR(i).growth,i=>RR(i).kg,i=>RR(i).kg-RR(i).sale1w,i=>RR(i).pcs,...[0,1,2,3,4,5,6].map(d=>i=>RR(i).days[d]),i=>RR(i).flags.length];const idxS=sortArr('#tFc',idx);
+  $('#tFc').innerHTML='<tr><th>CH</th><th>Nhóm</th><th class="n">Total FC KG</th><th>Lịch giao</th><th>SKU</th><th>ĐVT</th><th class="n">QC</th><th class="n">Min</th><th class="n">Sale 1W</th><th class="n">Hủy 1W</th><th class="n">Tồn</th><th class="n">Chờ giao</th>'+(CH?'':'<th class="n">Sale Mix</th>')+'<th class="n">Growth</th><th class="n">FC KG</th><th class="n">SL vượt (+/-) KG</th><th class="n">FC Pcs</th>'+E.DAYVN.map(d=>`<th class="n">${d}</th>`).join('')+'<th></th></tr>'+
   idxS.slice(st.fPage*P,(st.fPage+1)*P).map(i=>{const {S,r}=ROWS[i],x=r.sku,sev=[...new Set(r.flags.map(y=>y[1]))].sort((a,b)=>SEVO[a]-SEVO[b]);
-    return `<tr class="click" data-i="${i}"><td><b>${esc(S.code)}</b></td><td>${esc(S.N)}</td><td class="n">${nf(S.totalFC,1)}</td><td class="mono">${esc(S.lich)}</td><td>${esc(x.wec)} <span style="color:var(--muted)">${esc(x.name)}</span></td><td>${esc(x.dvt)}</td><td class="n">${x.qc??''}</td><td class="n">${r.minEff!=null&&r.minEff!==0?r.minEff:(x.min??'')}</td><td class="n">${nf(r.sale1w,2)}</td><td class="n">${nf(r.huy1w,2)}</td><td class="n">${nf(r.ton,2)}</td><td class="n">${r.cg?nf(r.cg,2):'·'}</td><td class="n">${pf(r.mix,2)}</td><td class="n">${pf(r.growth)}</td><td class="n"><b>${nf(r.kg,2)}</b></td><td class="n">${sgn(r.kg-r.sale1w,2)}</td><td class="n">${nf(r.pcs,r.pcs%1?1:0)}</td>${r.days.map(d=>`<td class="n">${d?nf(d,d%1?1:0):'·'}</td>`).join('')}<td><div class="chips">${sev.map(v=>`<span class="pill ${v}">${r.flags.filter(y=>y[1]===v).length}</span>`).join('')}</div></td></tr>`+(st.open===i?explain(S,r):'')}).join('');
+    return `<tr class="click" data-i="${i}"><td><b>${esc(S.code)}</b></td><td>${esc(S.N)}</td><td class="n">${nf(S.totalFC,1)}</td><td class="mono">${esc(S.lich)}</td><td>${esc(x.wec)} <span style="color:var(--muted)">${esc(x.name)}</span></td><td>${esc(x.dvt)}</td><td class="n">${x.qc??''}</td><td class="n">${r.minEff!=null&&r.minEff!==0?r.minEff:(x.min??'')}</td><td class="n">${nf(r.sale1w,2)}</td><td class="n">${nf(r.huy1w,2)}</td><td class="n">${nf(r.ton,2)}</td><td class="n">${r.cg?nf(r.cg,2):'·'}</td>${CH?'':`<td class="n">${pf(r.mix,2)}</td>`}<td class="n">${pf(r.growth)}</td><td class="n"><b>${nf(r.kg,2)}</b></td><td class="n">${sgn(r.kg-r.sale1w,2)}</td><td class="n">${nf(r.pcs,r.pcs%1?1:0)}</td>${r.days.map(d=>`<td class="n">${d?nf(d,d%1?1:0):'·'}</td>`).join('')}<td><div class="chips">${sev.map(v=>`<span class="pill ${v}">${r.flags.filter(y=>y[1]===v).length}</span>`).join('')}</div></td></tr>`+(st.open===i?explain(S,r):'')}).join('');
   markSort('#tFc');pager('#pgFc',idx.length,st.fPage,p=>{st.fPage=p;renderFc()},P);
 }
 const sgn=(v,d)=>(v>0?'+':'')+nf(v,d);
