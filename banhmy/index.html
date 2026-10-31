@@ -628,7 +628,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 3) tính từng CH
     const rows = []; const out = []; const dmN = DM.map(() => ({ s: new Array(8).fill(0), h: new Array(8).fill(0), c: new Array(8).fill(0), p: new Array(8).fill(0) }));
     const gSku = linMap(LV.gSku), gSt = linMap(LV.gSt); const dg = defaultGrowth(); dg.sku = linRow(dg.sku); dg.st = linRow(dg.st);
-    const bSku = BANDS, bSt = BANDS; const growthSku = (grp, w) => cfg.useGSku === false ? 0 : (gSku[grp] || dg.sku)[band(w, bSku)] || 0;
+    const bSku = BANDS, bSt = BANDS; const growthSku = (x, w) => { if (cfg.useGSku === false) return 0; const t = (cfg.gKey === 'wec' ? (gSku[x.wec] || gSku[x.grp]) : gSku[x.grp]) || dg.sku; return t[band(w, bSku)] || 0; };
     for (const st of stores) {
       const [code, name, qlkv, gdv, tinh, spd, nhomSPD, spdMCH3, N] = st; const ni = NG.indexOf(N);
       const lichVe = provLv.get(tinh) || ''; const lich = (LV.matrix[lichVe] || {})[N] || '';
@@ -648,7 +648,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       if (!sale) S.flags.push(['S_NOSALE', 'high', 'CH không có bán L2W trong danh mục — FC = 0']);
       for (const r of R) {
         const x = r.sku; r.mix = mixSum > 0 ? r.mixFC / mixSum : 0;
-        r.waste = r.sale1w > 0 ? r.huy1w / r.sale1w : dmCalc[r.i].wasteSku; r.gSku = growthSku(x.grp, r.waste); r.gSt = cfg.noClamp ? gS : 0; r.growth = r.gSku + r.gSt;
+        r.waste = r.sale1w > 0 ? r.huy1w / r.sale1w : dmCalc[r.i].wasteSku; r.gSku = growthSku(x, r.waste); r.gSt = cfg.noClamp ? gS : 0; r.growth = r.gSku + r.gSt;
         r.raw = r.sale1w * (1 + r.growth); r.target = r.mix * total; r.lo = r.target * cfg.minPct / 100; r.hi = r.target * cfg.maxPct / 100;
         if (cfg.noClamp) { r.kgBand = r.raw; r.clamp = ''; } else { r.kgBand = Math.min(Math.max(r.raw, r.lo), r.hi); r.clamp = r.raw < r.lo - 1e-9 ? 'min' : r.raw > r.hi + 1e-9 ? 'max' : ''; }
         r.cfg = []; if (!x.qd) r.cfg.push('Quy đổi KG'); if (!x.qc) r.cfg.push('QC'); if (x.min == null && !x.minN) r.cfg.push('Min');
@@ -922,7 +922,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 3) tính từng CH
     const rows = []; const out = []; const dmN = DM.map(() => ({ s: new Array(8).fill(0), h: new Array(8).fill(0), c: new Array(8).fill(0), p: new Array(8).fill(0) }));
     const gSku = linMap(LV.gSku), gSt = linMap(LV.gSt); const dg = defaultGrowth(); dg.sku = linRow(dg.sku); dg.st = linRow(dg.st);
-    const bSku = BANDS, bSt = BANDS; const growthSku = (grp, w) => cfg.useGSku === false ? 0 : (gSku[grp] || dg.sku)[band(w, bSku)] || 0;
+    const bSku = BANDS, bSt = BANDS; const growthSku = (x, w) => { if (cfg.useGSku === false) return 0; const t = (cfg.gKey === 'wec' ? (gSku[x.wec] || gSku[x.grp]) : gSku[x.grp]) || dg.sku; return t[band(w, bSku)] || 0; };
     for (const st of stores) {
       const [code, name, qlkv, gdv, tinh, spd, nhomSPD, spdMCH3, N] = st; const ni = NG.indexOf(N);
       const lichVe = provLv.get(tinh) || ''; const lich = (LV.matrix[lichVe] || {})[N] || '';
@@ -942,7 +942,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       if (!sale) S.flags.push(['S_NOSALE', 'high', 'CH không có bán L2W trong danh mục — FC = 0']);
       for (const r of R) {
         const x = r.sku; r.mix = mixSum > 0 ? r.mixFC / mixSum : 0;
-        r.waste = r.sale1w > 0 ? r.huy1w / r.sale1w : dmCalc[r.i].wasteSku; r.gSku = growthSku(x.grp, r.waste); r.gSt = cfg.noClamp ? gS : 0; r.growth = r.gSku + r.gSt;
+        r.waste = r.sale1w > 0 ? r.huy1w / r.sale1w : dmCalc[r.i].wasteSku; r.gSku = growthSku(x, r.waste); r.gSt = cfg.noClamp ? gS : 0; r.growth = r.gSku + r.gSt;
         r.raw = r.sale1w * (1 + r.growth); r.target = r.mix * total; r.lo = r.target * cfg.minPct / 100; r.hi = r.target * cfg.maxPct / 100;
         if (cfg.noClamp) { r.kgBand = r.raw; r.clamp = ''; } else { r.kgBand = Math.min(Math.max(r.raw, r.lo), r.hi); r.clamp = r.raw < r.lo - 1e-9 ? 'min' : r.raw > r.hi + 1e-9 ? 'max' : ''; }
         r.cfg = []; if (!x.qd) r.cfg.push('Quy đổi KG'); if (!x.qc) r.cfg.push('QC'); if (x.min == null && !x.minN) r.cfg.push('Min');
@@ -1301,7 +1301,7 @@ let rt;function later(){clearTimeout(rt);rt=setTimeout(recompute,300)}
 function recompute(){
   const t=performance.now();
   if(CH)ensureHub();
-  try{RES=E.compute(MS,SA,CH?{minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL()})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
+  try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL()})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
   if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
   ROWS=[];for(const S of RES.stores)for(const r of S.rows)ROWS.push({S,r});
   perf('Tính FC',performance.now()-t,ni(ROWS.length)+' dòng CH × SKU');st.aIdx=null;
@@ -1350,10 +1350,11 @@ function renderLv(){
   $('#tMatrix').innerHTML='<tr><th>Lịch về</th>'+E.NG.map(g=>`<th>${g}</th>`).join('')+'</tr>'+L.lichVe.map(l=>`<tr data-l="${esc(l)}"><td><b>${esc(l)}</b></td>${E.NG.map(g=>{const v=(L.matrix[l]||{})[g]||'';return `<td class="${v&&!LICH_RE.test(v)?'ed':''}" title="${esc(dayTxt(v))}">${esc(v)||'—'}</td>`}).join('')}</tr>`).join('');
   L.bSku=E.BANDS.slice();L.bSt=E.BANDS.slice();['gSku','gSt'].forEach(t=>{for(const k in L[t])L[t][k]=E.linRow(L[t][k]||[])});
   const pc=x=>Math.round(x*1000)/10;const last=E.BANDS.length-1;
-  const wG={},wN={};for(const S of (RES?RES.stores:[])){const n=wN[S.N]=wN[S.N]||{s:0,h:0};n.s+=S.sale1w||0;n.h+=S.huy1w||0;for(const r of S.rows||[]){const g=wG[r.sku.grp]=wG[r.sku.grp]||{s:0,h:0};g.s+=r.sale1w;g.h+=r.huy1w}}
-  const gt=(id,obj,keys,W)=>{$(id).innerHTML='<tr><th>Block hiện trạng (%Hủy)</th><th class="n">Tỷ lệ hủy</th>'+E.BANDS.map(b=>`<th class="n">${pc(b)}%</th>`).join('')+'</tr>'+keys.map(k=>{const r=obj[k]||[],w=W[k],wr=w&&w.s>0?w.h/w.s:null,cur=wr==null?-1:E.band(wr);return `<tr data-g="${esc(k)}"><td>${esc(k)}</td><td class="n"><b>${wr==null?'—':pf(wr,1)}</b></td>${E.BANDS.map((b,j)=>`<td class="n">${(j===0||j===last)?inp('data-j="'+j+'" type="number" step="1" aria-label="Growth '+esc(k)+' tại '+pc(b)+'% hủy"',pc(r[j]??0),56):'<span class="bandc">'+pc(r[j]??0)+'</span>'}</td>`).join('')}</tr>`}).join('')};
-  const grps=[...new Set([...Object.keys(L.gSku),...MS.danhmuc.skus.map(x=>x.grp)])].filter(Boolean).sort();grps.forEach(g=>{if(!L.gSku[g])L.gSku[g]=E.linRow(E.defaultGrowth().sku)});
-  gt('#tGSku',L.gSku,grps,wG);gt('#tGSt',L.gSt,E.NG,wN);
+  const wG={},wN={};for(const S of (RES?RES.stores:[])){const n=wN[S.N]=wN[S.N]||{s:0,h:0};n.s+=S.sale1w||0;n.h+=S.huy1w||0;for(const r of S.rows||[]){const gk=CH?r.sku.wec:r.sku.grp;const g=wG[gk]=wG[gk]||{s:0,h:0};g.s+=r.sale1w;g.h+=r.huy1w}}
+  const gt=(id,obj,keys,W)=>{$(id).innerHTML='<tr><th>Block hiện trạng (%Hủy)</th><th class="n">Tỷ lệ hủy</th>'+E.BANDS.map(b=>`<th class="n">${pc(b)}%</th>`).join('')+'</tr>'+keys.map(k=>{const r=obj[k]||[],w=W[k],wr=w&&w.s>0?w.h/w.s:null,cur=wr==null?-1:E.band(wr);return `<tr data-g="${esc(k)}"><td>${esc(gt.lab?gt.lab(k):k)}</td><td class="n"><b>${wr==null?'—':pf(wr,1)}</b></td>${E.BANDS.map((b,j)=>`<td class="n">${(j===0||j===last)?inp('data-j="'+j+'" type="number" step="1" aria-label="Growth '+esc(k)+' tại '+pc(b)+'% hủy"',pc(r[j]??0),56):'<span class="bandc">'+pc(r[j]??0)+'</span>'}</td>`).join('')}</tr>`}).join('')};
+  let grps;if(CH){const DS=MS.danhmuc.skus;grps=DS.map(x=>x.wec).filter(Boolean);DS.forEach(x=>{if(!x.wec)return;if(!L.gSku[x.wec])L.gSku[x.wec]=(L.gSku[x.grp]||E.linRow(E.defaultGrowth().sku)).slice()});const nm=new Map(DS.map(x=>[x.wec,x.name]));gt.lab=k=>k+' · '+(nm.get(k)||'')}
+  else{grps=[...new Set([...Object.keys(L.gSku),...MS.danhmuc.skus.map(x=>x.grp)])].filter(Boolean).sort();grps.forEach(g=>{if(!L.gSku[g])L.gSku[g]=E.linRow(E.defaultGrowth().sku)});gt.lab=null}
+  gt('#tGSku',L.gSku,grps,wG);gt.lab=null;gt('#tGSt',L.gSt,E.NG,wN);
   if(CH)renderNcc();
 }
 document.addEventListener('change',e=>{const t=e.target,L=MS.lichve;if(!t.closest||!t.closest('#s-cfg,#s-plan,#s-growth'))return;
@@ -1613,8 +1614,8 @@ function hubBind(){const c=()=>MS.lichve.cfg,num=e=>{const x=parseFloat(String(e
 
 function chInit(){
   document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 31/10/2026 · by HaoDT</span>';
-  const RL=[[/Nhóm rau/g,'Mã SP'],[/nhóm rau/g,'mã SP'],[/Rau Củ Quả|RCQ/g,AC.short],[/\(FC \+ Tồn dự kiến\)/g,'FC'],[/FC \+ Tồn dự kiến/g,'FC'],[/sau kẹp Min\/Max, /g,''],[/Tồn & Chờ giao/g,'Tồn & Hủy'],[/nhóm SP \(MCH4\) × %hủy SKU/g,'mã hàng × %hủy mã']];
-  const fix=n=>{if(!n)return;if(n.nodeType===3){let v=n.nodeValue,o=v;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)n.nodeValue=v;return}if(n.nodeType!==1)return;const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){let v=t.nodeValue,o=v;if(!/hóm rau|RCQ|Rau Củ|Tồn dự kiến|kẹp Min|Chờ giao|MCH4/.test(v))continue;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)t.nodeValue=v}};
+  const RL=[[/Nhóm rau/g,'Mã SP'],[/nhóm rau/g,'mã SP'],[/Rau Củ Quả|RCQ/g,AC.short],[/\(FC \+ Tồn dự kiến\)/g,'FC'],[/FC \+ Tồn dự kiến/g,'FC'],[/sau kẹp Min\/Max, /g,''],[/Tồn & Chờ giao/g,'Tồn & Hủy'],[/nhóm SP \(MCH4\) × %hủy SKU/g,'mã quy đổi (Mã WEC) × %hủy mã quy đổi'],[/Nhóm SP: (bật|tắt)/g,'Mã quy đổi: $1']];
+  const fix=n=>{if(!n)return;if(n.nodeType===3){let v=n.nodeValue,o=v;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)n.nodeValue=v;return}if(n.nodeType!==1)return;const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){let v=t.nodeValue,o=v;if(!/hóm rau|RCQ|Rau Củ|Tồn dự kiến|kẹp Min|Chờ giao|MCH4|Nhóm SP: /.test(v))continue;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)t.nodeValue=v}};
   fix(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fix))).observe(document.body,{childList:true,subtree:true});
   hubBind();
 }
