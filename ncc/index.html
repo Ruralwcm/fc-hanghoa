@@ -278,18 +278,18 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <div class="row"><button class="btn" id="savePeriod" disabled>Lưu kỳ này &amp; tính FC</button><span id="saveMsg" class="sub"></span></div>
     </div>
   </div></div></details>
-<details class="sec" id="s-ky" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Các kỳ đã lưu</h3><span class="sum" id="sum-ky"></span></summary>
-<div class="body"><p class="hint">Tích chọn kỳ dùng để tính FC. Sale 1 tuần = tổng các kỳ chọn ÷ tổng số tuần. Tồn lấy theo kỳ mới nhất.</p><div class="plist" id="plist"><div class="sub">Đang tải…</div></div></div></details>
-<details class="sec" id="s-sel" open><summary><span class="chev">▶</span><span class="num">C</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-sel"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
+<details class="sec" id="s-sel" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-sel"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
     <div class="body"><p class="hint">Không chọn = tất cả CH của NCC. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="stTree"></div></div></details>
-<details class="sec" id="s-cfg" open><summary><span class="chev">▶</span><span class="num">D</span><h3>Cấu hình đặt hàng</h3><span class="sum" id="sum-cfg"></span></summary>
+<details class="sec" id="s-ky"><summary><span class="chev">▶</span><span class="num">C</span><h3>Các kỳ đã lưu</h3><span class="sum" id="sum-ky"></span></summary>
+<div class="body"><p class="hint">Tích chọn kỳ dùng để tính FC. Sale 1 tuần = tổng các kỳ chọn ÷ tổng số tuần. Tồn lấy theo kỳ mới nhất.</p><div class="plist" id="plist"><div class="sub">Đang tải…</div></div></div></details>
+<details class="sec" id="s-cfg"><summary><span class="chev">▶</span><span class="num">D</span><h3>Cấu hình đặt hàng</h3><span class="sum" id="sum-cfg"></span></summary>
 <div class="body"><div class="kv"><span>Đặt tối đa = Min ×</span><input type="number" id="capX" min="0" step="0.5"></div>
 <div class="kv"><span>Trừ tồn khi đặt</span><input type="checkbox" id="truTon"></div>
 <div class="kv"><span>Tự tăng FC khi cần thêm dưới (%)</span><input id="autoUp" type="number" min="0" max="100" step="5"></div>
 <div class="kv"><span>Cụm thiếu chưa chọn</span><select id="blockShort"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt</option></select></div>
 <div class="row" style="justify-content:flex-end"><button class="btn sm ghost" id="saveMod" disabled>Lưu cài đặt MOQ</button></div>
 <p class="hint">Đặt tối đa & Trừ tồn lưu bằng nút Lưu ở mục Cài Min.</p></div></details>
-<details class="sec" id="s-gn" open><summary><span class="chev">▶</span><span class="num">E</span><h3>Tăng trưởng theo %hủy</h3><span class="sum" id="sum-gn"></span></summary>
+<details class="sec" id="s-gn"><summary><span class="chev">▶</span><span class="num">E</span><h3>Tăng trưởng theo %hủy</h3><span class="sum" id="sum-gn"></span></summary>
 <div class="body"><div class="kv"><span>Theo %hủy mã tại CH (bảng từng mã ở mục Cài Min)</span><input type="checkbox" id="useGSku"></div>
 <div class="kv"><span>Theo %hủy phân nhóm (%hủy cả CH × nhóm N)</span><input type="checkbox" id="useGSt"></div>
 <p class="hint">Tăng trưởng = mức theo mã + mức theo phân nhóm. Bậc %hủy CH 0%–100%: nhập cột 0% và 100%, các cột giữa tự tính. Lưu bằng nút Lưu ở mục Cài Min.</p>
@@ -332,17 +332,17 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <main class="right">
   <nav class="jump" id="jump"><a href="#s-min"><span class="dot"></span>Cài Min</a><a href="#s-fc"><span class="dot"></span>FC đặt hàng</a><a href="#s-det"><span class="dot"></span>Chi tiết CH</a><a href="#s-hub"><span class="dot"></span>MOQ & gom HUB</a><a href="#s-ov"><span class="dot"></span>Tổng quan FC</a></nav>
   <div class="gh"><h2>Khai báo</h2><span class="ln"></span></div>
-<details class="sec" id="s-min" open><summary><span class="chev">▶</span><span class="num">1</span><h3>Sale & Hủy · Cài Min</h3><span class="sum" id="sum-min"></span><span class="act"><button class="btn sm ghost" id="resetMin" disabled>Bỏ thay đổi</button><button class="btn sm pri" id="saveMin" disabled>Lưu cài đặt</button></span></summary>
+<details class="sec" id="s-min"><summary><span class="chev">▶</span><span class="num">1</span><h3>Sale & Hủy · Cài Min</h3><span class="sum" id="sum-min"></span><span class="act"><button class="btn sm ghost" id="resetMin" disabled>Bỏ thay đổi</button><button class="btn sm pri" id="saveMin" disabled>Lưu cài đặt</button></span></summary>
 <div class="body"><p class="hint">Ô nền vàng (Min, QC gói) và tím (Tăng trưởng) là chỗ anh chỉnh. Min tính theo gói (Min 2 với gói 0,8 kg = 1,6 kg). <b>Số đặt</b>: Min = 0 thì không đặt; Min &gt; 0 thì = Sale 1 tuần × (1 + tăng trưởng), không thấp hơn Min và không quá 3 × Min. Tăng trưởng áp theo %Hủy của từng cửa hàng: hủy càng cao, tăng trưởng càng thấp.</p><div id="minMsg"></div><div class="tw" style="max-height:62vh"><table id="minTbl"></table></div><div class="legend"><span><span class="sw" style="background:var(--k-sale)"></span>Bán</span><span><span class="sw" style="background:var(--k-huy)"></span>Hủy</span><span><span class="sw" style="background:var(--k-bq)"></span>Sale BQ</span><span><span class="sw" style="background:var(--k-min)"></span>Min (nhập)</span><span><span class="sw" style="background:var(--k-tt)"></span>Tăng trưởng (nhập)</span><span><span class="sw" style="background:var(--warn-soft)"></span>%Hủy ≥ 20%</span><span>Sale BQ/CH/tuần = SL bán nhóm ÷ số CH có bán ÷ số tuần (kg)</span></div></div></details>
   <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
-<details class="sec" id="s-fc" open><summary><span class="chev">▶</span><span class="num">2</span><h3>FC đặt hàng · tổng hợp theo mã (kg)</h3><span class="sum" id="sum-fc"></span><span class="act"><button class="btn sm ghost" id="exportBtn">Tải Excel đầy đủ</button><button class="btn sm pri" id="orderBtn">Xuất file đặt hàng</button></span></summary>
+<details class="sec" id="s-fc"><summary><span class="chev">▶</span><span class="num">2</span><h3>FC đặt hàng · tổng hợp theo mã (kg)</h3><span class="sum" id="sum-fc"></span><span class="act"><button class="btn sm ghost" id="exportBtn">Tải Excel đầy đủ</button><button class="btn sm pri" id="orderBtn">Xuất file đặt hàng</button></span></summary>
 <div class="body"><div class="kpis" id="kpis"></div><div class="row fl"><label class="f">Tỉnh<select id="fTinh"><option value="">Tất cả</option></select></label>
         <label class="f">GĐV<select id="fGdv"><option value="">Tất cả</option></select></label></div><div class="tw"><table id="sumTbl"></table></div></div></details>
 <details class="sec" id="s-det"><summary><span class="chev">▶</span><span class="num">3</span><h3>Chi tiết theo cửa hàng</h3><span class="sum" id="sum-det"></span><span class="act"><button class="btn sm pri" id="savePhu" disabled>Lưu thay đổi Phủ</button><span id="phuMsg" class="sub"></span></span></summary>
 <div class="body"><div class="row fl"><label class="f">Tìm CH / mã SP<input id="fQ" placeholder="2A00, Vĩnh Ninh, 10053441…" style="min-width:200px"></label>
         <label class="f">Hiển thị<select id="fOnly"><option value="1">Dòng có đặt</option><option value="0">Tất cả dòng</option></select></label></div><div class="tw" style="max-height:62vh"><table id="detTbl"></table></div><div class="row sp"><div class="pager" id="pager"></div><span class="hint">Bỏ tích cột "Phủ" để chặn CH rồi bấm Lưu thay đổi Phủ.</span></div></div></details>
   <div class="gh"><h2>Review</h2><span class="ln"></span></div>
-<details class="sec" id="s-hub" open><summary><span class="chev">▶</span><span class="num">4</span><h3>MOQ cửa hàng & gom HUB</h3><span class="sum" id="sum-hub"></span><span class="act"><button class="btn sm pri" id="orderBtn2">Xuất file đặt hàng</button></span></summary>
+<details class="sec" id="s-hub"><summary><span class="chev">▶</span><span class="num">4</span><h3>MOQ cửa hàng & gom HUB</h3><span class="sum" id="sum-hub"></span><span class="act"><button class="btn sm pri" id="orderBtn2">Xuất file đặt hàng</button></span></summary>
 <div class="body"><p class="hint">Mỗi đơn (từng thứ giao) phải đạt MOQ của cửa hàng (HTX Xuyên tính theo kg; Sapo tính theo GT nghìn đ: Hà Nội 500, tỉnh 1.000). Biên tự tăng FC chỉnh ở mục Cấu hình đặt hàng. CH đủ MOQ giao thẳng. CH không đủ gom về HUB cấp 1 theo sheet HUB (chỉ cộng các CH thiếu, cụm ≥ 2 CH, tổng đạt MOQ của HUB). Chưa đủ thì lên cấp 2 (gom tối đa đến cấp 2). Cụm vẫn thiếu mà cần tăng dưới 20% thì app tự tăng FC cho đủ MOQ; từ 20% trở lên anh chọn ở bảng cuối.</p><div class="kpis" id="hubKpis" role="group" aria-label="Lọc theo trạng thái"></div>
   <div class="row sp"><span class="sub" id="hubSelTxt">Bấm vào một ô ở trên để chỉ xem trạng thái đó.</span>
     <label class="f">Tìm HUB / CH<input id="hQ" placeholder="mã hoặc tên" style="min-width:180px"></label></div>
@@ -1278,7 +1278,7 @@ if(NCC.modType==='gt'){const RG=[[/\bMOQ\b/g,'MOD'],[/\bkg\b/g,'đv'],[/\bKg\b/g
  const fix=n=>{if(!n)return;const w=n.nodeType===3?[n]:(()=>{const a=[],t=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let x;while(x=t.nextNode())a.push(x);return a})();w.forEach(t=>{const v=t.nodeValue;if(!/kg|Kg|MOQ/.test(v))return;const rr=t.parentNode&&t.parentNode.closest&&t.parentNode.closest('#s-hub')?RH:RG;let s=v;rr.forEach(([a,b])=>s=s.replace(a,b));if(s!==v)t.nodeValue=s})};
  fix(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fix))).observe(document.body,{childList:true,subtree:true});}
 const $$=s=>[...document.querySelectorAll(s)],$=s=>document.querySelector(s);
-const OK='fc_open_basa';try{const o=JSON.parse(localStorage.getItem(OK)||'null');if(o)$$('details.sec').forEach(d=>{if(o[d.id]!=null)d.open=o[d.id]})}catch(e){}
+const OK='fc_open_basa';/* mở web: chỉ Data Sale + Chọn Stores FC mở */
 $$('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const o={};$$('details.sec').forEach(x=>o[x.id]=x.open);try{localStorage.setItem(OK,JSON.stringify(o))}catch(e){}}));
 $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.isTrusted)return;if(e.target.closest('button,select,input,label,.btn'))e.preventDefault()}));
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
