@@ -263,7 +263,7 @@ th.sortable{cursor:pointer}th.sortable[data-arrow]:not([data-arrow=""])::after{c
 html{font-size:var(--fs)!important}
 body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .top1{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line)}
-.top1 .in{display:flex;align-items:center;gap:0.6154rem;padding:0.4615rem 1.2308rem;flex-wrap:wrap;max-width:135.385rem;margin:0 auto}
+.top1 .in{display:flex;align-items:center;gap:0.6154rem;padding:0.4615rem 1.2308rem;flex-wrap:wrap;max-width:none;margin:0}
 .top1 .brand b{font-size:1.15rem}.top1 .brand span{color:var(--muted);font-size:.82rem;margin-left:0.4615rem}
 .top1 .sp{flex:1}
 .top1 .pill:empty{display:none}
@@ -276,7 +276,7 @@ body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .seg button{height:1.8462rem!important;padding:0 0.6923rem!important;font-size:.8rem!important}
 input[type=text],input[type=number],select{height:2rem!important;min-height:0!important;font-size:.86rem!important;padding:0 0.6154rem!important}
 .chk{font-size:.86rem}
-.wrap2{display:grid;grid-template-columns:minmax(20rem,1fr) minmax(0,3fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
+.wrap2{display:grid;grid-template-columns:minmax(20rem,1fr) minmax(0,3fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:none;margin:0}
 .left{position:sticky;top:3.8462rem;align-self:start;max-height:calc(100vh - 4.6154rem);overflow:auto;padding-right:0.2308rem;scrollbar-width:thin}
 .right{min-width:0}
 @media (max-width:1100px){.wrap2{grid-template-columns:minmax(0,1fr)}.left{position:static;max-height:none;overflow:visible}}
@@ -314,7 +314,6 @@ table{font-size:.86rem!important}
 th{font-size:.68rem!important;padding:0.3846rem 0.5385rem!important}
 td{padding:0.2308rem 0.5385rem!important}
 td.n,.mono{font-size:.84rem}
-.tree{max-height:none!important;border:0!important;padding:0!important}
 .tree label{font-size:.85rem!important}
 .lg{margin:0.3077rem 0 0 1.2308rem;padding:0;font-size:.85rem}.lg li{margin:0.2308rem 0}
 #saveBar{bottom:0.9231rem!important;padding:0.4615rem 0.7692rem!important;font-size:.86rem}
@@ -353,6 +352,16 @@ html[data-app="cahoi"] .wrap2 .left .cfg4 [data-only="rcq"],html:not([data-app="
 @media (max-width:1700px){.top1 .brand .sub{display:none}}
 .top1 .brand{display:flex;align-items:baseline;gap:0.4615rem}.top1 .brand .ver{margin-left:0}
 #ovGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:0.7692rem 1.0769rem!important}@media (max-width:1000px){#ovGrid{grid-template-columns:minmax(0,1fr)!important}}
+tr.xf{cursor:pointer}tr.xf:hover td{background:var(--soft)}tr.xsel td{background:var(--leaf-soft)!important;font-weight:700}tr.xsel td:first-child{box-shadow:inset 3px 0 0 var(--leaf)}
+.xfbar{display:flex;flex-wrap:wrap;gap:0.4615rem;align-items:center;margin:0.6154rem 0 0;font-size:.82rem}.xfbar .xfl{color:var(--muted)}.xfc{border:1px solid var(--leaf);background:var(--leaf-soft);color:var(--ink);border-radius:99px;padding:1px 0.6923rem;font:inherit;cursor:pointer}
+.xfn{background:var(--leaf-soft);border-radius:6px;padding:0.3077rem 0.7692rem;font-size:.82rem;margin:0.3077rem 0 0.4615rem;display:flex;gap:0.4615rem;align-items:center;flex-wrap:wrap}.xfn[hidden]{display:none}
+/*TREE*/.tree{max-height:32em;overflow:auto;border:1px solid var(--line)!important;border-radius:6px;padding:0.3077rem 0.6154rem!important;background:var(--panel)}
+.tree details{margin:1px 0}.tree summary{cursor:pointer;list-style:none;padding:2px 0}.tree summary::-webkit-details-marker{display:none}
+.tree summary::before{content:'▸';display:inline-block;width:1.1em;color:var(--muted)}.tree details[open]>summary::before{content:'▾'}
+.tree .tg{margin-left:1.2em}.tree .tt{margin-left:2.4em;display:grid;grid-template-columns:repeat(auto-fill,minmax(11em,1fr));gap:1px 0.6154rem}
+.tree label{cursor:pointer;font-size:.86rem!important;display:inline-flex;align-items:center;gap:0.3077rem}.tree .cnt{color:var(--muted);font-size:.75rem;font-family:var(--f-mono)}
+#ovGrid table{width:100%}#ovGrid th,#ovGrid td{padding:0.2308rem 0.3077rem!important}#ovGrid th{font-size:.64rem!important}#ovGrid td:first-child{white-space:nowrap;max-width:12em;overflow:hidden;text-overflow:ellipsis}
+#ovGrid .stt3{white-space:nowrap}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -390,8 +399,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <p class="hint">Mặc định áp cho mã / NCC chưa khai báo riêng. Lưu trên máy này.</p>
     </div></details>
 
-  <details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">C</span><h3>Vùng</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
-    <div class="body"><p class="hint">Không chọn tỉnh nào = tất cả CH có trong file Sale.</p><div class="tree" id="tree"></div></div></details>
+  <details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">C</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
+    <div class="body"><p class="hint">Không chọn = tất cả CH có trong file Sale. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="tree"></div></div></details>
 
   <details class="sec" id="s-mov" open><summary><span class="chev">▶</span><span class="num">D</span><h3>MOV NCC × Tỉnh</h3><span class="sum" id="sum-mov"></span><span class="act"><button class="btn sm sav" data-save="mov" type="button">Lưu</button></span></summary>
     <div class="body"><p class="hint">MOV tiền (GT FC theo giá mua) cho mỗi CH × NCC. Bấm ▸ để khai báo MOV riêng từng tỉnh; tỉnh để trống = dùng MOV tất cả tỉnh.</p><div class="srcline" id="src-mov"></div>
