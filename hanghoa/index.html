@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>window.FC_GAS_URL="https://script.google.com/macros/s/AKfycbzz5xBX7jFDg-gL2evpY6-1S9v_dhjSIjnghMLv1NPSc-wNuxOgheXB3p4SBWqVZ8rjYg/exec";</script>
+<script>window.FC_GAS_URL="https://script.google.com/macros/s/AKfycbxM-yFzIPsW-HG3RY5VRICeE04XVLMxZ8RBFYUs_lQqTF2NkDqUrzPmRGOjVIe6UIrbOQ/exec";</script>
 <title>FC Hàng Hóa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -603,7 +603,7 @@ const lsGet=k=>{try{return JSON.parse(localStorage.getItem('fchh_'+k))}catch(e){
 const lsSet=(k,v)=>{try{localStorage.setItem('fchh_'+k,JSON.stringify(v))}catch(e){}};
 
 // ---------- KHO CHUNG (Claude db / Google Sheet Apps Script / máy này) ----------
-const GAS_URL=(()=>{try{const q=new URLSearchParams(location.search).get('gas');if(q){localStorage.setItem('fc_portal_gas',q);return q}return localStorage.getItem('fc_portal_gas')||window.FC_GAS_URL||''}catch(e){return window.FC_GAS_URL||''}})();
+const GAS_URL=(()=>{try{const q=new URLSearchParams(location.search).get('gas');if(q){localStorage.setItem('fc_portal_gas2',q);return q}return localStorage.getItem('fc_portal_gas2')||window.FC_GAS_URL||''}catch(e){return window.FC_GAS_URL||''}})();
 let db=null,DL=null,DBKIND='local';
 function gasDb(url,ns){let cache=null;
   const all=async()=>{if(cache)return cache;const r=await fetch(url+(url.includes('?')?'&':'?')+'action=all&prefix='+encodeURIComponent(ns));const j=await r.json();if(!j.ok)throw new Error(j.error||'Apps Script lỗi');cache=j.data||{};return cache};
