@@ -984,18 +984,20 @@ function csvRows(t){ const rows=[]; let row=[],cur='',q=false; for(let i=0;i<t.l
   row.push(cur); if(row.length>1||row[0]!=='') rows.push(row); return rows; }
 async function gviz(q){ const u='https://docs.google.com/spreadsheets/d/'+SHEET_GOC+'/gviz/tq?tqx=out:csv&'+q; const go=async x=>{ const r=await fetch(x,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); };
   try{ return csvRows(await go(u)); }catch(e){ return csvRows(await go('https://corsproxy.io/?url='+encodeURIComponent(u))); } }
-async function syncSheet(){ const el=$('sprev'); el.className='msg info'; el.textContent='Đang đọc Storeslist, PhanNhomCH ('+NCC.mch3+'), HUB từ Sheet gốc…';
+async function syncSheet(auto){ const el=$('sprev'); if(!auto) el.className='msg info'; if(!auto) el.textContent='Đang đọc Storeslist, PhanNhomCH ('+NCC.mch3+'), HUB từ Sheet gốc…';
   try{ const [st,pn,hb]=await Promise.all([gviz('gid=164583655'),gviz('gid=879484655'),gviz('sheet=HUB').catch(()=>[])]);
     const K=v=>{ const s=String(v||'').trim().toUpperCase(); return s==='0'?'':s; }; const nh={}; pn.slice(1).forEach(r=>{ if(String(r[1]).trim()===NCC.mch3&&/^N[1-8]$/.test(String(r[2]).trim())) nh[K(r[0])]=String(r[2]).trim(); });
     const old={}; MASTER.stores.forEach((s,i)=>old[s[0]]=i); const oldSS={}; MASTER.ss.forEach(x=>{ const c=MASTER.stores[x[0]][0]; (oldSS[c]=oldSS[c]||[]).push([x[1],x[2],x[3]]); });
     const lc={}; MASTER.ss.forEach(x=>lc[x[2]]=(lc[x[2]]||0)+1); const defLich=Object.keys(lc).sort((a,b)=>lc[b]-lc[a])[0]||'37'; const std=stdSkus();
     const p={stores:{},ss:{},hub:{},mod:{},names:{},unknownSku:new Set(),src:'Sheet gốc'};
-    st.slice(1).forEach(r=>{ const c=K(r[0]); if(!c||!nh[c]) return; if(r[2]&&!/hoạt động/i.test(r[2])) return;
+    st.slice(1).forEach(r=>{ const c=K(r[0]); if(!c||!nh[c]) return; if(auto&&old[c]===undefined) return; if(r[2]&&!/hoạt động/i.test(r[2])) return;
       p.stores[c]={code:c,name:String(r[1]||'').trim(),tinh:tinhClean(r[5]),gdv:String(r[8]||'').trim(),nhom:nh[c],qlkv:String(r[7]||'').trim()}; p.names[c]=p.stores[c].name;
-      p.ss[c]=oldSS[c]||std.map(k=>[k,defLich,1]); if(HUB.mod[c]===undefined) p.mod[c]=NCC.modType==='gt'?(/Hà Nội/.test(r[5])?500:NCC.modDef):NCC.modDef; });
+      p.ss[c]=oldSS[c]||std.map(k=>[k,defLich,1]); if(HUB.mod[c]!==undefined) p.mod[c]=HUB.mod[c]; else p.mod[c]=NCC.modType==='gt'?(/Hà Nội/.test(r[5])?500:NCC.modDef):NCC.modDef; });
     let nh2=0; hb.slice(1).forEach(r=>{ const c=K(r[0]); if(!c) return; const lv=[K(r[1])||c,K(r[2])||K(r[1])||c,K(r[3])||K(r[2])||K(r[1])||c]; p.hub[c]=lv; nh2++; });
+    if(!nh2) Object.keys(p.stores).forEach(c=>{ if(HUB.hub[c]) p.hub[c]=HUB.hub[c]; });
+    if(auto){ if(!Object.keys(p.stores).length) return; const nm=buildMaster(p,true); MASTER={stores:nm.stores,ss:nm.ss,cfg:MASTER.cfg,updatedAt:MASTER.updatedAt}; HUB={hub:nm.hub,mod:nm.mod,names:nm.names}; window.__sgAt=new Date(); fillFilters(); recompute(); try{ $('stInfo').textContent='· Đang dùng Sheet gốc ('+nm.stores.length.toLocaleString('vi-VN')+' CH, '+window.__sgAt.toLocaleTimeString('vi-VN')+')'; }catch(e){} return; }
     $('stReplace').checked=true; showStore(p); el.innerHTML+='<br><small>Phân nhóm theo MCH3 "'+esc(NCC.mch3)+'": '+Object.keys(nh).length.toLocaleString('vi-VN')+' CH · HUB: '+(nh2?nh2.toLocaleString('vi-VN')+' CH':'chưa có tab HUB, giữ HUB hiện tại')+'</small>';
-  }catch(e){ el.className='msg err'; el.textContent='Không đọc được Sheet gốc ('+(e.message||e)+'). Kiểm tra quyền xem "Bất kỳ ai có đường liên kết".'; } }
+  }catch(e){ if(auto) return; el.className='msg err'; el.textContent='Không đọc được Sheet gốc ('+(e.message||e)+'). Kiểm tra quyền xem "Bất kỳ ai có đường liên kết".'; } }
 function showStore(p){
   stParsed=null; $('stApply').disabled=true;
   if(!p||!Object.keys(p.stores).length){ $('sprev').className='msg err'; $('sprev').innerHTML='Không tìm thấy danh sách CH trong file. Cần sheet Order_NCC của file RM030, hoặc file mẫu có cột Mã CH, Tên CH.'; return; }
@@ -1218,7 +1220,7 @@ $('savePeriod').onclick=async()=>{
   }catch(e){ $('saveMsg').textContent=e.code==='quota_exceeded'?'Bộ nhớ đầy – anh xóa bớt kỳ cũ rồi lưu lại.':'Chưa lưu được: '+(e.code||e.message); btn.disabled=false; }
 };
 
-fillFilters(); recompute(); loadAll();
+fillFilters(); recompute(); loadAll().then(()=>syncSheet(true));
 })();
 </script>
 <script>
