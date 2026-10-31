@@ -353,6 +353,7 @@ html[data-app="cahoi"] #tGSku th:first-child{z-index:2}
 .gtab{width:max-content;min-width:100%}#s-growth .tw{overflow-x:auto}
 #tDm .fz{position:sticky;z-index:2;background:var(--panel)}#tDm th.fz{z-index:4;background:var(--soft)}#tDm .fzl{box-shadow:inset -1px 0 0 var(--line),4px 0 6px -4px rgba(0,0,0,.18)}#tDm td.fz.mixc,#tDm tr:hover td.fz{background:var(--panel)}
 .minc .cellin{width:3.5385rem}.minc.on{background:var(--high-soft)}.minc.on .cellin{font-weight:700}
+#tNcc{width:100%}#tNcc tr.ncch td{background:var(--soft);white-space:normal}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -364,7 +365,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="sp"></div>
   <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost ico" id="exAll" type="button" title="Mở tất cả section" aria-label="Mở tất cả">⊞</button><button class="btn ghost ico" id="coAll" type="button" title="Thu tất cả section" aria-label="Thu tất cả">⊟</button>
-  <span class="hgrp"><span class="hl">Sale</span><label class="btn imp" for="inSale">Import</label><button class="btn tpl" id="saleTpl" type="button" title="File mẫu Sale · Tồn · Chờ giao">Template</button></span><span class="hsep"></span><span class="hgrp"><span class="hl">Cấu hình</span><span class="btn upl imp" title="Nhập file Excel: sheet nào có (Quy đổi KG, Lịch về hàng, Danh mục) thì cập nhật dữ liệu đó, không có sheet thì giữ nguyên. Phân nhóm CH luôn lấy từ Storelist.">Import<input type="file" id="cfgImport" accept=".xlsx,.xlsb,.xlsm" aria-label="Import cấu hình từ Excel"></span><button class="btn tpl" id="cfgTpl" type="button" title="Xuất toàn bộ dữ liệu đang hiệu lực, mỗi loại 1 sheet">Template</button></span><span class="hsep"></span><button class="btn sav" id="cfgSave" type="button" title="Lưu tất cả thay đổi lên kho chung">Lưu</button><span class="hsep"></span><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
+  <span class="hgrp"><span class="hl">Sale</span><label class="btn imp" for="inSale">Import</label><button class="btn tpl" id="saleTpl" type="button" title="File mẫu Sale · Tồn · Chờ giao">Template</button></span><span class="hsep"></span><span class="hgrp"><span class="hl">Cấu hình</span><span class="btn upl imp" title="Nhập file Excel: sheet nào có (Quy đổi KG, Lịch về hàng, Danh mục) (Cá hồi/Basa/Bánh mỳ có thêm NCC, HUB) thì cập nhật dữ liệu đó, không có sheet thì giữ nguyên. Phân nhóm CH luôn lấy từ Storelist.">Import<input type="file" id="cfgImport" accept=".xlsx,.xlsb,.xlsm" aria-label="Import cấu hình từ Excel"></span><button class="btn tpl" id="cfgTpl" type="button" title="Xuất toàn bộ dữ liệu đang hiệu lực, mỗi loại 1 sheet">Template</button></span><span class="hsep"></span><button class="btn sav" id="cfgSave" type="button" title="Lưu tất cả thay đổi lên kho chung">Lưu</button><span class="hsep"></span><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
 </div></header>
 <input type="file" id="inSale" accept=".xlsx,.xlsb,.xlsm" hidden>
 
@@ -410,8 +411,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     <div class="body"><div class="srcline" id="src-lichve"></div><div class="tw" style="max-height:460px"><table id="tMatrix" class="mx"></table></div></div></details>
 <details class="sec" id="s-prov"><summary><span class="chev">▶</span><span class="num">H</span><h3>Tuyến giao: tỉnh → lịch về</h3><span class="sum" id="sum-prov"></span></summary>
     <div class="body"><div class="tw" style="max-height:420px"><table id="tProv" class="small"></table></div></div></details>
-<details class="sec" id="s-plan"><summary><span class="chev">▶</span><span class="num">I</span><h3><span data-only="rcq">Số mã quy hoạch</span><span data-only="ch">NCC · MOV mỗi ngày</span></h3><span class="sum" id="sum-plan"></span></summary>
-    <div class="body"><p class="hint" data-only="rcq">Danh mục được cài tối đa vượt 10% số mã quy hoạch.</p><div class="tw" data-only="rcq"><table id="tPlan" class="gtab"></table></div><p class="hint" data-only="ch">Tổng kg các CH thuộc tỉnh của NCC trong 1 ngày giao phải ≥ MOV.</p><div class="tw" data-only="ch"><table id="tNcc"></table></div></div></details>
+<details class="sec" id="s-plan"><summary><span class="chev">▶</span><span class="num">I</span><h3><span data-only="rcq">Số mã quy hoạch</span><span data-only="ch">NCC · MOD theo tỉnh</span></h3><span class="sum" id="sum-plan"></span></summary>
+    <div class="body"><p class="hint" data-only="rcq">Danh mục được cài tối đa vượt 10% số mã quy hoạch.</p><div class="tw" data-only="rcq"><table id="tPlan" class="gtab"></table></div><p class="hint" data-only="ch">MOD mỗi CH/ngày theo NCC × tỉnh; trống = MOD mặc định. MOD riêng từng CH ở sheet HUB được ưu tiên. Import/Template qua sheet "NCC" (NCC · Tỉnh · MOD).</p><div class="tw" data-only="ch"><table id="tNcc"></table></div></div></details>
 <details class="sec" id="s-logic"><summary><span class="chev">▶</span><span class="num">J</span><h3>Logic tính FC</h3><span class="sum" id="sum-logic"></span></summary>
     <div class="body"><div class="grid" style="grid-template-columns:minmax(0,1fr);gap:8px"><div class="card" data-only="ch"><h3>Chuỗi tính · Cá hồi</h3><div class="flow">
         <div><span><b>Quy về KG</b>: Article → Mã đặt hàng × Quy đổi (HL 200g = 0,2 · 100g = 0,1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing Quantity (chỉ hiển thị).</span></div>
@@ -509,6 +510,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     danhmuc: t => t.startsWith('4.') || t.includes('DANH MỤC'),
     datafc: t => t.startsWith('5.') || t.includes('DATA FC'),
     hub: t => t === 'HUB' || t.startsWith('HUB '),
+    ncc: t => t === 'NCC' || t.startsWith('NCC ') || t.includes('MOD NCC'),
     phannhom: t => t.includes('PHÂN NHÓM'),
   };
   const BAD_WEC = new Set(['', '0', '#N/A', 'N/A', '#REF!']);
@@ -579,6 +581,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   function parseMasters(book, log) {
     const out = {}; const q = pick(book, SHEET.quydoi), l = pick(book, SHEET.lichve), d = pick(book, SHEET.danhmuc), p = pick(book, SHEET.phannhom);
     if (q) out.quydoi = parseQuydoi(q.rows, log); if (l) out.lichve = parseLichve(l.rows, log); if (d) out.danhmuc = parseDanhmuc(d.rows, log); if (p) out.phannhom = parsePhannhom(p.rows, log);
+    const nc = pick(book, SHEET.ncc); if (nc) { const M = new Map(); rowsOf(nc.rows).slice(1).forEach(r => { const nm = s(r && r[0]), t = s(r && r[1]); if (!nm || !t) return; const o = M.get(nm) || { name: nm, tinh: [], movT: {} }; if (!o.tinh.includes(t)) o.tinh.push(t); const v = n(r[2]); if (v != null) o.movT[t] = v; M.set(nm, o); }); out.ncc = [...M.values()]; log.push({ lvl: 'ok', msg: `NCC: ${out.ncc.length} NCC, ${out.ncc.reduce((a, x) => a + x.tinh.length, 0)} dòng NCC × tỉnh.` }); }
     const hb = pick(book, SHEET.hub); if (hb) { const H = {}; rowsOf(hb.rows).slice(1).forEach(r => { const c = K(r && r[0]); if (!c) return; H[c] = [K(r[1]), K(r[2]), n(r[3])]; }); out.hub = H; log.push({ lvl: 'ok', msg: `HUB: ${Object.keys(H).length.toLocaleString('vi-VN')} CH.` }); }
     return out;
   }
@@ -768,6 +771,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
+    const NC = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.ncc; if (fam && NC && NC.length) sh['NCC'] = [['NCC', 'Tỉnh', 'MOD mỗi CH/ngày (trống = mặc định)'], ...NC.flatMap(x => (x.tinh || []).map(t => [x.name, t, x.movT && x.movT[t] != null ? x.movT[t] : (x.mov > 0 ? x.mov : null)]))];
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (HB && Object.keys(HB).length) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
     return sh;
   }
@@ -829,6 +833,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     danhmuc: t => t.startsWith('4.') || t.includes('DANH MỤC'),
     datafc: t => t.startsWith('5.') || t.includes('DATA FC'),
     hub: t => t === 'HUB' || t.startsWith('HUB '),
+    ncc: t => t === 'NCC' || t.startsWith('NCC ') || t.includes('MOD NCC'),
     phannhom: t => t.includes('PHÂN NHÓM'),
   };
   const BAD_WEC = new Set(['', '0', '#N/A', 'N/A', '#REF!']);
@@ -899,6 +904,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   function parseMasters(book, log) {
     const out = {}; const q = pick(book, SHEET.quydoi), l = pick(book, SHEET.lichve), d = pick(book, SHEET.danhmuc), p = pick(book, SHEET.phannhom);
     if (q) out.quydoi = parseQuydoi(q.rows, log); if (l) out.lichve = parseLichve(l.rows, log); if (d) out.danhmuc = parseDanhmuc(d.rows, log); if (p) out.phannhom = parsePhannhom(p.rows, log);
+    const nc = pick(book, SHEET.ncc); if (nc) { const M = new Map(); rowsOf(nc.rows).slice(1).forEach(r => { const nm = s(r && r[0]), t = s(r && r[1]); if (!nm || !t) return; const o = M.get(nm) || { name: nm, tinh: [], movT: {} }; if (!o.tinh.includes(t)) o.tinh.push(t); const v = n(r[2]); if (v != null) o.movT[t] = v; M.set(nm, o); }); out.ncc = [...M.values()]; log.push({ lvl: 'ok', msg: `NCC: ${out.ncc.length} NCC, ${out.ncc.reduce((a, x) => a + x.tinh.length, 0)} dòng NCC × tỉnh.` }); }
     const hb = pick(book, SHEET.hub); if (hb) { const H = {}; rowsOf(hb.rows).slice(1).forEach(r => { const c = K(r && r[0]); if (!c) return; H[c] = [K(r[1]), K(r[2]), n(r[3])]; }); out.hub = H; log.push({ lvl: 'ok', msg: `HUB: ${Object.keys(H).length.toLocaleString('vi-VN')} CH.` }); }
     return out;
   }
@@ -1088,6 +1094,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
+    const NC = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.ncc; if (fam && NC && NC.length) sh['NCC'] = [['NCC', 'Tỉnh', 'MOD mỗi CH/ngày (trống = mặc định)'], ...NC.flatMap(x => (x.tinh || []).map(t => [x.name, t, x.movT && x.movT[t] != null ? x.movT[t] : (x.mov > 0 ? x.mov : null)]))];
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (HB && Object.keys(HB).length) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
     return sh;
   }
@@ -1169,7 +1176,7 @@ function hubMod(RES,o){
   const GT=!!o.gt,val=x=>GT?x.gt:x.kg,H=o.hub||{},dec=o.dec||{},defMod=+o.defMod||0;
   const K=c=>String(c||'').toUpperCase();
   const lv=(c,i)=>{const v=(H[K(c)]||[])[i];return v&&v!=='0'&&K(v)!==K(c)?K(v):''};
-  const modOf=c=>{const v=(H[K(c)]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:defMod};
+  const modOf=o.modOf||(c=>{const v=(H[K(c)]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:defMod});
   const po={};
   for(const S of RES.stores)for(const r of S.rows){const qd=r.sku.qd||1,gia=(r.sku.gia||0)/1000;(r.days||[]).forEach((u,d)=>{if(!(u>0))return;const k=S.code+'|'+d;
     const p=po[k]||(po[k]={store:S.code,name:S.name,tinh:S.tinh,day:d,kg:0,gt:0,refs:[]});const kg=u*qd;p.kg+=kg;p.gt+=kg*gia;p.refs.push([r,d,S])})}
@@ -1343,7 +1350,7 @@ async function onSaleFile(file){
 }
 function applyMasters(masters,log,only){
   if(masters&&masters.phannhom)delete masters.phannhom;
-  const got=[];if(masters.hub&&!only&&CH&&MS.lichve){MS.lichve.cfg.hub=masters.hub;META.lichve.dirty=true;got.push('HUB')}for(const m of MASTERS){if(only&&only!==m)continue;if(masters[m]){if(m==='lichve'&&MS.lichve){const o=MS.lichve,nw=masters[m];nw.cfg=CH?Object.assign({},o.cfg):Object.assign({},o.cfg,nw.cfg);if(!nw.growthFilled){['gSku','gSt','bSku','bSt'].forEach(k=>{if(o[k])nw[k]=o[k]});got.push('(giữ nguyên 2 bảng Growth đang dùng vì file để trống)')}}MS[m]=masters[m];META[m].src='import';META[m].dirty=true;got.push(LABEL[m])}}
+  const got=[];if(masters.hub&&!only&&CH&&MS.lichve){MS.lichve.cfg.hub=masters.hub;META.lichve.dirty=true;got.push('HUB')}if(masters.ncc&&!only&&CH&&MS.lichve){MS.lichve.cfg.ncc=masters.ncc;META.lichve.dirty=true;got.push('NCC × tỉnh')}for(const m of MASTERS){if(only&&only!==m)continue;if(masters[m]){if(m==='lichve'&&MS.lichve){const o=MS.lichve,nw=masters[m];nw.cfg=CH?Object.assign({},o.cfg):Object.assign({},o.cfg,nw.cfg);if(!nw.growthFilled){['gSku','gSt','bSku','bSt'].forEach(k=>{if(o[k])nw[k]=o[k]});got.push('(giữ nguyên 2 bảng Growth đang dùng vì file để trống)')}}MS[m]=masters[m];META[m].src='import';META[m].dirty=true;got.push(LABEL[m])}}
   if(log)MLOG=log;if(!got.length){toast(only?'File không có sheet '+LABEL[only]+'.':'File không có sheet master nào.');return}
   toast('Đã nhập '+got.join(', ')+' — bấm "Lưu lên app" để lưu chung');renderSaveBar();recompute();
 }
@@ -1362,8 +1369,8 @@ let rt;function later(){clearTimeout(rt);rt=setTimeout(recompute,300)}
 function recompute(){
   const t=performance.now();
   if(CH){ensureHub();(MS.danhmuc.skus||[]).forEach(x=>{const mn=x.minN||{};x.flags=E.NG.map(g=>+mn[g]>0)})}
-  try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL(),moq:CH?{gt:!!AC.gt,of:(()=>{const c=MS.lichve.cfg,H=c.hub||{},d=c.modDef!=null?+c.modDef:(AC.modDef||0);return k=>{const v=(H[String(k).toUpperCase()]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:d}})()}:null})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
-  if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
+  try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL(),moq:CH?{gt:!!AC.gt,of:moqOf()}:null})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
+  if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{modOf:moqOf(),gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
   ROWS=[];for(const S of RES.stores)for(const r of S.rows)ROWS.push({S,r});
   perf('Tính FC',performance.now()-t,ni(ROWS.length)+' dòng CH × SKU');st.aIdx=null;
   whenIdle(renderAll);
@@ -1424,7 +1431,7 @@ function renderLv(){
 document.addEventListener('change',e=>{const t=e.target,L=MS.lichve;if(!t.closest||!t.closest('#s-cfg,#s-plan,#s-growth'))return;
   if(t.dataset.plan!=null){const v=Math.round(Number(t.value));if(!isFinite(v)||v<0){toast('Số mã quy hoạch phải ≥ 0');setTimeout(renderLv);return}if(!L.cfg.plan)L.cfg.plan=planOf();L.cfg.plan[+t.dataset.plan]=v;markDirty('lichve');setTimeout(()=>{renderLv();renderDm()});return}
   if(t.dataset.cfg){const v=Number(t.value);if(!isFinite(v)||v<0){toast('Giá trị không hợp lệ');setTimeout(renderLv);return}L.cfg[t.dataset.cfg]=v}
-  else if(t.dataset.ncc!=null){const v=Number(t.value);if(!isFinite(v)||v<0){toast('MOV phải ≥ 0');setTimeout(renderLv);return}L.cfg.ncc[+t.dataset.ncc].mov=v}
+  else if(t.dataset.ncc!=null){const n=L.cfg.ncc[+t.dataset.ncc],raw=String(t.value).trim();if(t.dataset.t!=null){n.movT=n.movT||{};if(raw===''){delete n.movT[t.dataset.t]}else{const v=Number(raw);if(!isFinite(v)||v<0){toast('MOD phải ≥ 0');setTimeout(renderLv);return}n.movT[t.dataset.t]=v}}else{const v=Number(raw);if(!isFinite(v)||v<0){toast('MOV phải ≥ 0');setTimeout(renderLv);return}n.mov=v}}
   else if(t.dataset.set){L.cfg[t.dataset.set]=t.type==='checkbox'?t.checked:Number(t.value)}
     else if(t.dataset.j!=null){const v=Number(t.value);if(!isFinite(v)||v<-100||v>200){toast('%Growth phải trong khoảng −100% đến 200%');setTimeout(renderLv);return}const k=t.closest('tr').dataset.g,tb=t.closest('table').id==='tGSku'?L.gSku:L.gSt;const row=(tb[k]||(tb[k]=E.linRow(E.defaultGrowth().sku)));row[+t.dataset.j]=v/100;tb[k]=E.linRow(row)}
   else return;markDirty('lichve');setTimeout(renderLv)});
@@ -1662,8 +1669,12 @@ $('#dmCalcMin')&&$('#dmCalcMin').addEventListener('click',()=>{let n=0;MS.danhmu
   const u=(x.qc||1)*(x.qd||1),st=(N[i8]-N[i1])/(i8-i1);x.minN=Object.assign({},mn);for(let i=i1+1;i<i8;i++){x.minN[E.NG[i]]=+(Math.max(u,Math.round((N[i1]+(i-i1)*st)/u)*u)).toFixed(4)}x.flags=E.NG.map(g=>+x.minN[g]>0);n++});
   if(!n){toast('Cần ít nhất 2 mốc Min cách nhau (ví dụ N1 và N8) để nội suy');return}markDirty('danhmuc');toast('Đã tính Min cho '+n+' mã — bấm Lưu để giữ')});
 
+// MOD (MOQ) mỗi CH/ngày: HUB sheet (riêng CH) → NCC × tỉnh → mặc định
+function moqOf(){const c=MS.lichve.cfg,H=c.hub||{},d=c.modDef!=null?+c.modDef:(AC.modDef||0),T={};nccList().forEach(n=>(n.tinh||[]).forEach(t=>{const v=n.movT&&n.movT[t]!=null&&n.movT[t]!==''?+n.movT[t]:null;if(v!=null&&isFinite(v)&&!(t in T))T[t]=v}));
+  const ST=new Map(MS.phannhom.rows.map(r=>[String(r[0]).toUpperCase(),r[4]]));return k=>{k=String(k).toUpperCase();const v=(H[k]||[])[2];if(v!=null&&v!==''&&isFinite(+v))return +v;const t=ST.get(k);return t!=null&&T[t]!=null?T[t]:d}}
 function renderNcc(){const N=nccList(),cfg=MS.lichve.cfg;
-  $('#tNcc').innerHTML='<tr><th>NCC</th><th>Vùng</th><th>Tỉnh phụ trách</th><th class="n">CH</th><th class="n">MOV kg/ngày</th></tr>'+N.map((n,i)=>{const c=MS.phannhom.rows.filter(r=>(n.tinh||[]).includes(r[4])).length;return `<tr><td><b>${esc(n.name)}</b><div class="smallnote">${esc(n.nhom||'')}</div></td><td>${esc(n.vung||'')}</td><td class="smallnote">${esc((n.tinh||[]).join(', '))}</td><td class="n">${c}</td><td class="n">${inp('data-ncc="'+i+'" type="number" step="1" min="0" aria-label="MOV '+esc(n.name)+'"',n.mov||0,72)}</td></tr>`}).join('');
+  const U=AC.gt?'nghìn đ':'kg',cnt=new Map();MS.phannhom.rows.forEach(r=>cnt.set(r[4],(cnt.get(r[4])||0)+1));
+  $('#tNcc').innerHTML=`<tr><th>Tỉnh</th><th class="n">CH</th><th class="n">MOD/CH/ngày (${U})</th></tr>`+N.map((n,i)=>`<tr class="ncch"><td colspan="3"><b>${esc(n.name)}</b>${n.vung?' <span class="smallnote">· '+esc(n.vung)+'</span>':''}</td></tr>`+(n.tinh||[]).map(t=>`<tr><td>${esc(t)}</td><td class="n">${cnt.get(t)||0}</td><td class="n">${inp('data-ncc="'+i+'" data-t="'+esc(t)+'" type="number" step="any" min="0" placeholder="'+(cfg.modDef!=null?cfg.modDef:AC.modDef||0)+'" aria-label="MOD '+esc(n.name)+' '+esc(t)+'"',n.movT&&n.movT[t]!=null?n.movT[t]:'',72)}</td></tr>`).join('')).join('');
 }
 function renderMov(){
   const M=RES.mod,c=MS.lichve.cfg,U=AC.gt?'nghìn đ':'kg',v=x=>AC.gt?x.gt:x.kg,fv=x=>AC.gt?nf(x,0):nf(x,1);
