@@ -257,111 +257,156 @@ html[data-app="cahoi"] .tw:has(#tByD),html[data-app="cahoi"] .tw:has(#tByT){max-
 #tPv tr.tot td{border-top:2px solid var(--line);font-weight:700;background:var(--soft)}
 th.sortable{cursor:pointer}th.sortable[data-arrow]:not([data-arrow=""])::after{content:attr(data-arrow);margin-left:4px;font-size:9px}
 .pill.leaf{background:var(--leaf-soft);color:var(--leaf)}.pill.high{background:var(--high-soft);color:var(--high)}.pill.crit{background:var(--crit-soft);color:var(--crit)}
+.kp>.bad .v{color:var(--crit)}.kp>.warn .v{color:var(--high)}.kp2>.warn .v{color:var(--high)}
+/*LAYOUT 1 trang · 2 cột*/
+:root{--fs:13px}
+html{font-size:var(--fs)!important}
+body{font-size:1rem!important;line-height:1.45;padding-bottom:64px}
+.top1{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line)}
+.top1 .in{display:flex;align-items:center;gap:8px;padding:6px 16px;flex-wrap:wrap;max-width:1760px;margin:0 auto}
+.top1 .brand b{font-size:1.15rem}.top1 .brand span{color:var(--muted);font-size:.82rem;margin-left:6px}
+.top1 .sp{flex:1}
+.top1 .pill:empty{display:none}
+.pill{font-size:.78rem!important;padding:1px 8px!important}
+.btn{height:26px!important;min-height:0!important;padding:0 10px!important;font-size:.86rem!important;border-radius:6px!important;display:inline-flex!important;align-items:center;gap:4px;line-height:1!important;white-space:nowrap}
+.btn.sm{height:22px!important;padding:0 7px!important;font-size:.78rem!important}
+.btn.ghost{background:none!important;border-color:transparent!important;color:var(--muted)!important}
+.btn.ghost:hover{background:var(--soft)!important;color:var(--ink)!important}
+.btn.sav{min-width:0!important}
+.seg button{height:24px!important;padding:0 9px!important;font-size:.8rem!important}
+input[type=text],input[type=number],select{height:26px!important;min-height:0!important;font-size:.86rem!important;padding:0 8px!important}
+.chk{font-size:.86rem}
+.wrap2{display:grid;grid-template-columns:minmax(330px,1fr) minmax(0,2fr);gap:14px;padding:12px 16px 30px;max-width:1760px;margin:0 auto}
+.left{position:sticky;top:50px;align-self:start;max-height:calc(100vh - 60px);overflow:auto;padding-right:3px;scrollbar-width:thin}
+.right{min-width:0}
+@media (max-width:1100px){.wrap2{grid-template-columns:minmax(0,1fr)}.left{position:static;max-height:none;overflow:visible}}
+.colh{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:2px 0 6px}
+.gh{display:flex;align-items:center;gap:8px;margin:10px 0 6px}.gh h2{font-size:.85rem!important;margin:0!important;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.gh .ln{flex:1;height:1px;background:var(--line)}
+.jump{position:sticky;top:44px;z-index:30;display:flex;gap:4px;flex-wrap:wrap;background:var(--bg);padding:4px 0 6px}
+.jump a{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--ink);text-decoration:none;font-size:.8rem;font-weight:600}
+.jump a.on{border-color:var(--leaf);color:var(--leaf)}
+.jump .n{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line);flex:none;display:inline-block}.dot.ok{background:var(--leaf)}.dot.warn{background:var(--high)}.dot.bad{background:var(--crit)}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;scroll-margin-top:84px}
+details.sec>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;min-height:36px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary .chev{display:inline-block;width:10px;font-size:.7rem;color:var(--muted);transition:transform .15s}
+details.sec[open]>summary .chev{transform:rotate(90deg)}
+details.sec>summary .num{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);background:var(--soft);border-radius:4px;padding:0 5px}
+details.sec>summary h3{font-size:1rem!important;margin:0!important;font-weight:700;white-space:nowrap}
+details.sec>summary .sum{color:var(--muted);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+details.sec>summary .act{margin-left:auto;display:flex;gap:6px;align-items:center;flex:none}
+details.sec>.body{padding:6px 12px 12px;border-top:1px solid var(--line)}
+.right .row,.left .row{margin:6px 0;gap:8px}
+.hint{font-size:.78rem;color:var(--muted);margin:4px 0 6px}
+.kv{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 0;font-size:.88rem}.kv input{width:80px}
+.drop2{display:flex;flex-direction:column;gap:2px;border:1px dashed var(--line);border-radius:6px;padding:8px 10px;color:var(--muted);font-size:.85rem;cursor:pointer;margin:4px 0 8px}
+.drop2.over{border-color:var(--leaf);background:var(--leaf-soft)}.drop2 .fn{color:var(--ink)}
+.kp2{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px}
+.kp2>div{padding:5px 9px;border-bottom:1px solid var(--line)}.kp2>div:nth-child(odd){border-right:1px solid var(--line)}.kp2>div:nth-last-child(-n+2){border-bottom:0}
+.kp2 .l,.kp .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}.kp2 .v{font-weight:700;font-size:1.1rem;line-height:1.3}.kp2 .d,.kp .d{font-size:.75rem;color:var(--muted)}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:4px 0}
+.kp>div{padding:6px 10px;border-right:1px solid var(--line)}.kp>div:last-child{border-right:0}.kp .v{font-size:1.2rem;font-weight:700;line-height:1.3}.kp .v.w{color:var(--high)}.kp .v.b{color:var(--crit)}.kp .kst{display:block;font-size:.95rem}
+.log div{font-size:.82rem;padding:1px 0}
+.note2{background:var(--high-soft);color:var(--high);border-radius:6px;padding:5px 10px;font-size:.82rem;margin:6px 0}
+.tw{border:1px solid var(--line);border-radius:6px}
+table{font-size:.86rem!important}
+th{font-size:.68rem!important;padding:5px 7px!important}
+td{padding:3px 7px!important}
+td.n,.mono{font-size:.84rem}
+.tree{max-height:none!important;border:0!important;padding:0!important}
+.tree label{font-size:.85rem!important}
+.lg{margin:4px 0 0 16px;padding:0;font-size:.85rem}.lg li{margin:3px 0}
+#saveBar{bottom:12px!important;padding:6px 10px!important;font-size:.86rem}
+#tMov input.cellin{width:84px}
+#tMov tr.ncc td{font-weight:700;background:var(--soft)}#tMov tr.tn td:first-child{padding-left:26px!important;color:var(--muted)}
+#tMov .tg{cursor:pointer;color:var(--muted);display:inline-block;width:14px}
+.srcline{font-size:.78rem!important}.srcline .pill{font-size:.72rem!important}
+/*ENDLAYOUT*/
 </style>
 </head><body>
-<header class="top">
-  <div class="wrap">
-    <div class="bar">
-      <div class="brand"><b>FC Hàng Hóa</b><span>FC Ambient theo CTKM · WinMart+ Rural · bản 31/10</span></div>
-      <div class="src"><span id="dbState" class="pill"></span><span id="mState" class="pill"></span><span id="srcInfo"></span></div>
-    </div>
-    <nav class="tabs" id="tabs">
-      <a href="#du-lieu"><span class="num">1</span>Dữ liệu & vùng</a>
-      <a href="#thong-so"><span class="num">2</span>Thông số FC</a>
-      <a href="#mov"><span class="num">3</span>MOV NCC</a>
-      <span class="sep" aria-hidden="true"></span>
-      <a href="#tong-quan">Tổng quan</a>
-      <a href="#canh-bao">Cảnh báo</a>
-      <a href="#data-fc">Data FC</a>
-      <a href="#logic">Logic</a>
-    </nav>
-  </div>
-</header>
+<header class="top1"><div class="in">
+  <div class="brand"><b>FC Hàng Hóa</b><span>FC Ambient theo CTKM · bản 31/10</span></div>
+  <span id="dbState" class="pill"></span><span id="mState" class="pill"></span><span id="srcInfo" class="pill"></span>
+  <div class="sp"></div>
+  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="12px">A−</button><button type="button" data-v="13px">A</button><button type="button" data-v="14.5px">A+</button></div>
+  <button class="btn ghost" id="exAll" type="button">Mở tất cả</button><button class="btn ghost" id="coAll" type="button">Thu tất cả</button>
+  <label class="btn imp" for="inFile">Import</label><button class="btn tpl" id="btnTpl" type="button">Template</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
+</div></header>
+<input type="file" id="inFile" accept=".xlsx,.xlsb,.xlsm,.xls" hidden>
 
-<main class="wrap">
-  <div class="note" id="saveBar" hidden></div>
+<div class="wrap2">
+<aside class="left">
+  <div class="colh">Cấu hình & dữ liệu</div>
 
-  <section class="view" id="v-du-lieu">
-    <div class="shead"><div><h2>Bước 1 · Dữ liệu & vùng</h2><p class="sub">Master (Storelist, SKU, Phân nhóm CH × MCH3) đọc trực tiếp từ Sheet gốc. Mỗi đợt CTKM: Import file gồm sheet "SKUs" (danh mục CTKM + MOV) và sheet "Sale" (Store · Article · Sales Quantity · Closing Quantity · Chờ giao).</p></div>
-      <div class="row"><label class="btn upl imp" for="inFile">Import</label><input type="file" id="inFile" accept=".xlsx,.xlsb,.xlsm,.xls" hidden><button class="btn tpl" id="btnTpl" type="button">Template</button></div></div>
-    <label class="drop slim" id="drop" for="inFile"><b>Kéo thả file Template (SKUs + Sale) vào đây</b><span class="fn" id="fn"></span></label>
-    <div class="kpis" id="dKpi"></div>
-    <div class="grid two" style="align-items:start">
-      <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Chọn vùng (Miền › GĐV › Tỉnh)</h3><div class="row"><button class="btn" id="selAll" type="button">Chọn tất cả</button><button class="btn" id="selNone" type="button">Bỏ chọn</button></div></div>
-        <p class="smallnote">Không chọn tỉnh nào = tất cả CH có trong file Sale. Số trong ngoặc: CH có trong file Sale (hoặc CH đang hoạt động khi chưa có Sale).</p>
-        <div class="tree" id="tree"></div></div>
-      <div class="grid" style="grid-template-columns:minmax(0,1fr)">
-        <div class="card"><h3>Tham số chung</h3><div class="cfg4" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-          <label class="f">Số ngày của dữ liệu Sale (ngày KD)<input type="number" id="ngayKD" min="1" step="1"></label>
-        </div></div>
-        <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Sheet gốc</h3><button class="btn" id="mReload" type="button">Tải lại</button></div><div class="log" id="mLog"></div></div>
-        <div class="card"><h3>Kiểm tra dữ liệu</h3><div class="log" id="dLog"><div>Chưa có file.</div></div></div>
-      </div>
-    </div>
-  </section>
+  <details class="sec" id="s-data" open><summary><span class="chev">▶</span><span class="num">A</span><h3>Import dữ liệu</h3><span class="sum" id="sum-data"></span></summary>
+    <div class="body">
+      <label class="drop2" id="drop" for="inFile"><span>⇪ Kéo thả / bấm chọn file Template (sheet SKUs + sheet Sale)</span><b class="fn" id="fn"></b></label>
+      <div class="kp2" id="dKpi"></div>
+      <div class="log" id="mLog"></div><div class="row" style="margin:2px 0"><button class="btn sm ghost" id="mReload" type="button">Tải lại Sheet gốc</button></div>
+      <div class="log" id="dLog"></div>
+    </div></details>
 
-  <section class="view" id="v-thong-so" hidden>
-    <div class="shead"><div><h2>Bước 2 · Thông số FC theo SKU</h2><div class="srcline" id="src-params"></div></div>
-      <div class="row"><button class="btn" id="btnMin" type="button" title="Nội suy Min giữa mốc đầu và mốc cuối đã nhập (cần ≥ 2 mốc cách nhau)">Tính Min</button><button class="btn sav" data-save="params" type="button">Lưu</button></div></div>
-    <div class="row fl"><input type="text" id="qP" placeholder="Tìm mã / tên SP" aria-label="Tìm SKU"><select id="pNcc" aria-label="NCC"></select><label class="chk"><input type="checkbox" id="pMin"> Chỉ mã đã có Min</label><label class="chk"><input type="checkbox" id="pRef" checked> Hiện Sale BQ/CH</label>
-      <div class="seg" id="pView" role="group" aria-label="Kiểu xem"><button type="button" data-v="short" aria-pressed="true">Rút gọn</button><button type="button" data-v="full" aria-pressed="false">Đầy đủ</button></div></div>
-    <div class="note" id="pNote" hidden></div>
-    <div class="tw" style="max-height:72vh"><table id="tP"></table></div>
-  </section>
+  <details class="sec" id="s-cfg" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Tham số chung</h3><span class="sum" id="sum-cfg"></span></summary>
+    <div class="body">
+      <div class="kv"><span>Số ngày của dữ liệu Sale (ngày KD)</span><input type="number" id="ngayKD" data-c="ngayKD" min="1" step="1"></div>
+      <div class="kv"><span>Cover mặc định (ngày)</span><input type="number" data-c="defCover" min="0" step="1"></div>
+      <div class="kv"><span>Lock mặc định (× Min)</span><input type="number" data-c="defLock" min="0" step="0.5"></div>
+      <div class="kv"><span>%Min MOV mặc định</span><input type="number" data-c="defPct" min="0" max="100" step="5"></div>
+      <p class="hint">Mặc định áp cho mã / NCC chưa khai báo riêng. Lưu trên máy này.</p>
+    </div></details>
 
-  <section class="view" id="v-mov" hidden>
-    <div class="shead"><div><h2>Bước 3 · MOV theo NCC × Tỉnh</h2><p class="sub">MOV tính bằng tiền (GT FC theo giá mua) cho mỗi CH × NCC. Ô tỉnh để trống = dùng MOV "Tất cả tỉnh".</p><div class="srcline" id="src-mov"></div></div>
-      <div class="row"><button class="btn sav" data-save="mov" type="button">Lưu</button></div></div>
-    <div class="tw" style="max-height:72vh"><table id="tMov"></table></div>
-  </section>
+  <details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">C</span><h3>Vùng</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
+    <div class="body"><p class="hint">Không chọn tỉnh nào = tất cả CH có trong file Sale.</p><div class="tree" id="tree"></div></div></details>
 
-  <section class="view" id="v-tong-quan" hidden>
-    <div><h2>Tổng quan FC</h2><p class="sub" id="ovSub"></p></div>
-    <div class="kpis" id="kpis"></div>
-    <div class="card">
-      <div class="row fl" style="justify-content:space-between"><div class="seg" id="pvView" role="group" aria-label="Pivot"><button type="button" data-v="mien">Miền › Tỉnh</button><button type="button" data-v="gdv">GĐV › QLKV</button><button type="button" data-v="nhom">Nhóm N</button><button type="button" data-v="ncc">NCC › SKU</button><button type="button" data-v="mch3">MCH3 › SKU</button><button type="button" data-v="store">Cửa hàng</button></div>
-        <div class="row fl"><select id="pvMch3" aria-label="MCH3"></select><select id="pvNcc" aria-label="NCC"></select><select id="pvSku" aria-label="SKU"></select></div></div>
-      <p class="smallnote">Bấm dòng có ▸ để mở cấp dưới. Bấm tiêu đề cột để sắp xếp.</p>
-      <div class="tw" style="max-height:70vh"><table id="tPv"></table></div><div class="pager" id="pgPv"></div>
-    </div>
-  </section>
+  <details class="sec" id="s-mov" open><summary><span class="chev">▶</span><span class="num">D</span><h3>MOV NCC × Tỉnh</h3><span class="sum" id="sum-mov"></span><span class="act"><button class="btn sm sav" data-save="mov" type="button">Lưu</button></span></summary>
+    <div class="body"><p class="hint">MOV tiền (GT FC theo giá mua) cho mỗi CH × NCC. Bấm ▸ để khai báo MOV riêng từng tỉnh; tỉnh để trống = dùng MOV tất cả tỉnh.</p><div class="srcline" id="src-mov"></div>
+      <div class="tw" style="max-height:none"><table id="tMov"></table></div></div></details>
 
-  <section class="view" id="v-canh-bao" hidden>
-    <div><h2>Cảnh báo · MOV & dữ liệu</h2><p class="sub">Mỗi dòng = 1 CH × NCC. Đủ MOV giữ nguyên; đạt từ %Min × MOV thì nhân SL lên cho đủ MOV; thấp hơn thì loại FC.</p></div>
-    <div class="kpis" id="cbKpi"></div>
-    <div class="note" id="cbData" hidden></div>
-    <div class="row fl" style="margin:10px 0"><select id="cbStt" aria-label="Trạng thái"><option value="">Tất cả trạng thái</option><option value="nang">Nâng đủ MOV</option><option value="loai">Loại FC</option><option value="du">Đủ MOV</option><option value="none">Chưa cài MOV</option><option value="zero">Không có FC</option></select><select id="cbNcc" aria-label="NCC"></select><select id="cbGdv" aria-label="GĐV"></select><input type="text" id="cbQ" placeholder="Tìm mã / tên CH" aria-label="Tìm CH"></div>
-    <div class="tw" style="max-height:66vh"><table id="tCb"></table></div><div class="pager" id="pgCb"></div>
-  </section>
+  <details class="sec" id="s-logic"><summary><span class="chev">▶</span><span class="num">E</span><h3>Logic tính FC</h3><span class="sum">công thức v9.2.8</span></summary>
+    <div class="body"><ol class="lg">
+      <li><b>Danh sách tính</b>: CH có trong file Sale (lọc theo vùng) × SKU trong sheet SKUs. CH × SKU không có dòng Sale coi như Bán = Tồn = 0.</li>
+      <li><b>Nhóm N</b>: tra PhanNhomCH theo Mã CH + MCH3 của SKU; không có thì N6.</li>
+      <li><b>Nhu cầu</b> = Sale × (1 + Growth%) ÷ Ngày KD × Cover + Min − Tồn × (+Stock) − Chờ giao × (+CG).</li>
+      <li><b>SL FC</b> = QC × làm tròn(max(0, min(Nhu cầu, Lock × Min)) ÷ QC); Tồn = 0 thì SL FC = 0; Min = 0 thì không có FC. GT = SL × Giá mua (trống thì COGS gốc).</li>
+      <li><b>MOV</b>: cộng GT FC theo CH × NCC × Tỉnh. ≥ MOV giữ; ≥ %Min × MOV nhân SL lên cho đủ MOV (làm tròn lên QC); thấp hơn loại FC. NCC chưa cài MOV giữ nguyên.</li>
+      <li><b>Tính Min</b>: nhập ≥ 2 mốc N, app nội suy nhóm ở giữa theo QC.</li>
+      <li>Khác v9.2.8: sửa lỗi tráo +Stock / +CG; chỉ dựng dòng cho CH có trong file Sale; Import không xóa Min đã cài; Thông số + MOV lưu chung.</li>
+    </ol></div></details>
+</aside>
 
-  <section class="view" id="v-data-fc" hidden>
-    <div class="row" style="justify-content:space-between"><div><h2>Data FC</h2><p class="sub">Chi tiết CH × SKU. SL Final = SL sau xử lý MOV.</p></div>
-      <div class="row"><button class="btn pri" id="btnExport">Tải Data FC (Excel)</button></div></div>
-    <div class="row fl"><select id="fGdv" aria-label="GĐV"></select><select id="fTinh" aria-label="Tỉnh"></select><select id="fNcc" aria-label="NCC"></select><select id="fMov" aria-label="MOV"><option value="">MOV: tất cả</option><option value="du">Đủ MOV</option><option value="nang">Nâng đủ MOV</option><option value="loai">Loại FC</option><option value="none">Chưa cài MOV</option></select><input type="text" id="fQ" placeholder="Tìm mã CH / SP / tên" aria-label="Tìm"><label class="chk"><input type="checkbox" id="fPos" checked> Chỉ dòng có FC</label></div>
-    <div class="tw" style="max-height:70vh"><table id="tFc"></table></div><div class="pager" id="pgFc"></div>
-  </section>
+<main class="right">
+  <nav class="jump" id="jump">
+    <a href="#s-ts" data-d="ts"><span class="dot"></span>Min & thông số</a><a href="#s-kpi" data-d="kpi"><span class="dot"></span>Recap</a><a href="#s-pv" data-d="pv"><span class="dot"></span>Pivot</a><a href="#s-cb" data-d="cb"><span class="dot"></span>Review MOV</a><a href="#s-fc" data-d="fc"><span class="dot"></span>Data FC</a>
+  </nav>
 
-  <section class="view" id="v-logic" hidden>
-    <div><h2>Logic tính FC</h2><p class="sub">Giữ công thức FC Hàng Hóa v9.2.8, sửa lỗi +Stock / +CG bị tráo.</p></div>
-    <div class="grid g2">
-      <div class="card"><h3>Chuỗi tính</h3><div class="flow">
-        <div><span><b>Danh sách tính</b>: CH có trong file Sale (lọc theo vùng đã chọn) × SKU trong sheet "SKUs" của Template. CH × SKU không có dòng Sale coi như Bán = Tồn = 0.</span></div>
-        <div><span><b>Nhóm N</b> của CH × SKU: tra PhanNhomCH theo Mã CH + MCH3 của SKU (sheet SKUs gốc). Không tra được thì mặc định N6 (đếm ở tab Cảnh báo).</span></div>
-        <div><span><b>Min</b> = ô N1–N8 của SKU (bước 2). Min = 0 thì CH thuộc nhóm đó không có FC (vì bị chặn trần Lock × Min).</span></div>
-        <div><span><b>Nhu cầu</b> = Sale × (1 + Growth%) ÷ Ngày KD × Cover + Min − Tồn × (+Stock) − Chờ giao × (+CG). +Stock, +CG = 1: có trừ; 0: không trừ.</span></div>
-        <div><span><b>SL FC</b> = QC × làm tròn( max(0, min(Nhu cầu, Lock × Min)) ÷ QC ). CH × SKU không còn tồn (Tồn = 0) thì SL FC = 0. GT = SL × Giá mua (trống thì COGS sheet gốc).</span></div>
-        <div><span><b>MOV</b>: cộng GT FC theo CH × NCC × Tỉnh, so với MOV của NCC tại tỉnh đó (trống thì "Tất cả tỉnh"). ≥ MOV: giữ. ≥ %Min × MOV: nhân SL từng SKU với MOV ÷ GT rồi làm tròn lên bội QC. Thấp hơn: loại FC (SL Final = 0). NCC chưa cài MOV: giữ nguyên.</span></div>
-        <div><span><b>Tính Min</b>: nhập ít nhất 2 mốc (ví dụ N1 và N8), app nội suy các nhóm ở giữa, làm tròn theo QC (bước nhỏ hơn QC thì theo ước số của QC).</span></div>
-      </div></div>
-      <div class="card"><h3>Khác bản v9.2.8</h3><ol class="issues">
-        <li>Bản cũ nhân Tồn với cờ +CG và Chờ giao với cờ +Stock (tráo cột). Bản mới: Tồn × +Stock, Chờ giao × +CG.</li>
-        <li>Chỉ dựng dòng cho CH có trong file Sale (bản cũ nhân chéo toàn bộ Storelist). SL FC không đổi vì CH không có tồn thì FC = 0; Sale BQ/CH tính trên các CH này.</li>
-        <li>Import Template giữ lại Min và tham số đã lưu của các mã cũ thay vì ghi đè về 0.</li>
-        <li>Thông số SKU và MOV lưu chung (Google Sheet Portal), mọi người mở app đều thấy cùng cấu hình.</li>
-      </ol></div>
-    </div>
-  </section>
+  <div class="gh"><h2>Khai báo</h2><span class="ln"></span></div>
+  <details class="sec" id="s-ts" open><summary><span class="chev">▶</span><span class="num">1</span><h3>Min & thông số SKU</h3><span class="sum" id="sum-ts"></span><span class="act"><button class="btn sm" id="btnMin" type="button" title="Nội suy Min giữa mốc đầu và mốc cuối đã nhập">Tính Min</button><button class="btn sm sav" data-save="params" type="button">Lưu</button></span></summary>
+    <div class="body">
+      <div class="row fl"><input type="text" id="qP" placeholder="Tìm mã / tên SP" aria-label="Tìm SKU" style="width:180px"><select id="pNcc" aria-label="NCC"></select><label class="chk"><input type="checkbox" id="pMin"> Chỉ mã có Min</label><label class="chk"><input type="checkbox" id="pRef" checked> Sale BQ/CH</label>
+        <div class="seg" id="pView" role="group" aria-label="Kiểu xem"><button type="button" data-v="short" aria-pressed="true">Rút gọn</button><button type="button" data-v="full" aria-pressed="false">Đầy đủ</button></div><span class="srcline" id="src-params"></span></div>
+      <div class="note2" id="pNote" hidden></div>
+      <div class="tw" style="max-height:62vh"><table id="tP"></table></div>
+    </div></details>
+
+  <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
+  <details class="sec" id="s-kpi" open><summary><span class="chev">▶</span><span class="num">2</span><h3>Recap</h3><span class="sum" id="sum-kpi"></span></summary>
+    <div class="body"><p class="hint" id="ovSub"></p><div class="kp" id="kpis"></div></div></details>
+  <details class="sec" id="s-pv" open><summary><span class="chev">▶</span><span class="num">3</span><h3>Pivot</h3><span class="sum" id="sum-pv"></span><span class="act"><div class="seg" id="pvView" role="group" aria-label="Pivot"><button type="button" data-v="mien">Miền›Tỉnh</button><button type="button" data-v="gdv">GĐV›QLKV</button><button type="button" data-v="nhom">Nhóm N</button><button type="button" data-v="ncc">NCC›SKU</button><button type="button" data-v="mch3">MCH3›SKU</button><button type="button" data-v="store">CH</button></div></span></summary>
+    <div class="body"><div class="row fl"><select id="pvMch3" aria-label="MCH3"></select><select id="pvNcc" aria-label="NCC"></select><select id="pvSku" aria-label="SKU"></select><span class="hint" style="margin:0">Bấm dòng ▸ để mở cấp dưới · bấm tiêu đề cột để sắp xếp</span></div>
+      <div class="tw" style="max-height:62vh"><table id="tPv"></table></div><div class="pager" id="pgPv"></div></div></details>
+
+  <div class="gh"><h2>Review</h2><span class="ln"></span></div>
+  <details class="sec" id="s-cb"><summary><span class="chev">▶</span><span class="num">4</span><h3>Review MOV</h3><span class="sum" id="sum-cb"></span></summary>
+    <div class="body"><div class="kp" id="cbKpi"></div><div class="note2" id="cbData" hidden></div>
+      <div class="row fl"><select id="cbStt" aria-label="Trạng thái"><option value="">Tất cả trạng thái</option><option value="nang">Nâng đủ MOV</option><option value="loai">Loại FC</option><option value="du">Đủ MOV</option><option value="none">Chưa cài MOV</option><option value="zero">Không có FC</option></select><select id="cbNcc" aria-label="NCC"></select><select id="cbGdv" aria-label="GĐV"></select><input type="text" id="cbQ" placeholder="Tìm mã / tên CH" aria-label="Tìm CH"></div>
+      <div class="tw" style="max-height:62vh"><table id="tCb"></table></div><div class="pager" id="pgCb"></div></div></details>
+  <details class="sec" id="s-fc"><summary><span class="chev">▶</span><span class="num">5</span><h3>Data FC</h3><span class="sum" id="sum-fc"></span></summary>
+    <div class="body"><div class="row fl"><select id="fGdv" aria-label="GĐV"></select><select id="fTinh" aria-label="Tỉnh"></select><select id="fNcc" aria-label="NCC"></select><select id="fMov" aria-label="MOV"><option value="">MOV: tất cả</option><option value="du">Đủ MOV</option><option value="nang">Nâng đủ MOV</option><option value="loai">Loại FC</option><option value="none">Chưa cài MOV</option></select><input type="text" id="fQ" placeholder="Tìm mã CH / SP / tên" aria-label="Tìm"><label class="chk"><input type="checkbox" id="fPos" checked> Chỉ dòng có FC</label></div>
+      <div class="tw" style="max-height:62vh"><table id="tFc"></table></div><div class="pager" id="pgFc"></div></div></details>
 </main>
+</div>
+<div class="note" id="saveBar" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="busy" id="busy" hidden><span id="busyMsg">Đang xử lý…</span></div>
 
@@ -421,7 +466,7 @@ th.sortable{cursor:pointer}th.sortable[data-arrow]:not([data-arrow=""])::after{c
       if (k) { if (seen.has(k)) dup++; else { seen.add(k); const o = { maSP: k, tenSP: S(r[1]), dvt: S(r[2]) || 'G1', qc: Math.max(1, Math.round(num(r[3])) || 1), giaMua: num(r[4]), giaThuong: num(r[5]), giaKM: num(r[6]), dienGiai: S(r[7]), tgKM: S(r[8]), ncc: S(r[9]) || 'Chia hàng', set: {} };
           for (const j in opt) { const v = numOrNull(r[j]); if (v != null) o.set[opt[j]] = v; } skus.push(o); } }
       const mn = S(r[12]), mt = S(r[13]);
-      if (mn && mt) { const m = mov[mn] || (mov[mn] = { ncc: mn, pctMinMOV: 0.7, allTinh: 0, tinhMOV: {} }); if (/^tất cả|^all|^\*$/i.test(mt)) m.allTinh = num(r[14]); else m.tinhMOV[mt] = num(r[14]); const p = numOrNull(r[15]); if (p != null) m.pctMinMOV = p > 1 ? p / 100 : p; }
+      if (mn && mt) { const m = mov[mn] || (mov[mn] = { ncc: mn, pctMinMOV: null, allTinh: 0, tinhMOV: {} }); if (/^tất cả|^all|^\*$/i.test(mt)) m.allTinh = num(r[14]); else m.tinhMOV[mt] = num(r[14]); const p = numOrNull(r[15]); if (p != null) m.pctMinMOV = p > 1 ? p / 100 : p; }
     }
     log && log.push({ lvl: skus.length ? 'ok' : 'crit', msg: `Template: ${skus.length} SKU${dup ? ` (bỏ ${dup} dòng trùng mã)` : ''}, MOV cho ${Object.keys(mov).length} NCC.` });
     return { skus, mov: Object.values(mov) };
@@ -472,7 +517,7 @@ th.sortable{cursor:pointer}th.sortable[data-arrow]:not([data-arrow=""])::after{c
     const groups = [];
     for (const g of G.values()) { const m = ml[g.ncc]; g.gt = g.items.reduce((a, r) => a + r.gtFC, 0); g.sl = g.items.reduce((a, r) => a + r.slFC, 0);
       if (!m) { g.status = 'none'; g.M = null; groups.push(g); continue; }
-      const M0 = (m.tinhMOV && m.tinhMOV[g.tinh] != null && m.tinhMOV[g.tinh] !== '') ? Number(m.tinhMOV[g.tinh]) : Number(m.allTinh) || 0; const pct = m.pctMinMOV != null ? Number(m.pctMinMOV) : 0.7; g.M = M0; g.pct = pct;
+      const M0 = (m.tinhMOV && m.tinhMOV[g.tinh] != null && m.tinhMOV[g.tinh] !== '') ? Number(m.tinhMOV[g.tinh]) : Number(m.allTinh) || 0; const pct = m.pctMinMOV != null ? Number(m.pctMinMOV) : (cfg.defPct != null ? Number(cfg.defPct) / 100 : 0.7); g.M = M0; g.pct = pct;
       if (g.gt <= 0) { g.status = 'zero'; g.items.forEach(r => { r.mov = 'zero'; r.movVal = M0; }); }
       else if (g.gt >= M0) { g.status = 'du'; g.items.forEach(r => { r.mov = 'du'; r.movVal = M0; }); }
       else if (g.gt >= M0 * pct) { const k = M0 / g.gt; g.status = 'nang'; g.k = k; g.items.forEach(r => { r.slFinal = r.slFC > 0 ? Math.ceil(r.slFC * k / r.qc - 1e-9) * r.qc : 0; r.gtFinal = r.slFinal * r.cogs; r.mov = 'nang'; r.movVal = M0; r.movK = k; }); }
@@ -523,7 +568,7 @@ const MOVLAB={du:['Đủ MOV','leaf'],nang:['Nâng đủ MOV','high'],loai:['Lo�
 const movPill=k=>{const m=MOVLAB[k]||MOVLAB.none;return `<span class="pill ${m[1]}">${m[0]}</span>`};
 
 // ---------- STATE ----------
-const ST={stores:{},skus:{},nhom:{},sale:null,saleFile:'',recap:[],params:{},mov:[],cfg:{ngayKD:30,sel:[]},R:null,mOk:false};
+const ST={stores:{},skus:{},nhom:{},sale:null,saleFile:'',recap:[],params:{},mov:[],cfg:{ngayKD:30,sel:[],defCover:14,defLock:2,defPct:70},R:null,mOk:false};
 const META={params:{dirty:false,savedAt:null},mov:{dirty:false,savedAt:null}};
 const LABEL={params:'Thông số FC',mov:'MOV NCC'};
 const UI={pView:'short',pv:'mien',open:new Set(),pvPage:0,cbPage:0,fPage:0,sort:{}};
@@ -608,10 +653,10 @@ function applyTemplate(T){
   if(T.mov.length){T.mov.forEach(m=>{const i=ST.mov.findIndex(x=>x.ncc===m.ncc);if(i>=0)ST.mov[i]=m;else ST.mov.push(m)});META.mov.dirty=true}
   META.params.dirty=true;buildRecap();renderSaveBar();
 }
-function buildRecap(){ST.recap=(ST.recapSrc||[]).map(o=>{const p=Object.assign({},H.PDEF,ST.params[o.maSP]||{});const r=Object.assign({},o,p);delete r.set;return r})}
+function buildRecap(){ST.recap=(ST.recapSrc||[]).map(o=>{const p=Object.assign({},H.PDEF,{coverDay:Number(ST.cfg.defCover)||0,lockMax:Number(ST.cfg.defLock)||0},ST.params[o.maSP]||{});const r=Object.assign({},o,p);delete r.set;return r})}
 $('#inFile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)onFile(f)});
 {const dz=$('#drop');['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));dz.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)onFile(f)})}
-$('#ngayKD').addEventListener('change',e=>{const v=Math.round(Number(e.target.value));if(!(v>0)){toast('Số ngày phải > 0');e.target.value=ST.cfg.ngayKD;return}ST.cfg.ngayKD=v;lsSet('cfg',ST.cfg);later()});
+$$('[data-c]').forEach(el=>el.addEventListener('change',e=>{const k=el.dataset.c,v=Number(el.value);if(!isFinite(v)||v<0||(k==='ngayKD'&&!(v>0))||(k==='defPct'&&v>100)){toast('Giá trị không hợp lệ');el.value=ST.cfg[k];return}ST.cfg[k]=k==='ngayKD'?Math.round(v):v;lsSet('cfg',ST.cfg);later()}));
 
 // ---------- TÍNH ----------
 let rt;function later(){clearTimeout(rt);rt=setTimeout(recompute,250)}
@@ -619,12 +664,12 @@ function recompute(){buildRecap();
   const t=performance.now();
   try{ST.R=H.compute({stores:ST.stores,skus:ST.skus,nhom:ST.nhom,sale:ST.sale,recap:ST.recap,mov:ST.mov,sel:sel()},ST.cfg)}catch(e){console.error(e);toast('Lỗi tính FC: '+e.message);return}
   ST.R.ms=performance.now()-t;renderAll()}
-function renderAll(){[renderData,renderTree,renderP,renderMov,renderOv,renderCb,renderFc,renderSaveBar,renderSrc].forEach(f=>{try{f()}catch(e){console.error(f.name,e)}})}
+function renderAll(){[renderData,renderTree,renderP,renderMov,renderOv,renderCb,renderFc,renderSaveBar,renderSrc,renderSums].forEach(f=>{try{f()}catch(e){console.error(f.name,e)}})}
 
 // ---------- 1 · DỮ LIỆU ----------
 function renderData(){
-  $('#ngayKD').value=ST.cfg.ngayKD;const R=ST.R;
-  const k=(l,v,d,c='')=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  $$('[data-c]').forEach(el=>{if(document.activeElement!==el)el.value=ST.cfg[el.dataset.c]});const R=ST.R;
+  const k=(l,v,d,c='')=>`<div class="${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
   $('#dKpi').innerHTML=[k('Storelist',nf(Object.keys(ST.stores).length),'CH trong Sheet gốc'),k('SKU CTKM',nf(ST.recap.length),ST.recap.length?'từ sheet SKUs của Template':'chưa Import Template',ST.recap.length?'':'warn'),
     k('Data Sale',ST.sale?nf(ST.sale.rows):'—',ST.sale?nf(ST.sale.stores.length)+' CH · '+esc(ST.saleFile):'chưa Import',ST.sale?'':'warn'),
     k('Dòng tính',R?nf(R.rows.length):'—',R?nf(R.stores)+' CH × '+nf(ST.recap.length)+' SKU'+(R.ms?' · '+nf(R.ms/1000,1)+' s':''):'')].join('');
@@ -682,15 +727,18 @@ $('#btnMin').onclick=()=>{let n=0;ST.recap.forEach(p=>{const o=Object.assign({},
 function renderMov(){
   const a=document.activeElement;if(a&&a.closest&&a.closest('#tMov')&&a.tagName==='INPUT'){if(!a.__d){a.__d=1;a.addEventListener('blur',()=>{a.__d=0;setTimeout(renderMov)},{once:true})}return}
   const nccs=uniq([...ST.recap.map(r=>r.ncc),...ST.mov.map(m=>m.ncc)]);
-  const tinhs=uniq(ST.R&&ST.R.rows.length?ST.R.rows.map(r=>r.tinh):[...ST.mov.flatMap(m=>Object.keys(m.tinhMOV||{}))]);
-  const mv=n=>ST.mov.find(m=>m.ncc===n);
-  if(!nccs.length){$('#tMov').innerHTML='<tr><td class="smallnote">Chưa có NCC — Import Template ở bước 1.</td></tr>';return}
-  const inp=(n,f,v,w=86)=>`<input class="cellin" data-ncc="${esc(n)}" data-f="${esc(f)}" type="text" inputmode="decimal" value="${v==null||v===''?'':(typeof v==='number'?nf(v):v)}" style="width:${w}px" placeholder="—">`;
-  $('#tMov').innerHTML='<tr><th>NCC</th><th class="n">SKU</th><th class="n">%Min MOV</th><th class="n">Tất cả tỉnh</th>'+tinhs.map(t=>`<th class="n">${esc(t)}</th>`).join('')+'</tr>'+nccs.map(n=>{const m=mv(n)||{};return `<tr><td><b>${esc(n)}</b>${m.ncc?'':'<div class="smallnote">chưa cài MOV → giữ nguyên FC</div>'}</td><td class="n">${ST.recap.filter(r=>r.ncc===n).length}</td><td class="n">${inp(n,'pct',m.ncc?Math.round((m.pctMinMOV??0.7)*100)+'%':'',56)}</td><td class="n">${inp(n,'all',m.ncc?m.allTinh||'':'')}</td>`+tinhs.map(t=>`<td class="n">${inp(n,'t:'+t,m.tinhMOV&&m.tinhMOV[t]!=null?m.tinhMOV[t]:'')}</td>`).join('')+'</tr>'}).join('');
+  const tinhs=uniq([...(ST.R&&ST.R.rows.length?ST.R.rows.map(r=>r.tinh):[]),...ST.mov.flatMap(m=>Object.keys(m.tinhMOV||{}))]);
+  const mv=n=>ST.mov.find(m=>m.ncc===n),dp=Number(ST.cfg.defPct)||0;
+  if(!nccs.length){$('#tMov').innerHTML='<tr><td class="hint">Chưa có NCC — Import Template.</td></tr>';return}
+  const inp=(n,f,v,w,ph)=>`<input class="cellin" data-ncc="${esc(n)}" data-f="${esc(f)}" type="text" inputmode="decimal" value="${v==null||v===''?'':(typeof v==='number'?nf(v):v)}" style="width:${w||84}px" placeholder="${ph||'—'}">`;
+  $('#tMov').innerHTML='<tr><th>NCC / Tỉnh</th><th class="n">%Min</th><th class="n">MOV</th></tr>'+nccs.map(n=>{const m=mv(n)||{},op=UI.open.has('mv|'+n),own=Object.keys(m.tinhMOV||{});
+    return `<tr class="ncc"><td><span class="tg" data-tg="${esc(n)}">${op?'▾':'▸'}</span>${esc(n)} <span class="hint" style="font-weight:400">· ${ST.recap.filter(r=>r.ncc===n).length} SKU${own.length?' · '+own.length+' tỉnh riêng':''}</span></td><td class="n">${inp(n,'pct',m.ncc&&m.pctMinMOV!=null?Math.round(m.pctMinMOV*100)+'%':'',52,dp+'%')}</td><td class="n">${inp(n,'all',m.ncc?m.allTinh||'':'',84,'chưa cài')}</td></tr>`+
+      (op?tinhs.map(t=>`<tr class="tn"><td>${esc(t)}</td><td></td><td class="n">${inp(n,'t:'+t,m.tinhMOV&&m.tinhMOV[t]!=null?m.tinhMOV[t]:'',84,'= tất cả')}</td></tr>`).join(''):own.map(t=>`<tr class="tn"><td>${esc(t)}</td><td></td><td class="n">${nf(m.tinhMOV[t])}</td></tr>`).join(''))}).join('');
 }
+$('#tMov').addEventListener('click',e=>{const t=e.target.closest('[data-tg]');if(!t)return;const k='mv|'+t.dataset.tg;UI.open.has(k)?UI.open.delete(k):UI.open.add(k);renderMov()});
 $('#tMov').addEventListener('change',e=>{const t=e.target,n=t.dataset.ncc,f=t.dataset.f;if(!n)return;const raw=String(t.value).replace(/[%\s.]/g,'').replace(',','.');
-  let m=ST.mov.find(x=>x.ncc===n);if(!m){m={ncc:n,pctMinMOV:0.7,allTinh:0,tinhMOV:{}};ST.mov.push(m)}
-  if(f==='pct'){const v=Number(raw);if(raw===''||!isFinite(v)||v<0||v>100){toast('%Min từ 0 đến 100');return}m.pctMinMOV=v/100}
+  let m=ST.mov.find(x=>x.ncc===n);if(!m){m={ncc:n,pctMinMOV:null,allTinh:0,tinhMOV:{}};ST.mov.push(m)}
+  if(f==='pct'){const v=Number(raw);if(raw===''){m.pctMinMOV=null}else{if(!isFinite(v)||v<0||v>100){toast('%Min từ 0 đến 100');return}m.pctMinMOV=v/100}}
   else{const v=raw===''?null:Number(raw);if(v!=null&&(!isFinite(v)||v<0)){toast('MOV không hợp lệ');return}if(f==='all')m.allTinh=v||0;else{const tt=f.slice(2);if(v==null)delete m.tinhMOV[tt];else m.tinhMOV[tt]=v}}
   markDirty('mov')});
 
@@ -704,7 +752,7 @@ function pager(sel,total,p,go){const pages=Math.ceil(total/PG)||1,el=$(sel);el.i
 const LV={mien:[r=>r.mien||'—',r=>r.tinh||'—','Miền','Tỉnh'],gdv:[r=>r.gdv||'—',r=>r.qlkv||'—','GĐV','QLKV'],nhom:[r=>r.nhomN,null,'Nhóm N'],ncc:[r=>r.ncc,r=>r.maSP+' · '+r.tenSP,'NCC','SKU'],mch3:[r=>r.mch3||'(Chưa có MCH3)',r=>r.maSP+' · '+r.tenSP,'MCH3','SKU'],store:[r=>r.maCH+' · '+r.tenCH,null,'Cửa hàng']};
 function agg(rows,f){const m=new Map();for(const r of rows){const k=f(r);let g=m.get(k);if(!g)m.set(k,g={k,ch:new Set(),slB:0,gtB:0,slT:0,gtT:0,slCG:0,gtCG:0,slFC:0,gtFC:0,slF:0,gtF:0,dr:0,n:0,rows:[]});g.ch.add(r.maCH);g.n++;g.dr+=r.dr;g.slB+=r.slBan;g.gtB+=r.gtBan;g.slT+=r.slTon;g.gtT+=r.gtTon;g.slCG+=r.slCG;g.gtCG+=r.gtCG;g.slFC+=r.slFC;g.gtFC+=r.gtFC;g.slF+=r.slFinal;g.gtF+=r.gtFinal;g.rows.push(r)}return [...m.values()]}
 function renderOv(){const R=ST.R;const rowsAll=R?R.rows:[];
-  const k=(l,v,d,c='')=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  const k=(l,v,d,c='')=>`<div class="${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
   const s=f=>rowsAll.reduce((a,r)=>a+r[f],0);const G=R?R.groups:[];const c={};G.forEach(g=>c[g.status]=(c[g.status]||0)+1);
   $('#ovSub').textContent=R?`${nf(R.stores)} CH × ${nf(ST.recap.length)} SKU · Sale ${ST.saleFile||'—'} · ${ST.cfg.ngayKD} ngày`:'';
   $('#kpis').innerHTML=[k('Bán',mf(s('gtBan')),nf(s('slBan'))+' đv · '+ST.cfg.ngayKD+' ngày'),k('Tồn · Chờ giao',`<span class="kst">${mf(s('gtTon'))}</span><span class="kst">CG ${mf(s('gtCG'))}</span>`,nf(rowsAll.filter(r=>r.dr).length)+' dòng còn tồn'),k('FC trước MOV',mf(s('gtFC')),nf(s('slFC'))+' đv'),k('FC Final',mf(s('gtFinal')),nf(s('slFinal'))+' đv · sau MOV',''),
@@ -729,7 +777,7 @@ $('#pvView').addEventListener('click',e=>{const b=e.target.closest('button[data-
 
 // ---------- CẢNH BÁO ----------
 function renderCb(){const R=ST.R,G=R?R.groups:[];
-  const k=(l,v,d,c='')=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;const c={},gt={};G.forEach(g=>{c[g.status]=(c[g.status]||0)+1;gt[g.status]=(gt[g.status]||0)+g.gt});
+  const k=(l,v,d,c='')=>`<div class="${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;const c={},gt={};G.forEach(g=>{c[g.status]=(c[g.status]||0)+1;gt[g.status]=(gt[g.status]||0)+g.gt});
   $('#cbKpi').innerHTML=[k('Đủ MOV',nf(c.du||0),mf(gt.du||0)+' GT FC'),k('Nâng đủ MOV',nf(c.nang||0),'GT FC '+mf(gt.nang||0)+' → nâng lên MOV',c.nang?'warn':''),k('Loại FC',nf(c.loai||0),'mất '+mf(gt.loai||0)+' GT FC',c.loai?'bad':''),k('Chưa cài MOV',nf(c.none||0),'CH × NCC giữ nguyên FC')].join('');
   const notes=[];if(R){if(R.noStore)notes.push(`${nf(R.noStore)} CH trong file Sale không có trong Storelist (bị bỏ qua).`);if(R.defNset)notes.push(`${nf(R.defNset)} cặp CH × MCH3 không có trong PhanNhomCH → dùng N6.`);if(R.noSku.length&&ST.mOk)notes.push(`${R.noSku.length} SKU không có trong sheet SKUs gốc (không có MCH3): ${R.noSku.slice(0,8).join(', ')}${R.noSku.length>8?'…':''}.`)}
   $('#cbData').hidden=!notes.length;$('#cbData').innerHTML=notes.map(esc).join('<br>');
@@ -771,12 +819,32 @@ async function exportSheets(sheets,filename){
 }
 $('#btnExport').onclick=()=>{if(!ST.R||!ST.R.rows.length){toast('Chưa có dữ liệu FC');return}exportSheets(H.exportAoa(ST.R,ST.recap,ST.mov),`FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsx`)};
 
-// ---------- ĐIỀU HƯỚNG ----------
-const VIEWS=['du-lieu','thong-so','mov','tong-quan','canh-bao','data-fc','logic'];
-function route(){const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'du-lieu';VIEWS.forEach(x=>$('#v-'+x).hidden=x!==v);$$('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+v?'page':'false'))}
-window.addEventListener('hashchange',route);
+// ---------- 1 TRANG: section, cỡ chữ, tóm tắt ----------
+const OPENK='fchh_open';
+try{const o=JSON.parse(localStorage.getItem(OPENK)||'null');if(o)$$('details.sec').forEach(d=>{if(o[d.id]!=null)d.open=o[d.id]})}catch(e){}
+const saveOpen=()=>{const o={};$$('details.sec').forEach(d=>o[d.id]=d.open);try{localStorage.setItem(OPENK,JSON.stringify(o))}catch(e){}};
+$$('details.sec').forEach(d=>d.addEventListener('toggle',saveOpen));
+$$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(e.target.closest('button,select,input,label'))e.preventDefault()}));
+$('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
+$$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const d=$(a.getAttribute('href'));if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}}));
+{const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d))}
+const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs',v)}catch(e){}};
+$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{return localStorage.getItem('fc_fs')||'13px'}catch(e){return '13px'}})());
+function renderSums(){const R=ST.R,rows=R?R.rows:[],G=R?R.groups:[],c={};G.forEach(g=>c[g.status]=(c[g.status]||0)+1);const s=f=>rows.reduce((a,r)=>a+r[f],0);
+  const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHTML=h};const dot=(k,cls,n)=>{const a=$('#jump a[data-d="'+k+'"]');if(!a)return;a.querySelector('.dot').className='dot '+cls;let x=a.querySelector('.n');if(n!=null){if(!x){x=document.createElement('span');x.className='n';a.appendChild(x)}x.textContent=n}else if(x)x.remove()};
+  set('data',ST.sale?`${esc(ST.saleFile)} · ${nf(ST.recap.length)} SKU · ${nf(ST.sale.rows)} dòng`:(ST.recap.length?nf(ST.recap.length)+' SKU · chưa có Sale':'chưa Import'));
+  set('cfg',`Ngày KD ${ST.cfg.ngayKD} · Cover ${ST.cfg.defCover} · Lock ${ST.cfg.defLock} · %Min ${ST.cfg.defPct}%`);
+  const sl=sel();set('vung',`${R?nf(R.stores):0} CH · ${sl.size?sl.size+' tỉnh':'tất cả'}`);
+  const nccs=uniq(ST.recap.map(r=>r.ncc)),done=nccs.filter(n=>ST.mov.some(m=>m.ncc===n&&Number(m.allTinh||0)+Object.keys(m.tinhMOV||{}).length>0)).length;set('mov',`${done}/${nccs.length} NCC đã cài`);
+  const noMin=ST.recap.filter(p=>!NG.some(n=>Number(p[n]))).length;set('ts',`${nf(ST.recap.length)} SKU${noMin?` · <span style="color:var(--high)">${noMin} chưa có Min</span>`:''}${META.params.dirty?' · chưa lưu':''}`);
+  dot('ts',!ST.recap.length?'':noMin?'warn':'ok',noMin||null);
+  set('kpi',rows.length?`FC Final ${mf(s('gtFinal'))} · ${nf(s('slFinal'))} đv · ${c.du||0} đủ / ${c.nang||0} nâng / ${c.loai||0} loại`:'chưa có kết quả');dot('kpi',rows.length?'ok':'');
+  set('pv',{mien:'Miền › Tỉnh',gdv:'GĐV › QLKV',nhom:'Nhóm N',ncc:'NCC › SKU',mch3:'MCH3 › SKU',store:'Cửa hàng'}[UI.pv]);dot('pv',rows.length?'ok':'');
+  set('cb',G.length?`<span style="color:var(--crit)">${c.loai||0} loại FC</span> · <span style="color:var(--high)">${c.nang||0} nâng</span> · ${c.du||0} đủ · ${c.none||0} chưa cài`:'');dot('cb',c.loai?'bad':c.nang?'warn':G.length?'ok':'',c.loai||null);
+  const nf_=rows.filter(r=>r.slFinal>0).length;set('fc',rows.length?`${nf(nf_)} dòng có FC / ${nf(rows.length)}`:'');dot('fc',rows.length?'ok':'',rows.length?nf(nf_):null);
+}
 window.addEventListener('beforeunload',e=>{if(Object.values(META).some(m=>m.dirty)){e.preventDefault();e.returnValue=''}});
-route();initDb().then(loadMasters);
+initDb().then(loadMasters);
 window.__hh={ST,recompute,save,setData(o){if(o.stores)ST.stores=H.buildStores(H.parseCSV(o.stores));if(o.skus)ST.skus=H.buildSkus(H.parseCSV(o.skus));if(o.nhom)ST.nhom=H.buildNhom(H.parseCSV(o.nhom));ST.mOk=true;const log=[];if(o.tpl)applyTemplate(H.parseTemplate(o.tpl,log));if(o.sale){ST.sale=H.parseSale(o.sale,log);ST.saleFile='test.xlsx'}recompute();return log}};
 })();
 </script>
