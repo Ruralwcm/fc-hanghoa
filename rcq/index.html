@@ -237,7 +237,7 @@ td.mixc.fixed input.cellin{font-weight:700;border-color:transparent}
 .drop.slim{padding:12px 16px;flex-direction:row;gap:12px;align-items:center;justify-content:flex-start;min-height:0}
 #tDm select.cellsel{font:inherit;font-family:var(--f-mono);font-size:12px;padding:1px 2px;border:1px solid transparent;background:transparent;border-radius:4px}#tDm select.cellsel:hover,#tDm select.cellsel:focus{border-color:var(--line);background:var(--panel)}
 /*ENDWRAP*/</style>
-<script>window.FC_GAS_URL=window.FC_GAS_URL||"";</script>
+<script>window.FC_GAS_URL="https://script.google.com/macros/s/AKfycbzz5xBX7jFDg-gL2evpY6-1S9v_dhjSIjnghMLv1NPSc-wNuxOgheXB3p4SBWqVZ8rjYg/exec";</script>
 </head>
 <body>
 
@@ -1073,7 +1073,7 @@ function markDirty(m){META[m].dirty=true;renderSaveBar();later()}
 async function save(m){
   if(!db){lsSave();MASTERS.forEach(x=>META[x].dirty=false);META[m].src='local';renderSaveBar();renderSrc();toast('Đã lưu trên máy này (chưa có kho chung)');return}
   busy(true,'Đang lưu '+LABEL[m]+' lên app…');
-  try{await dbSave(m);toast('Đã lưu '+LABEL[m]+' lên app');$('#dbState').textContent='Master lưu chung';$('#dbState').className='pill leaf'}
+  try{await dbSave(m);toast('Đã lưu '+LABEL[m]+' lên app');$('#dbState').textContent=(DBKIND==='gas'?'Google Sheet · ':'')+'Master lưu chung';$('#dbState').className='pill leaf'}
   catch(err){toast('Chưa lưu được: '+(err.code==='invalid_argument'?'anh chỉ có quyền xem, cần quyền Contributor/Editor để sửa':err.code==='quota_exceeded'?'kho dữ liệu đã đầy':(err.message||err.code)))}
   busy(false);renderSaveBar();renderSrc();
 }
