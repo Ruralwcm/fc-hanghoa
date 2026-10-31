@@ -277,7 +277,12 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <div class="kv"><span>Cụm thiếu chưa chọn</span><select id="blockShort"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt</option></select></div>
 <div class="row" style="justify-content:flex-end"><button class="btn sm ghost" id="saveMod" disabled>Lưu cài đặt MOQ</button></div>
 <p class="hint">Đặt tối đa & Trừ tồn lưu bằng nút Lưu ở mục Cài Min.</p></div></details>
-<details class="sec" id="s-ch"><summary><span class="chev">▶</span><span class="num">D</span><h3>Danh sách CH & phân nhóm</h3><span class="sum" id="sum-ch"></span></summary>
+<details class="sec" id="s-gn" open><summary><span class="chev">▶</span><span class="num">D</span><h3>Tăng trưởng theo %hủy</h3><span class="sum" id="sum-gn"></span></summary>
+<div class="body"><div class="kv"><span>Theo %hủy mã tại CH (bảng từng mã ở mục Cài Min)</span><input type="checkbox" id="useGSku"></div>
+<div class="kv"><span>Theo %hủy phân nhóm (%hủy cả CH × nhóm N)</span><input type="checkbox" id="useGSt"></div>
+<p class="hint">Tăng trưởng = mức theo mã + mức theo phân nhóm. Nhập % tăng trưởng theo bậc %hủy của CH; lưu bằng nút Lưu ở mục Cài Min.</p>
+<div class="tw"><table id="gnTbl"></table></div></div></details>
+<details class="sec" id="s-ch"><summary><span class="chev">▶</span><span class="num">E</span><h3>Danh sách CH & phân nhóm</h3><span class="sum" id="sum-ch"></span></summary>
 <div class="body"><span class="sub" id="stInfo"></span><div class="grid2" style="margin-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="drop" id="sdrop" tabindex="0"><b>Kéo thả file danh sách CH</b><br>File RM030 (xlsb) hoặc file mẫu danh sách CH<input type="file" id="sfile" accept=".xlsx,.xlsb,.xls,.csv" hidden></div>
@@ -294,7 +299,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div class="row"><button class="btn" id="nApply" disabled hidden>Cập nhật phân nhóm</button><span class="sub" id="nMsg"></span></div>
       </div>
     </div></div></details>
-<details class="sec" id="s-minup"><summary><span class="chev">▶</span><span class="num">E</span><h3>Upload Min từ Excel</h3><span class="sum" id="sum-minup"></span></summary>
+<details class="sec" id="s-minup"><summary><span class="chev">▶</span><span class="num">F</span><h3>Upload Min từ Excel</h3><span class="sum" id="sum-minup"></span></summary>
 <div class="body"><div class="grid2" style="margin-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="drop" id="mdrop" tabindex="0"><b>Kéo thả file Min vào đây</b><br>hoặc bấm để chọn file (xlsx, xlsb, csv)<input type="file" id="mfile" accept=".xlsx,.xlsb,.xls,.csv" hidden></div>
@@ -306,7 +311,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div class="row"><button class="btn" id="mapply" disabled>Áp dụng &amp; lưu Min</button></div>
       </div>
     </div></div></details>
-<details class="sec" id="s-logic"><summary><span class="chev">▶</span><span class="num">F</span><h3>Logic đặt hàng</h3><span class="sum" id="sum-logic"></span></summary>
+<details class="sec" id="s-logic"><summary><span class="chev">▶</span><span class="num">G</span><h3>Logic đặt hàng</h3><span class="sum" id="sum-logic"></span></summary>
 <div class="body"><div class="lg-flow" aria-label="Các bước">
     <div><b>Bước 1</b>Sale 1 tuần</div><div><b>Bước 2</b>Tăng trưởng theo %Hủy</div><div><b>Bước 3</b>Số đặt theo Min</div><div><b>Bước 4</b>Chia ngày giao</div><div><b>Bước 5</b>MOQ &amp; gom HUB</div><div><b>Bước 6</b>Tăng FC hoặc không đặt</div>
   </div>
@@ -395,6 +400,7 @@ function computeAll(M, cfg, periods) {
   const skus = cfg.skus;
   const skuIdx = {}; skus.forEach((s,i)=>skuIdx[s.code]=i);
   const qdOf = c => (skuIdx[c]!==undefined ? skus[skuIdx[c]].qd : c);
+  const qfOf = c => { const s=skus[skuIdx[c]]; return s&&s.qd!==s.code&&+s.qdf>0 ? +s.qdf : 1; };
   const storeNhom = {}; M.stores.forEach(s=>storeNhom[s[0]]=s[4]);
   // aggregate per store|raw sku and per store|qd
   const raw = {}, agg = {};
@@ -406,7 +412,7 @@ function computeAll(M, cfg, periods) {
       a.slb+=slb;a.gtb+=gtb;a.slh+=slh;a.gth+=gth;
       const k2=st+'|'+qdOf(sk); const b=agg[k2]||(agg[k2]={st,slb:0,gtb:0,slh:0,gth:0,ton:0,nh:''});
       if(nh) b.nh=nh;
-      b.slb+=slb;b.gtb+=gtb;b.slh+=slh;b.gth+=gth; if(last) b.ton+=ton;
+      const f=qfOf(sk); b.slb+=slb*f;b.gtb+=gtb;b.slh+=slh*f;b.gth+=gth; if(last) b.ton+=ton*f;
     });
   });
   // SKU overview
@@ -420,16 +426,20 @@ function computeAll(M, cfg, periods) {
     skus.forEach((s,i)=>{ if(s.qd===q){ ov[i]._s[g]+=b.slb; if(b.slb>0) ov[i]._n[g]++; } });
   });
   ov.forEach(o=>{ o.pct = o.gtb>0?o.gth/o.gtb:(o.gth>0?1:0); o.bq=o._s.map((v,g)=>o._n[g]?v/o._n[g]/W:0); });
+  // %hủy CH (theo giá trị, mọi mã của NCC)
+  const stW={}; Object.values(agg).forEach(b=>{ const o=stW[b.st]||(stW[b.st]={b:0,h:0}); o.b+=b.gtb; o.h+=b.gth; });
   // FC lines
-  const th = cfg.thresholds, phuOv = cfg.phu||{};
+  const th = cfg.thresholds, phuOv = cfg.phu||{}, gn = cfg.gn||{}, useGSku = cfg.useGSku!==0 && cfg.useGSku!==false, useGSt = !!cfg.useGSt;
+  const tierOf = p => { let t=0; for(let j=0;j<th.length;j++) if(p>=th[j]) t=j; return t; };
   const lines = M.ss.map(([si,ki,lich,phu0])=>{
     const st=M.stores[si], s=skus[ki]; const key=st[0]+'|'+s.code;
     const b=agg[st[0]+'|'+s.code]||{slb:0,gtb:0,slh:0,gth:0,ton:0};
     const phu = phuOv[key]!==undefined?phuOv[key]:phu0;
     const sale1w=b.slb/W, hu1w=b.slh/W;
     const pct = b.gtb>0?b.gth/b.gtb:(b.slh>0?1:0);
-    let t=0; for(let j=0;j<th.length;j++) if(pct>=th[j]) t=j;
-    const g=s.tiers[t]||0;
+    const sw=stW[st[0]]||{b:0,h:0}; const pctSt = sw.b>0?sw.h/sw.b:(sw.h>0?1:0);
+    const gSku = useGSku ? (+s.tiers[tierOf(pct)]||0) : 0; const gSt = useGSt ? (+((gn[st[4]]||[])[tierOf(pctSt)])||0) : 0;
+    const g=gSku+gSt;
     const gi=GROUPS.indexOf(st[4]); const mn=gi>=0?(+s.min[gi]||0):0;
     const moq=+s.moq||1;
     let pcs=0;
@@ -440,7 +450,7 @@ function computeAll(M, cfg, periods) {
     const days=DAYS.map(d=>{ if(!n||!pcs) return 0; const k=ds.filter(x=>x<=d).length; if(!ds.includes(d)) return 0;
       return (Math.ceil(pcs*k/n-1e-9)-Math.ceil(pcs*(k-1)/n-1e-9))*moq; });
     return {si,ki,key,store:st[0],name:st[1],tinh:st[2],gdv:st[3],nhom:st[4],lich,phu,sku:s.code,skuName:s.name,moq,cogs:+s.cogs||0,
-      slb:b.slb,slh:b.slh,gtb:b.gtb,gth:b.gth,qlkv:st[5]||'',sale1w,hu1w,pct,g,ton:b.ton,min:mn,raw:raw0,capped:raw0>pcs&&mn>0,pcs,kg:pcs*moq,gt:pcs*moq*(+s.cogs||0),days};
+      slb:b.slb,slh:b.slh,gtb:b.gtb,gth:b.gth,qlkv:st[5]||'',sale1w,hu1w,pct,pctSt,gSku,gSt,g,ton:b.ton,min:mn,raw:raw0,capped:raw0>pcs&&mn>0,pcs,kg:pcs*moq,gt:pcs*moq*(+s.cogs||0),days};
   });
   return {W,ov,lines};
 }
@@ -560,37 +570,48 @@ function renderMin(){
   const G=GROUPS, o=result.ov, S=cfg.skus;
   const maxbq=Math.max(0.0001,...o.flatMap(x=>x.bq));
   const B=(cls,n,first)=>cls+(first?' bs':'');
-  let h='<thead><tr class="grp"><th colspan="4" class="l k-info">Mã hàng</th><th colspan="3" class="k-sale bs">Bán ('+result.W+' tuần)</th><th colspan="2" class="k-huy bs">Hủy</th><th colspan="8" class="k-bq bs">Sale BQ / CH / tuần (kg)</th><th colspan="8" class="k-min bs">Min theo nhóm CH (gói) · nhập</th><th colspan="5" class="k-tt bs">Tăng trưởng theo %Hủy CH · nhập</th></tr><tr>'+
-  '<th class="l stk s1">Mã SP</th><th class="l stk s2">Tên SP</th><th>QC gói (kg)</th><th class="l">Quy đổi</th><th class="k-sale bs">Số CH bán</th><th class="k-sale">SL bán</th><th class="k-sale">GT bán (tr)</th><th class="k-huy bs">SL hủy</th><th class="k-huy">%Hủy</th>'+
+  let h='<thead><tr class="grp"><th colspan="5" class="l k-info">Mã hàng</th><th colspan="3" class="k-sale bs">Bán ('+result.W+' tuần)</th><th colspan="2" class="k-huy bs">Hủy</th><th colspan="8" class="k-bq bs">Sale BQ / CH / tuần (kg)</th><th colspan="8" class="k-min bs">Min theo nhóm CH (gói) · nhập</th><th colspan="5" class="k-tt bs">Tăng trưởng theo %Hủy mã tại CH · nhập</th></tr><tr>'+
+  '<th class="l stk s1">Mã SP</th><th class="l stk s2">Tên SP</th><th>QC gói (kg)</th><th class="l">Quy đổi về mã</th><th title="1 đơn vị mã bán = ? đơn vị mã đặt">Hệ số QĐ</th><th class="k-sale bs">Số CH bán</th><th class="k-sale">SL bán</th><th class="k-sale">GT bán (tr)</th><th class="k-huy bs">SL hủy</th><th class="k-huy">%Hủy</th>'+
   G.map((g,j)=>'<th class="k-bq'+(j?'':' bs')+'">'+g+'</th>').join('')+G.map((g,j)=>'<th class="k-min'+(j?'':' bs')+'">'+g+'</th>').join('')+cfg.thresholds.map((t,j)=>'<th class="k-tt'+(j?'':' bs')+'">≥'+Math.round(t*100)+'%</th>').join('')+'</tr></thead><tbody>';
   S.forEach((s,i)=>{ const x=o[i], s0=cfgSaved.skus[i]||s;
     const inp=(f,j,v,v0,pct,cls)=>'<td class="in '+(cls||'')+'"><input aria-label="'+f+'" data-i="'+i+'" data-f="'+f+'" data-j="'+j+'" value="'+(pct?Math.round(v*100):v)+'" class="'+((+v)!==(+v0)?'dirty':'')+'" inputmode="decimal"></td>';
-    h+='<tr><td class="l stk s1">'+s.code+'</td><td class="l name stk s2" title="'+esc(s.name)+'">'+esc(s.name)+'</td>'+inp('moq',0,s.moq,s0.moq)+'<td class="l">'+(s.qd!==s.code?s.qd:'<span class="zero">–</span>')+'</td>'+
+    h+='<tr><td class="l stk s1">'+s.code+'</td><td class="l name stk s2" title="'+esc(s.name)+'">'+esc(s.name)+'</td>'+inp('moq',0,s.moq,s0.moq)+'<td class="l">'+(s.qd!==s.code?s.qd+'</td>'+inp('qdf',0,(s.qdf===undefined?1:s.qdf),(s0.qdf===undefined?1:s0.qdf)):'<span class="zero">–</span></td><td></td>')+
     '<td class="c-sale bs">'+nf(x.ch,0)+'</td><td class="c-sale">'+nf(x.slb)+'</td><td class="c-sale">'+nf(x.gtb)+'</td><td class="c-huy bs">'+nf(x.slh)+'</td><td class="c-huy'+(x.pct>=.2?' hi':'')+'">'+pf(x.pct)+'</td>'+
     x.bq.map((v,j)=>'<td class="c-bq'+(j?'':' bs')+'">'+(v?'<span class="bar-bq" style="width:'+Math.max(2,Math.round(v/maxbq*28))+'px"></span>':'')+nf(v,2)+'</td>').join('')+
     s.min.map((v,j)=>inp('min',j,v,s0.min[j],false,'c-min'+(j?'':' bs'))).join('')+s.tiers.map((v,j)=>inp('tier',j,v,s0.tiers[j],true,'c-tt'+(j?'':' bs'))).join('')+'</tr>';
   });
   $('minTbl').innerHTML=h+'</tbody>';
   $('truTon').checked=!!cfg.truTon; $('capX').value=cfg.capX===undefined?3:cfg.capX;
-  const dirty=JSON.stringify({s:cfg.skus,t:cfg.truTon,c:cfg.capX})!==JSON.stringify({s:cfgSaved.skus,t:cfgSaved.truTon,c:cfgSaved.capX});
+  const pk=c=>JSON.stringify({s:c.skus,t:c.truTon,c:c.capX,gn:c.gn||{},u1:c.useGSku===undefined?1:+c.useGSku,u2:+!!c.useGSt});const dirty=pk(cfg)!==pk(cfgSaved); renderGN();
   $('saveMin').disabled=!dirty||!db; $('resetMin').disabled=!dirty;
 }
 $('minTbl').addEventListener('change',e=>{ const t=e.target; if(!t.dataset.f) return;
   let v=parseFloat(String(t.value).replace(',','.')); if(!isFinite(v)||v<0) v=0;
   const s=cfg.skus[+t.dataset.i];
-  if(t.dataset.f==='moq') s.moq=v||s.moq; else if(t.dataset.f==='min') s.min[+t.dataset.j]=v; else s.tiers[+t.dataset.j]=v/100;
+  if(t.dataset.f==='moq') s.moq=v||s.moq; else if(t.dataset.f==='qdf') s.qdf=v>0?v:1; else if(t.dataset.f==='min') s.min[+t.dataset.j]=v; else s.tiers[+t.dataset.j]=v/100;
   recompute(); });
 $('truTon').onchange=e=>{cfg.truTon=e.target.checked?1:0; recompute();};
 $('capX').onchange=e=>{ let v=parseFloat(e.target.value); cfg.capX=isFinite(v)&&v>=0?v:3; recompute(); };
-$('resetMin').onclick=()=>{ cfg.skus=clone(cfgSaved.skus); cfg.truTon=cfgSaved.truTon; recompute(); };
+$('resetMin').onclick=()=>{ cfg.skus=clone(cfgSaved.skus); cfg.truTon=cfgSaved.truTon; cfg.gn=clone(cfgSaved.gn||{}); cfg.useGSku=cfgSaved.useGSku; cfg.useGSt=cfgSaved.useGSt; recompute(); };
 async function saveCfg(part){
   const now=new Date().toISOString();
-  if(!part||part==='min'){ const b={skus:cfg.skus,selected:cfg.selected??null,updatedAt:now}; await db.doc('config/min').set(b); cfgSaved=clone(Object.assign({},cfgSaved,b)); }
+  if(!part||part==='min'){ const b={skus:cfg.skus,selected:cfg.selected??null,gn:cfg.gn||{},useGSku:cfg.useGSku===undefined?1:+cfg.useGSku,useGSt:+!!cfg.useGSt,updatedAt:now}; await db.doc('config/min').set(b); cfgSaved=clone(Object.assign({},cfgSaved,b)); }
   if((!part&&OWNER)||part==='admin'){ const b={autoUp:cfg.autoUp===undefined?0.2:+cfg.autoUp,modMode:'po',blockShort:cfg.blockShort||0,truTon:cfg.truTon||0,capX:cfg.capX===undefined?3:+cfg.capX,thresholds:cfg.thresholds,phu:cfg.phu||{},updatedAt:now};
     await db.doc('config/admin').set(b); cfgSaved=clone(Object.assign({},cfgSaved,b)); }
   if(part==='boost'){ const b={boost:cfg.boost||{},updatedAt:now}; await db.doc('config/boost').set(b); cfgSaved=clone(Object.assign({},cfgSaved,b)); }
 }
 $('saveMin').onclick=async()=>{ $('saveMin').disabled=true; try{ await saveCfg(); $('minMsg').innerHTML='<div class="msg ok">Đã lưu cài đặt Min.</div>'; }catch(e){ $('minMsg').innerHTML='<div class="msg err">Chưa lưu được ('+esc(e.code||e.message)+'). Thử lại sau ít phút.</div>'; } renderMin(); };
+
+
+// ---------- Tăng trưởng theo %hủy phân nhóm (N1–N8)
+function renderGN(){ const el=$('gnTbl'); if(!el) return; const a=document.activeElement; if(a&&el.contains(a)&&a.tagName==='INPUT'&&a.type!=='checkbox') return;
+  const th=cfg.thresholds, gn=cfg.gn||{}, o=result.lines; const w={}; o.forEach(l=>{ const x=w[l.nhom]||(w[l.nhom]={s:new Map()}); x.s.set(l.store,l.pctSt); });
+  $('useGSku').checked=cfg.useGSku===undefined?true:!!+cfg.useGSku; $('useGSt').checked=!!cfg.useGSt;
+  el.innerHTML='<thead><tr><th class="l">Nhóm</th><th title="%hủy BQ các CH trong nhóm">%Hủy CH BQ</th>'+th.map(t=>'<th>≥'+Math.round(t*100)+'%</th>').join('')+'</tr></thead><tbody>'+GROUPS.map(g=>{ const v=gn[g]||[]; const ss=w[g]?[...w[g].s.values()]:[]; const av=ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:null;
+    return '<tr><td class="l"><b>'+g+'</b></td><td>'+(av==null?'–':pf(av))+'</td>'+th.map((t,j)=>'<td class="in c-tt"><input data-gn="'+g+'" data-j="'+j+'" inputmode="decimal" value="'+Math.round((+v[j]||0)*100)+'"></td>').join('')+'</tr>'; }).join('')+'</tbody>';
+}
+document.addEventListener('change',e=>{ const t=e.target; if(t.id==='useGSku'){ cfg.useGSku=t.checked?1:0; recompute(); return; } if(t.id==='useGSt'){ cfg.useGSt=t.checked?1:0; recompute(); return; }
+  if(t.dataset&&t.dataset.gn){ let v=parseFloat(String(t.value).replace(',','.')); if(!isFinite(v)) v=0; cfg.gn=cfg.gn||{}; const r=cfg.gn[t.dataset.gn]=(cfg.gn[t.dataset.gn]||cfg.thresholds.map(()=>0)).slice(); r[+t.dataset.j]=v/100; recompute(); } });
 
 // ---------- FC
 function filtered(){ const t=$('fTinh').value,g=$('fGdv').value; return result.lines.filter(l=>(!t||l.tinh===t)&&(!g||l.gdv===g)); }
@@ -1064,7 +1085,7 @@ function renderLogic(){
   const S=(n,title,body)=>'<div class="lg-step"><div class="lg-num">'+n+'</div><div><h3>'+title+'</h3>'+body+'</div></div>';
   $('lgBody').innerHTML=
   S(1,'Sale 1 tuần','<ul><li>Lấy số bán của các kỳ đang chọn ở tab 1 (hiện tại: <b>'+sel+'</b>, tổng <b>'+W+' tuần</b>).</li><li>Tính riêng cho từng <b>cửa hàng × mã</b>. Mã có mã quy đổi thì gộp số bán vào mã chính.</li></ul><div class="fx">Sale 1 tuần = Tổng SL bán các kỳ chọn ÷ Số tuần</div>')+
-  S(2,'Tăng trưởng theo %Hủy của cửa hàng','<ul><li>%Hủy = GT hủy ÷ GT bán của cửa hàng ở mã đó. Hủy càng cao thì tăng trưởng càng thấp.</li><li>Bảng tăng trưởng (sửa ở tab 2 · Cài Min, ô tím):</li></ul><div class="tw" style="margin-top:6px;max-width:760px"><table class="lg-tbl"><thead><tr><th class="l">Mã hàng</th>'+th.map(x=>'<th>%Hủy ≥ '+x+'%</th>').join('')+'</tr></thead><tbody>'+tierRows+'</tbody></table></div>')+
+  S(2,'Tăng trưởng theo %Hủy mã + %Hủy phân nhóm','<ul><li><b>Theo %hủy mã</b> ('+((cfg.useGSku===undefined||+cfg.useGSku)?'đang bật':'đang tắt')+'): %Hủy = GT hủy ÷ GT bán của mã đó tại cửa hàng, tra bảng từng mã (ô tím ở Cài Min).</li><li><b>Theo %hủy phân nhóm</b> ('+(cfg.useGSt?'đang bật':'đang tắt')+'): %Hủy của cả cửa hàng (mọi mã NCC), tra bảng theo nhóm N1–N8 của CH (cột trái).</li><li>Tăng trưởng = mức theo mã + mức theo phân nhóm. Hủy càng cao thì tăng trưởng càng thấp.</li><li>Mã bán có <b>Quy đổi</b>: SL bán, hủy, tồn × Hệ số QĐ rồi cộng vào mã đặt.</li></ul><div class="tw" style="margin-top:6px;max-width:760px"><table class="lg-tbl"><thead><tr><th class="l">Mã hàng</th>'+th.map(x=>'<th>%Hủy ≥ '+x+'%</th>').join('')+'</tr></thead><tbody>'+tierRows+'</tbody></table></div>')+
   S(3,'Số đặt theo Min','<ul><li><b>Min = 0</b> → không đặt.</li><li><b>Min &gt; 0</b> → tính số đặt rồi kẹp trong khoảng <b>Min ≤ Số đặt ≤ '+capX+' × Min</b>.</li><li>Min theo nhóm cửa hàng N1 … N8, đơn vị là <b>gói</b> (ô vàng ở tab 2). Kg = Số gói × QC gói.</li>'+(cfg.truTon?'<li>Đang bật <b>Trừ tồn</b>: trừ tồn kho trước khi chia gói.</li>':'')+'<li>Cửa hàng bị bỏ tích <b>Phủ</b> thì không đặt.</li></ul>'+
     '<div class="fx">Số đặt (gói) = Làm tròn[ Sale 1 tuần × (1 + Tăng trưởng)'+(cfg.truTon?' − Tồn':'')+' ÷ QC gói ]  →  không dưới Min, không quá '+capX+' × Min</div>'+
     '<div class="lg-ex">Ví dụ Min = 2 gói: tính ra 1 gói → đặt 2 · ra 4 gói → đặt 4 · ra 10 gói → chỉ đặt '+(2*capX)+'.</div>')+
