@@ -388,6 +388,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <label data-only="rcq" class="f">MOV: tối thiểu mỗi lần giao (QC)<input type="number" step="0.5" data-cfg="mov"></label>
         <label data-only="rcq" class="f">Tỷ trọng LY2W trong Sale Mix FC (%)<input type="number" step="5" data-cfg="lyWeight"></label>
         <label data-only="rcq" class="f">Tăng rau ăn lá vào T6/T7/CN (%)<input type="number" step="5" min="0" data-cfg="wkUp"></label>
+        <label class="f" data-only="ch" title="SL FC không vượt quá Min × hệ số này">Lock Max (× Min)<input type="number" step="0.5" min="0" data-set="capX"></label>
+        <label class="chk" data-only="ch" title="Bật: mã có Min = 0 (hoặc trống) ở nhóm N của CH nhưng CH có bán vẫn đặt theo số bán × (1 + Growth), không sàn, không trần. Tắt: Min = 0 thì không đặt."><input type="checkbox" data-set="fcMin0"> FC khi Min = 0 (đặt theo số bán)</label>
         <label class="f">Cảnh báo %Hủy SKU từ<input type="number" step="0.05" data-set="rWaste"></label>
         <label class="f">Cảnh báo FC lệch bán từ<input type="number" step="0.1" data-set="rDev"></label>
         <label class="f">CH Thừa khi (FC + Tồn dự kiến)/Sale trên (%)<input type="number" step="5" min="0" data-cfg="thuaPct"></label>
@@ -418,7 +420,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div><span><b>Quy về mã quy đổi</b>: Article → Mã WEC × hệ số (mục Mã quy đổi). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2.</span></div>
         <div><span><b>Danh mục của CH</b>: mã có Min &gt; 0 ở nhóm N của CH.</span></div>
         <div><span><b>① FC theo bán</b> = Sale 1W × (1 + Growth theo %hủy mã quy đổi + Growth theo %hủy phân nhóm), làm tròn bội số QC.</span></div>
-        <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × hệ số "Đặt tối đa" (mặc định 3).</span></div>
+        <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × <b>Lock Max</b> (Cấu hình FC, mặc định 3). Min = 0: không đặt; bật "FC khi Min = 0" thì đặt theo ① (không sàn, không trần) nếu CH có bán.</span></div>
         <div><span><b>SL FC = min( max(①, ②), ③ )</b>.</span></div>
         <div><span><b>Chia ngày</b>: theo lịch giao tỉnh × N; mỗi lần giao ≥ Min của mã. Bật "Tối đa tần suất giao" thì giao thêm ngày trong lịch tuyến khi đủ.</span></div>
         <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; thiếu thì gom HUB cấp 1 → 2; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
@@ -463,7 +465,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <div><div class="tw"><table id="tAlerts"></table></div><div class="pager" id="pgAlerts"></div></div>
     </div>
     </div>
-    <div id="cbMov" data-only="ch"><div class="row fl hubcfg" style="gap:14px;margin-bottom:8px"><label class="chk"><span>MOQ mặc định mỗi CH (<b id="modUnit" style="font-weight:inherit">kg</b>)</span> <input type="number" id="hMod" step="any" min="0" style="width:84px"></label><label class="chk">Tự tăng FC khi thiếu dưới (%) <input type="number" id="hAuto" step="1" min="0" style="width:64px"></label><label class="chk">Cụm thiếu chưa chọn <select id="hBlock"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt hàng</option></select></label><label class="chk">Đặt tối đa = Min × <input type="number" id="hCap" step="any" min="0" style="width:64px"></label></div>
+    <div id="cbMov" data-only="ch"><div class="row fl hubcfg" style="gap:14px;margin-bottom:8px"><label class="chk"><span>MOQ mặc định mỗi CH (<b id="modUnit" style="font-weight:inherit">kg</b>)</span> <input type="number" id="hMod" step="any" min="0" style="width:84px"></label><label class="chk">Tự tăng FC khi thiếu dưới (%) <input type="number" id="hAuto" step="1" min="0" style="width:64px"></label><label class="chk">Cụm thiếu chưa chọn <select id="hBlock"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt hàng</option></select></label></div>
     <div class="kpis" id="hKpi"></div><div class="card"><h3>Cụm gom HUB (đủ MOQ)</h3><div class="tw" style="max-height:420px"><table id="tHub"></table></div></div><div class="card"><h3>Cụm còn thiếu MOQ</h3><div class="tw" style="max-height:420px"><table id="tShort"></table></div></div></div>
     <div id="cbDt" data-only="rcq">
     <p class="smallnote" style="margin:0 0 8px">Dự kiến thừa = FC đặt + Tồn dự kiến đầu tuần − Nhu cầu tuần (sau kẹp biên). Chỉ liệt kê dòng dư từ 0,1 kg.</p>
@@ -617,7 +619,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   let TUY_MATRIX = {};
   const tuyenDays = lv => { const s = String(lv || '').toUpperCase(); if (/^[\d,\sCN]+$/.test(s) && /\d|CN/.test(s)) { const o = new Set(); s.split(/[,\s]+/).forEach(t => { if (t === 'CN') o.add(6); else if (/^[2-8]$/.test(t)) o.add(t === '8' ? 6 : +t - 2); }); return [...o].sort((a, b) => a - b); }
     const row = TUY_MATRIX[lv] || {}; const o = new Set(); Object.values(row).forEach(v => daysOf(v).forEach(d => o.add(d))); return [...o].sort((a, b) => a - b); };
-  function defaultCfg() { return { minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
+  function defaultCfg() { return { capX: 3, fcMin0: false, minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
   function compute(MS, SA, cfgIn, opt) {
@@ -664,7 +666,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       if (!lichVe) S.flags.push(['S_NOLV', 'crit', `Tỉnh "${tinh}" chưa có lịch về hàng`]); else if (!lich) S.flags.push(['S_NOLICH', 'crit', `Không tra được lịch giao cho lịch về "${lichVe}" × ${N}`]);
       const inner = agg.get(code) || new Map();
       if (ni >= 0) DM.forEach((x, i) => { const o = dmN[i]; o.p[ni]++; const v = inner.get(x.wec); if (v) { o.s[ni] += v[2] / 2; o.h[ni] += v[0] / 2; if (v[2] > 0) o.c[ni]++; } });
-      let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni]);
+      let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni] || (cfg.minFloor && cfg.fcMin0 && (inner.get(DM[i].wec) || [0, 0, 0])[2] > 0));
       S.flagCount = idx.length;
       let sale = 0, huy = 0, ton = 0, saleLY = 0, mixSum = 0;
       const R = idx.map(i => { const x = DM[i], v = inner.get(x.wec) || [0, 0, 0, 0, 0, 0]; const r = { i, sku: x, sale1w: v[2] / 2, huy1w: v[0] / 2, ton: v[1], cg: v[5] || 0, saleLY1w: v[4] / 2, mixFC: dmCalc[i].mixFC };
@@ -689,7 +691,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.deduct = r.projStock; r.need = Math.max(0, r.kgBand - r.deduct);
         let units = r.need / qd; let q;
         if (cfg.minFloor) { // Min là sàn (đặt cả khi không bán), trần capX × Min; Min = 0 → không đặt
-          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
+          if (!(mn > 0)) { q = cfg.fcMin0 ? Math.max(0, Math.round(units / qc + 1e-9) * qc) : 0; r.qRaw = q; r.qLo = 0; r.qCap = Infinity; } else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
@@ -940,7 +942,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   let TUY_MATRIX = {};
   const tuyenDays = lv => { const s = String(lv || '').toUpperCase(); if (/^[\d,\sCN]+$/.test(s) && /\d|CN/.test(s)) { const o = new Set(); s.split(/[,\s]+/).forEach(t => { if (t === 'CN') o.add(6); else if (/^[2-8]$/.test(t)) o.add(t === '8' ? 6 : +t - 2); }); return [...o].sort((a, b) => a - b); }
     const row = TUY_MATRIX[lv] || {}; const o = new Set(); Object.values(row).forEach(v => daysOf(v).forEach(d => o.add(d))); return [...o].sort((a, b) => a - b); };
-  function defaultCfg() { return { minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
+  function defaultCfg() { return { capX: 3, fcMin0: false, minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
   function compute(MS, SA, cfgIn, opt) {
@@ -987,7 +989,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       if (!lichVe) S.flags.push(['S_NOLV', 'crit', `Tỉnh "${tinh}" chưa có lịch về hàng`]); else if (!lich) S.flags.push(['S_NOLICH', 'crit', `Không tra được lịch giao cho lịch về "${lichVe}" × ${N}`]);
       const inner = agg.get(code) || new Map();
       if (ni >= 0) DM.forEach((x, i) => { const o = dmN[i]; o.p[ni]++; const v = inner.get(x.wec); if (v) { o.s[ni] += v[2] / 2; o.h[ni] += v[0] / 2; if (v[2] > 0) o.c[ni]++; } });
-      let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni]);
+      let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni] || (cfg.minFloor && cfg.fcMin0 && (inner.get(DM[i].wec) || [0, 0, 0])[2] > 0));
       S.flagCount = idx.length;
       let sale = 0, huy = 0, ton = 0, saleLY = 0, mixSum = 0;
       const R = idx.map(i => { const x = DM[i], v = inner.get(x.wec) || [0, 0, 0, 0, 0, 0]; const r = { i, sku: x, sale1w: v[2] / 2, huy1w: v[0] / 2, ton: v[1], cg: v[5] || 0, saleLY1w: v[4] / 2, mixFC: dmCalc[i].mixFC };
@@ -1012,7 +1014,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.deduct = r.projStock; r.need = Math.max(0, r.kgBand - r.deduct);
         let units = r.need / qd; let q;
         if (cfg.minFloor) { // Min là sàn (đặt cả khi không bán), trần capX × Min; Min = 0 → không đặt
-          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
+          if (!(mn > 0)) { q = cfg.fcMin0 ? Math.max(0, Math.round(units / qc + 1e-9) * qc) : 0; r.qRaw = q; r.qLo = 0; r.qCap = Infinity; } else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
@@ -1624,8 +1626,8 @@ function explain(S,r){const c=RES.cfg,it=(a,b)=>`<div><span>${a}</span><span>${b
     return `<tr class="exp"><td colspan="25"><div class="explain">
     ${it('Sale 1W (mã quy đổi '+esc(r.sku.wec)+', = Sale L2W ÷ 2)',nf(r.sale1w,3)+' kg')}${it('%Hủy mã tại CH '+pf(r.waste)+' → Growth mã'+(c.useGSku===false?' (tắt)':''),pf(r.gSku))}${it('%Hủy CH '+pf(S.wStore)+' × '+S.N+' → Growth phân nhóm'+(c.useGSt?'':' (tắt)'),pf(r.gSt||0))}
     ${it('① FC theo bán = Sale 1W × (1 + '+pf(r.growth)+')'+(r.useDeduct?' − Tồn dự kiến '+nf(r.projStock,2):''),nf(r.need,3)+' kg → làm tròn QC '+qc+': '+nf((r.qRaw||0)*qd,3)+' kg')}
-    ${it('② Min '+S.N+' = '+(mn||0)+' kg'+(mn>0?' → sàn (làm tròn lên QC)':' → không đặt'),mn>0?nf((r.qLo||0)*qd,3)+' kg':'0')}
-    ${mn>0?it('③ Trần = '+cx+' × Min',isFinite(r.qCap)?nf(r.qCap*qd,3)+' kg':'không giới hạn'):''}
+    ${it('② Min '+S.N+' = '+(mn||0)+' kg'+(mn>0?' → sàn (làm tròn lên QC)':c.fcMin0?' → FC khi Min = 0 đang bật: đặt theo số bán, không sàn/trần':' → không đặt'),mn>0?nf((r.qLo||0)*qd,3)+' kg':c.fcMin0?'—':'0')}
+    ${mn>0?it('③ Trần = Lock Max '+cx+' × Min',isFinite(r.qCap)?nf(r.qCap*qd,3)+' kg':'không giới hạn'):''}
     ${it('<b>SL FC = min( max(①, ②), ③ )</b>'+(r.floored?' · lấy theo Min':r.capped?' · chạm trần':''),'<b>'+nf((r.kg-(r.boost||0)),3)+' kg</b>')}
     ${r.boost?it('Tăng thêm cho đủ MOQ (gom HUB)','+'+nf(r.boost,3)+' kg = '+nf(r.kg,3)+' kg'):''}${r.blocked?it('Cụm thiếu MOQ chọn Không đặt','0'):''}
     </div>${r.flags.length?'<div style="margin-top:8px">'+r.flags.map(f=>`<span class="pill ${f[1]}">${esc(f[2])}</span>`).join(' ')+'</div>':''}</td></tr>`}
@@ -1689,7 +1691,7 @@ function renderNcc(){const N=nccList(),cfg=MS.lichve.cfg;
 function renderMov(){
   const M=RES.mod,c=MS.lichve.cfg,U=AC.gt?'nghìn đ':'kg',v=x=>AC.gt?x.gt:x.kg,fv=x=>AC.gt?nf(x,0):nf(x,1);
   $('#modUnit').textContent=U;const setv=(id,val)=>{const el=$(id);if(el&&document.activeElement!==el)el.value=val};
-  setv('#hMod',c.modDef!=null?c.modDef:AC.modDef);setv('#hAuto',Math.round((c.autoUp!=null?+c.autoUp:0.2)*100));setv('#hCap',c.capX!=null?c.capX:3);{const el=$('#hBlock');if(el)el.value=String(+c.blockShort||0)}
+  setv('#hMod',c.modDef!=null?c.modDef:AC.modDef);setv('#hAuto',Math.round((c.autoUp!=null?+c.autoUp:0.2)*100));{const el=$('#hBlock');if(el)el.value=String(+c.blockShort||0)}
   if(!M){$('#hKpi').innerHTML='';$('#tHub').innerHTML='';$('#tShort').innerHTML='';return}
   const cnt=[0,0,0,0,0],sum=[0,0,0,0,0];M.POs.forEach(p=>{cnt[p.st]++;sum[p.st]+=v(p)});
   $('#hKpi').innerHTML=HUB_ST.map((t,i)=>`<div class="kpi ${i===4&&cnt[4]?'bad':''}"><div class="l">${t}</div><div class="v">${ni(cnt[i])} PO</div><div class="d">${fv(sum[i])} ${U}</div></div>`).join('');
@@ -1700,7 +1702,6 @@ function renderMov(){
 function hubBind(){const c=()=>MS.lichve.cfg,num=e=>{const x=parseFloat(String(e.target.value).replace(',','.'));return isFinite(x)&&x>=0?x:null};
   $('#hMod').addEventListener('change',e=>{c().modDef=num(e);markDirty('lichve')});
   $('#hAuto').addEventListener('change',e=>{const x=num(e);c().autoUp=x==null?0.2:x/100;markDirty('lichve')});
-  $('#hCap').addEventListener('change',e=>{const x=num(e);c().capX=x==null?3:x;markDirty('lichve')});
   $('#hBlock').addEventListener('change',e=>{c().blockShort=+e.target.value;markDirty('lichve')});
   $('#tShort').addEventListener('change',e=>{const t=e.target.closest('.hdec');if(!t)return;const d=c().dec=c().dec||{};if(t.value)d[t.dataset.k]=t.value;else delete d[t.dataset.k];markDirty('lichve')})}
 
@@ -1775,7 +1776,7 @@ const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg 
 $('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs3');return ['10px','11px','12px'].includes(v)?v:'11px'}catch(e){return '11px'}})());
 function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHTML=h};const c=RES.cfg,S=RES.stores;
   set('sale',SA?esc(SALEFILE):'chưa có file Sale');
-  set('cfg',CH?`MOV HUB ${c.hubMov||0} kg · Thừa > ${c.thuaPct}% · Thiếu < ${c.thieuPct}%`:`Min ${c.minPct}% · Max ${c.maxPct}% · MOV ${c.mov} QC · lead ${c.leadDays} ngày`);
+  set('cfg',CH?`Lock Max ${c.capX??3}× Min · FC khi Min = 0: ${c.fcMin0?'bật':'tắt'}${c.maxFreq?' · Tối đa tần suất':''}`:`Min ${c.minPct}% · Max ${c.maxPct}% · MOV ${c.mov} QC · lead ${c.leadDays} ngày`);
   set('plan',CH?`${(c.ncc||[]).length} NCC`:planOf().join(' / '));
   set('prov',`${MS.lichve.prov.length} tỉnh`);set('lv',`${MS.lichve.lichVe.length} kiểu lịch về × 8 nhóm`);
   set('growth',(c.useGSku!==false?'Nhóm SP: bật':'Nhóm SP: tắt')+(CH?'':' · Nhóm CH: '+(c.useGSt?'bật':'tắt')));
