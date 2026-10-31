@@ -244,7 +244,7 @@ td.mvlow{background:color-mix(in srgb,var(--crit) 16%,transparent);color:var(--c
 html[data-app="cahoi"] #cfgRow,html[data-app="cahoi"] #v-lichve .grid.two{grid-template-columns:minmax(0,1fr)!important}
 html[data-app="cahoi"] .tw:has(#tByD),html[data-app="cahoi"] .tw:has(#tByT){max-height:35.3846rem}
 /*LAYOUT 1 trang · 2 cột*/
-:root{--fs:12px}
+:root{--fs:11px}
 html{font-size:var(--fs)!important}
 body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .top1{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -261,7 +261,7 @@ body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .seg button{height:1.8462rem!important;padding:0 0.6923rem!important;font-size:.8rem!important}
 input[type=text],input[type=number],select{height:2rem!important;min-height:0!important;font-size:.86rem!important;padding:0 0.6154rem!important}
 .chk{font-size:.86rem}
-.wrap2{display:grid;grid-template-columns:minmax(25.3846rem,1fr) minmax(0,2fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
+.wrap2{display:grid;grid-template-columns:minmax(20rem,1fr) minmax(0,3fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
 .left{position:sticky;top:3.8462rem;align-self:start;max-height:calc(100vh - 4.6154rem);overflow:auto;padding-right:0.2308rem;scrollbar-width:thin}
 .right{min-width:0}
 @media (max-width:1100px){.wrap2{grid-template-columns:minmax(0,1fr)}.left{position:static;max-height:none;overflow:visible}}
@@ -337,6 +337,7 @@ html[data-app="cahoi"] .wrap2 .left .cfg4 [data-only="rcq"],html:not([data-app="
 .btn.ico{padding:0 0.4615rem!important;font-size:1.05rem!important}
 @media (max-width:1700px){.top1 .brand .sub{display:none}}
 .top1 .brand{display:flex;align-items:baseline;gap:0.4615rem}.top1 .brand .ver{margin-left:0}
+#ovGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:0.7692rem 1.0769rem!important}@media (max-width:1000px){#ovGrid{grid-template-columns:minmax(0,1fr)!important}}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -346,7 +347,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="brand"><b>FC Rau Củ Quả</b><span class="sub">Dự báo đặt hàng tuần · WinMart+ Rural</span><span class="ver">· <b>v4.2</b> · 31/10/2026 · by HaoDT</span></div>
   <span id="dbState" class="pill"></span><span id="srcInfo" class="pill"></span><span id="calcState" class="pill" hidden>Đang tính…</span>
   <div class="sp"></div>
-  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="11px" title="Chữ nhỏ">A−</button><button type="button" data-v="12px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="13.5px" title="Chữ lớn">A+</button></div>
+  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost ico" id="exAll" type="button" title="Mở tất cả section" aria-label="Mở tất cả">⊞</button><button class="btn ghost ico" id="coAll" type="button" title="Thu tất cả section" aria-label="Thu tất cả">⊟</button>
   <span class="hgrp"><span class="hl">Sale</span><label class="btn imp" for="inSale">Import</label><button class="btn tpl" id="saleTpl" type="button" title="File mẫu Sale · Tồn · Chờ giao">Template</button></span><span class="hsep"></span><span class="hgrp"><span class="hl">Cấu hình</span><span class="btn upl imp" title="Nhập file Excel: sheet nào có (Quy đổi KG, Lịch về hàng, Danh mục, Phân nhóm) thì cập nhật dữ liệu đó, không có sheet thì giữ nguyên">Import<input type="file" id="cfgImport" accept=".xlsx,.xlsb,.xlsm" aria-label="Import cấu hình từ Excel"></span><button class="btn tpl" id="cfgTpl" type="button" title="Xuất toàn bộ dữ liệu đang hiệu lực, mỗi loại 1 sheet">Template</button></span><span class="hsep"></span><button class="btn sav" id="cfgSave" type="button" title="Lưu tất cả thay đổi lên kho chung">Lưu</button><span class="hsep"></span><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
 </div></header>
@@ -428,7 +429,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
 <details class="sec" id="s-ov" open><summary><span class="chev">▶</span><span class="num">2</span><h3>Tổng quan</h3><span class="sum" id="sum-ov"></span></summary>
     <div class="body"><div class="row" style="justify-content:space-between"><p class="hint" id="ovSub" style="margin:0"></p><label class="chk">Phạm vi <select id="selProv"></select></label></div><div class="kpis" id="kpis"></div>
-    <div class="grid two" id="ovGrid" style="align-items:start;margin-top:8px"><div class="grid" style="grid-template-columns:minmax(0,1fr)"><div><h4 class="h4">Theo nhóm SP</h4><div class="tw"><table id="tByG"></table></div></div><div><h4 class="h4">Theo nhóm CH (N)</h4><div class="tw"><table id="tByN"></table></div></div></div><div class="grid" style="grid-template-columns:minmax(0,1fr)"><div><h4 class="h4">Theo tỉnh</h4><div class="tw"><table id="tByT"></table></div></div><div data-only="ch"><h4 class="h4">Theo NCC</h4><div class="tw"><table id="tByNcc"></table></div></div><div><h4 class="h4">Theo GĐV</h4><div class="tw"><table id="tByD"></table></div></div></div></div></div></details>
+    <div class="grid two" id="ovGrid" style="align-items:start;margin-top:8px"><div><h4 class="h4">Theo nhóm SP</h4><div class="tw"><table id="tByG"></table></div></div><div><h4 class="h4">Theo nhóm CH (N)</h4><div class="tw"><table id="tByN"></table></div></div><div><h4 class="h4">Theo tỉnh</h4><div class="tw"><table id="tByT"></table></div></div><div><h4 class="h4">Theo GĐV</h4><div class="tw"><table id="tByD"></table></div></div><div data-only="ch"><h4 class="h4">Theo NCC</h4><div class="tw"><table id="tByNcc"></table></div></div></div></div></details>
 <details class="sec" id="s-sk"><summary><span class="chev">▶</span><span class="num">3</span><h3>Theo SKU</h3><span class="sum" id="sum-sk"></span></summary>
     <div class="body"><div class="row fl"><select id="skGrp" aria-label="Nhóm SP"></select><input type="text" id="qSk" placeholder="Tìm Mã WEC / tên" aria-label="Tìm SKU"></div><div class="tw" style="max-height:62vh"><table id="tSk"></table></div><div class="pager" id="pgSk"></div></div></details>
 <details class="sec" id="s-st"><summary><span class="chev">▶</span><span class="num">4</span><h3>Theo cửa hàng</h3><span class="sum" id="sum-st"></span></summary>
@@ -1533,8 +1534,8 @@ $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.i
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
 $$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goSec(a.getAttribute('href').slice(1))}));
 {const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d))}
-const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs2',v)}catch(e){}};
-$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs2');return ['11px','12px','13.5px'].includes(v)?v:'12px'}catch(e){return '12px'}})());
+const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs3',v)}catch(e){}};
+$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs3');return ['10px','11px','12px'].includes(v)?v:'11px'}catch(e){return '11px'}})());
 function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHTML=h};const c=RES.cfg,S=RES.stores;
   set('sale',SA?esc(SALEFILE):'chưa có file Sale');
   set('cfg',CH?`MOV HUB ${c.hubMov||0} kg · Thừa > ${c.thuaPct}% · Thiếu < ${c.thieuPct}%`:`Min ${c.minPct}% · Max ${c.maxPct}% · MOV ${c.mov} QC · lead ${c.leadDays} ngày`);

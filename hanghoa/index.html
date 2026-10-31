@@ -259,7 +259,7 @@ th.sortable{cursor:pointer}th.sortable[data-arrow]:not([data-arrow=""])::after{c
 .pill.leaf{background:var(--leaf-soft);color:var(--leaf)}.pill.high{background:var(--high-soft);color:var(--high)}.pill.crit{background:var(--crit-soft);color:var(--crit)}
 .kp>.bad .v{color:var(--crit)}.kp>.warn .v{color:var(--high)}.kp2>.warn .v{color:var(--high)}
 /*LAYOUT 1 trang · 2 cột*/
-:root{--fs:12px}
+:root{--fs:11px}
 html{font-size:var(--fs)!important}
 body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .top1{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -276,7 +276,7 @@ body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .seg button{height:1.8462rem!important;padding:0 0.6923rem!important;font-size:.8rem!important}
 input[type=text],input[type=number],select{height:2rem!important;min-height:0!important;font-size:.86rem!important;padding:0 0.6154rem!important}
 .chk{font-size:.86rem}
-.wrap2{display:grid;grid-template-columns:minmax(25.3846rem,1fr) minmax(0,2fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
+.wrap2{display:grid;grid-template-columns:minmax(20rem,1fr) minmax(0,3fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
 .left{position:sticky;top:3.8462rem;align-self:start;max-height:calc(100vh - 4.6154rem);overflow:auto;padding-right:0.2308rem;scrollbar-width:thin}
 .right{min-width:0}
 @media (max-width:1100px){.wrap2{grid-template-columns:minmax(0,1fr)}.left{position:static;max-height:none;overflow:visible}}
@@ -345,6 +345,14 @@ html[data-app="cahoi"] .wrap2 .left .cfg4 [data-only="rcq"],html:not([data-app="
 
 .wlogo{height:2.2em;width:auto;border-radius:4px;display:block;flex:none}.top1 .in{gap:0.7692rem}.ver{font-size:.75rem;color:var(--muted);white-space:nowrap}.ver b{color:var(--ink);font-weight:600}
 .ver b{font-size:inherit!important;font-weight:700;letter-spacing:0}
+.cfgbar{display:flex;align-items:center;justify-content:space-between;gap:0.6154rem;margin-bottom:0.6154rem!important}.cfgact{display:flex;gap:0.4615rem;text-transform:none;letter-spacing:0}
+
+.hgrp{display:inline-flex;gap:0.4615rem;align-items:center}.hsep{width:1px;height:1.3846rem;background:var(--line);margin:0 2px}
+.hl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-right:1px}
+.btn.ico{padding:0 0.4615rem!important;font-size:1.05rem!important}
+@media (max-width:1700px){.top1 .brand .sub{display:none}}
+.top1 .brand{display:flex;align-items:baseline;gap:0.4615rem}.top1 .brand .ver{margin-left:0}
+#ovGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:0.7692rem 1.0769rem!important}@media (max-width:1000px){#ovGrid{grid-template-columns:minmax(0,1fr)!important}}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -355,7 +363,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="brand"><b>FC Hàng Hóa</b><span>FC Ambient theo CTKM <span class="ver">· <b>v10.0</b> · 31/10/2026 · by HaoDT</span></span></div>
   <span id="dbState" class="pill"></span><span id="mState" class="pill"></span><span id="srcInfo" class="pill"></span>
   <div class="sp"></div>
-  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="11px" title="Chữ nhỏ">A−</button><button type="button" data-v="12px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="13.5px" title="Chữ lớn">A+</button></div>
+  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost" id="exAll" type="button">Mở tất cả</button><button class="btn ghost" id="coAll" type="button">Thu tất cả</button>
   <label class="btn imp" for="inFile">Import</label><button class="btn tpl" id="btnTpl" type="button">Template</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
 </div></header>
@@ -854,8 +862,8 @@ $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.i
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
 $$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const d=$(a.getAttribute('href'));if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}}));
 {const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d))}
-const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs2',v)}catch(e){}};
-$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs2');return ['11px','12px','13.5px'].includes(v)?v:'12px'}catch(e){return '12px'}})());
+const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs3',v)}catch(e){}};
+$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs3');return ['10px','11px','12px'].includes(v)?v:'11px'}catch(e){return '11px'}})());
 function renderSums(){const R=ST.R,rows=R?R.rows:[],G=R?R.groups:[],c={};G.forEach(g=>c[g.status]=(c[g.status]||0)+1);const s=f=>rows.reduce((a,r)=>a+r[f],0);
   const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHTML=h};const dot=(k,cls,n)=>{const a=$('#jump a[data-d="'+k+'"]');if(!a)return;a.querySelector('.dot').className='dot '+cls;let x=a.querySelector('.n');if(n!=null){if(!x){x=document.createElement('span');x.className='n';a.appendChild(x)}x.textContent=n}else if(x)x.remove()};
   set('data',ST.sale?`${esc(ST.saleFile)} · ${nf(ST.recap.length)} SKU · ${nf(ST.sale.rows)} dòng`:(ST.recap.length?nf(ST.recap.length)+' SKU · chưa có Sale':'chưa Import'));

@@ -150,7 +150,7 @@ label.f{font-size:.8rem!important}
 .left .kv select{height:2rem}
 #roleNote{grid-column:1/-1}
 /*LAYOUT 1 trang · 2 cột*/
-:root{--fs:12px}
+:root{--fs:11px}
 html{font-size:var(--fs)!important}
 body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .top1{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -167,7 +167,7 @@ body{font-size:1rem!important;line-height:1.45;padding-bottom:4.9231rem}
 .seg button{height:1.8462rem!important;padding:0 0.6923rem!important;font-size:.8rem!important}
 input[type=text],input[type=number],select{height:2rem!important;min-height:0!important;font-size:.86rem!important;padding:0 0.6154rem!important}
 .chk{font-size:.86rem}
-.wrap2{display:grid;grid-template-columns:minmax(25.3846rem,1fr) minmax(0,2fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
+.wrap2{display:grid;grid-template-columns:minmax(20rem,1fr) minmax(0,3fr);gap:1.0769rem;padding:0.9231rem 1.2308rem 2.3077rem;max-width:135.385rem;margin:0 auto}
 .left{position:sticky;top:3.8462rem;align-self:start;max-height:calc(100vh - 4.6154rem);overflow:auto;padding-right:0.2308rem;scrollbar-width:thin}
 .right{min-width:0}
 @media (max-width:1100px){.wrap2{grid-template-columns:minmax(0,1fr)}.left{position:static;max-height:none;overflow:visible}}
@@ -248,7 +248,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <label class="nccpick">NCC <select id="nccSel" aria-label="Chọn NCC"></select></label>
   <span class="pill status"><span class="dot" id="dbDot"></span><span id="dbTxt">Đang kết nối…</span></span>
   <div class="sp"></div>
-  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="11px" title="Chữ nhỏ">A−</button><button type="button" data-v="12px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="13.5px" title="Chữ lớn">A+</button></div>
+  <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost" id="exAll" type="button">Mở tất cả</button><button class="btn ghost" id="coAll" type="button">Thu tất cả</button>
   <button class="btn pri" id="orderBtnTop" type="button">⤓ Xuất đơn hàng</button>
 </div></header>
@@ -1239,8 +1239,8 @@ $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.i
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
 $$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const d=$(a.getAttribute('href'));if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}}));
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d));
-const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs2',v)}catch(e){}};
-$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs2');return ['11px','12px','13.5px'].includes(v)?v:'12px'}catch(e){return '12px'}})());
+const setFs=v=>{document.documentElement.style.setProperty('--fs',v);$$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('fc_fs3',v)}catch(e){}};
+$('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.dataset.v)};setFs((()=>{try{const v=localStorage.getItem('fc_fs3');return ['10px','11px','12px'].includes(v)?v:'11px'}catch(e){return '11px'}})());
 })();
 </script>
 </body></html>
