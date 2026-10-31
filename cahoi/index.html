@@ -414,13 +414,14 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <details class="sec" id="s-plan"><summary><span class="chev">▶</span><span class="num">I</span><h3><span data-only="rcq">Số mã quy hoạch</span><span data-only="ch">NCC · MOD theo tỉnh</span></h3><span class="sum" id="sum-plan"></span></summary>
     <div class="body"><p class="hint" data-only="rcq">Danh mục được cài tối đa vượt 10% số mã quy hoạch.</p><div class="tw" data-only="rcq"><table id="tPlan" class="gtab"></table></div><p class="hint" data-only="ch">MOD mỗi CH/ngày theo NCC × tỉnh; trống = MOD mặc định. MOD riêng từng CH ở sheet HUB được ưu tiên. Import/Template qua sheet "NCC" (NCC · Tỉnh · MOD).</p><div class="tw" data-only="ch"><table id="tNcc"></table></div></div></details>
 <details class="sec" id="s-logic"><summary><span class="chev">▶</span><span class="num">J</span><h3>Logic tính FC</h3><span class="sum" id="sum-logic"></span></summary>
-    <div class="body"><div class="grid" style="grid-template-columns:minmax(0,1fr);gap:8px"><div class="card" data-only="ch"><h3>Chuỗi tính · Cá hồi</h3><div class="flow">
-        <div><span><b>Quy về KG</b>: Article → Mã đặt hàng × Quy đổi (HL 200g = 0,2 · 100g = 0,1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing Quantity (chỉ hiển thị).</span></div>
-        <div><span><b>Danh mục của CH</b>: mã được tick ở nhóm N của CH (bước 3).</span></div>
-        <div><span><b>FC (KG)</b> = Sale 1W × (1 + Growth theo %hủy mã + Growth theo %hủy phân nhóm). Growth mã tra theo %hủy của mã tại CH; Growth phân nhóm tra theo nhóm N × %hủy cả CH; bảng nào tắt thì = 0. Không kẹp biên theo Sale Mix, không trừ tồn.</span></div>
-        <div><span><b>Làm tròn</b>: theo bội số QC (≥ 0,5 QC thì lên); có bán thì tối thiểu bằng Min của nhóm N (làm tròn lên bội số QC).</span></div>
-        <div><span><b>Chia ngày</b>: theo lịch giao của tỉnh × N (bước 2). Mỗi lần giao ≥ Min của mã, nên mã nhỏ dồn vào ít lần giao hơn.</span></div>
-        <div><span><b>MOV</b>: cộng kg mỗi ngày theo NCC (theo tỉnh) và theo HUB, so với MOV kg/ngày; ngày dưới MOV hiện ở tab Cảnh báo.</span></div>
+    <div class="body"><div class="grid" style="grid-template-columns:minmax(0,1fr);gap:8px"><div class="card" data-only="ch"><h3>Chuỗi tính SL FC</h3><div class="flow">
+        <div><span><b>Quy về mã quy đổi</b>: Article → Mã WEC × hệ số (mục Mã quy đổi). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2.</span></div>
+        <div><span><b>Danh mục của CH</b>: mã có Min &gt; 0 ở nhóm N của CH.</span></div>
+        <div><span><b>① FC theo bán</b> = Sale 1W × (1 + Growth theo %hủy mã quy đổi + Growth theo %hủy phân nhóm), làm tròn bội số QC.</span></div>
+        <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × hệ số "Đặt tối đa" (mặc định 3).</span></div>
+        <div><span><b>SL FC = min( max(①, ②), ③ )</b>.</span></div>
+        <div><span><b>Chia ngày</b>: theo lịch giao tỉnh × N; mỗi lần giao ≥ Min của mã. Bật "Tối đa tần suất giao" thì giao thêm ngày trong lịch tuyến khi đủ.</span></div>
+        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; thiếu thì gom HUB cấp 1 → 2; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
       </div></div>
 <div class="card" data-only="rcq"><h3>Chuỗi tính</h3><div class="flow">
         <div><span><b>Quy về KG</b>: Article → Mã WEC × Quy đổi KG (bước 1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing L2W, Chờ giao = khối CHỜ GIAO (cột S–U) trong file sale. Mã có "Trừ Tồn CG" = 1: Tồn dự kiến đầu tuần FC = Tồn + Chờ giao − (Sale 1W + Hủy 1W) × <span data-k="leadDays"></span> ngày ÷ 7 (không âm); FC = FC sau kẹp − Tồn dự kiến (không âm), rồi mới làm tròn QC / Min. Mã = 0 thì không trừ.</span></div>
@@ -688,7 +689,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.deduct = r.projStock; r.need = Math.max(0, r.kgBand - r.deduct);
         let units = r.need / qd; let q;
         if (cfg.minFloor) { // Min là sàn (đặt cả khi không bán), trần capX × Min; Min = 0 → không đặt
-          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; q = Math.min(Math.max(Math.round(units / qc + 1e-9) * qc, lo), cap); r.capped = q === cap && Math.round(units / qc + 1e-9) * qc > cap; }
+          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
@@ -1011,7 +1012,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.deduct = r.projStock; r.need = Math.max(0, r.kgBand - r.deduct);
         let units = r.need / qd; let q;
         if (cfg.minFloor) { // Min là sàn (đặt cả khi không bán), trần capX × Min; Min = 0 → không đặt
-          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; q = Math.min(Math.max(Math.round(units / qc + 1e-9) * qc, lo), cap); r.capped = q === cap && Math.round(units / qc + 1e-9) * qc > cap; }
+          if (!(mn > 0)) q = 0; else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
@@ -1614,11 +1615,20 @@ function renderFc(){
   const RS=i=>ROWS[i].S,RR=i=>ROWS[i].r;GET['#tFc']=[i=>RS(i).code,i=>RS(i).N,i=>RS(i).totalFC,i=>RS(i).lich,i=>RR(i).sku.wec,i=>RR(i).sku.dvt,i=>RR(i).sku.qc,i=>RR(i).sku.min,i=>RR(i).sale1w,i=>RR(i).huy1w,i=>RR(i).ton,i=>RR(i).cg||0,i=>RR(i).mix,i=>RR(i).growth,i=>RR(i).kg,i=>RR(i).kg-RR(i).sale1w,i=>RR(i).pcs,...[0,1,2,3,4,5,6].map(d=>i=>RR(i).days[d]),i=>RR(i).flags.length];const idxS=sortArr('#tFc',idx);
   $('#tFc').innerHTML='<tr><th>CH</th><th>Nhóm</th><th class="n">Total FC KG</th><th>Lịch giao</th><th>SKU</th><th>ĐVT</th><th class="n">QC</th><th class="n">Min</th><th class="n">Sale 1W</th><th class="n">Hủy 1W</th><th class="n">Tồn</th><th class="n">Chờ giao</th><th class="n">Sale Mix</th><th class="n">Growth</th><th class="n">FC KG</th><th class="n">SL vượt (+/-) KG</th><th class="n">FC Pcs</th>'+E.DAYVN.map(d=>`<th class="n">${d}</th>`).join('')+'<th></th></tr>'+
   idxS.slice(st.fPage*P,(st.fPage+1)*P).map(i=>{const {S,r}=ROWS[i],x=r.sku,sev=[...new Set(r.flags.map(y=>y[1]))].sort((a,b)=>SEVO[a]-SEVO[b]);
-    return `<tr class="click" data-i="${i}"><td><b>${esc(S.code)}</b></td><td>${esc(S.N)}</td><td class="n">${nf(S.totalFC,1)}</td><td class="mono">${esc(S.lich)}</td><td>${esc(x.wec)} <span style="color:var(--muted)">${esc(x.name)}</span></td><td>${esc(x.dvt)}</td><td class="n">${x.qc??''}</td><td class="n">${x.min??''}</td><td class="n">${nf(r.sale1w,2)}</td><td class="n">${nf(r.huy1w,2)}</td><td class="n">${nf(r.ton,2)}</td><td class="n">${r.cg?nf(r.cg,2):'·'}</td><td class="n">${pf(r.mix,2)}</td><td class="n">${pf(r.growth)}</td><td class="n"><b>${nf(r.kg,2)}</b></td><td class="n">${sgn(r.kg-r.sale1w,2)}</td><td class="n">${nf(r.pcs,r.pcs%1?1:0)}</td>${r.days.map(d=>`<td class="n">${d?nf(d,d%1?1:0):'·'}</td>`).join('')}<td><div class="chips">${sev.map(v=>`<span class="pill ${v}">${r.flags.filter(y=>y[1]===v).length}</span>`).join('')}</div></td></tr>`+(st.open===i?explain(S,r):'')}).join('');
+    return `<tr class="click" data-i="${i}"><td><b>${esc(S.code)}</b></td><td>${esc(S.N)}</td><td class="n">${nf(S.totalFC,1)}</td><td class="mono">${esc(S.lich)}</td><td>${esc(x.wec)} <span style="color:var(--muted)">${esc(x.name)}</span></td><td>${esc(x.dvt)}</td><td class="n">${x.qc??''}</td><td class="n">${r.minEff!=null&&r.minEff!==0?r.minEff:(x.min??'')}</td><td class="n">${nf(r.sale1w,2)}</td><td class="n">${nf(r.huy1w,2)}</td><td class="n">${nf(r.ton,2)}</td><td class="n">${r.cg?nf(r.cg,2):'·'}</td><td class="n">${pf(r.mix,2)}</td><td class="n">${pf(r.growth)}</td><td class="n"><b>${nf(r.kg,2)}</b></td><td class="n">${sgn(r.kg-r.sale1w,2)}</td><td class="n">${nf(r.pcs,r.pcs%1?1:0)}</td>${r.days.map(d=>`<td class="n">${d?nf(d,d%1?1:0):'·'}</td>`).join('')}<td><div class="chips">${sev.map(v=>`<span class="pill ${v}">${r.flags.filter(y=>y[1]===v).length}</span>`).join('')}</div></td></tr>`+(st.open===i?explain(S,r):'')}).join('');
   markSort('#tFc');pager('#pgFc',idx.length,st.fPage,p=>{st.fPage=p;renderFc()},P);
 }
 const sgn=(v,d)=>(v>0?'+':'')+nf(v,d);
 function explain(S,r){const c=RES.cfg,it=(a,b)=>`<div><span>${a}</span><span>${b}</span></div>`;
+  if(CH){const qd=r.sku.qd||1,qc=r.sku.qc||1,cx=c.capX!=null?c.capX:3,mn=r.minEff||0;
+    return `<tr class="exp"><td colspan="25"><div class="explain">
+    ${it('Sale 1W (mã quy đổi '+esc(r.sku.wec)+', = Sale L2W ÷ 2)',nf(r.sale1w,3)+' kg')}${it('%Hủy mã tại CH '+pf(r.waste)+' → Growth mã'+(c.useGSku===false?' (tắt)':''),pf(r.gSku))}${it('%Hủy CH '+pf(S.wStore)+' × '+S.N+' → Growth phân nhóm'+(c.useGSt?'':' (tắt)'),pf(r.gSt||0))}
+    ${it('① FC theo bán = Sale 1W × (1 + '+pf(r.growth)+')'+(r.useDeduct?' − Tồn dự kiến '+nf(r.projStock,2):''),nf(r.need,3)+' kg → làm tròn QC '+qc+': '+nf((r.qRaw||0)*qd,3)+' kg')}
+    ${it('② Min '+S.N+' = '+(mn||0)+' kg'+(mn>0?' → sàn (làm tròn lên QC)':' → không đặt'),mn>0?nf((r.qLo||0)*qd,3)+' kg':'0')}
+    ${mn>0?it('③ Trần = '+cx+' × Min',isFinite(r.qCap)?nf(r.qCap*qd,3)+' kg':'không giới hạn'):''}
+    ${it('<b>SL FC = min( max(①, ②), ③ )</b>'+(r.floored?' · lấy theo Min':r.capped?' · chạm trần':''),'<b>'+nf((r.kg-(r.boost||0)),3)+' kg</b>')}
+    ${r.boost?it('Tăng thêm cho đủ MOQ (gom HUB)','+'+nf(r.boost,3)+' kg = '+nf(r.kg,3)+' kg'):''}${r.blocked?it('Cụm thiếu MOQ chọn Không đặt','0'):''}
+    </div>${r.flags.length?'<div style="margin-top:8px">'+r.flags.map(f=>`<span class="pill ${f[1]}">${esc(f[2])}</span>`).join(' ')+'</div>':''}</td></tr>`}
   return `<tr class="exp"><td colspan="25"><div class="explain">
   ${it('Sale 1W CH (danh mục '+S.n+' SKU)',nf(S.sale1w,2)+' kg')}${it(c.useGSt?'Growth phân nhóm '+S.N+': %Hủy CH '+pf(S.wStore)+' → block '+pf(E.BANDS[E.band(S.wStore)],0):'Growth phân nhóm (đang tắt)',pf(S.gStore))}${it('Total FC mục tiêu',nf(S.totalTarget,2)+' kg')}
   ${it('Sale Mix FC SKU (chia lại trong CH)',pf(r.mix,2))}${it('Mục tiêu theo mix = mix × Total',nf(r.target,3)+' kg')}${it('Biên '+c.minPct+'%–'+c.maxPct+'%',nf(r.lo,2)+' – '+nf(r.hi,2)+' kg')}
