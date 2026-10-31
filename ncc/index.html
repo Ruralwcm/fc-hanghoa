@@ -243,7 +243,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 /*TREE*/.tree{max-height:32em;overflow:auto;border:1px solid var(--line)!important;border-radius:6px;padding:4px 8px!important;background:var(--panel)}
 .tree details{margin:1px 0}.tree summary{cursor:pointer;list-style:none;padding:2px 0}.tree summary::-webkit-details-marker{display:none}
 .tree summary::before{content:'▸';display:inline-block;width:1.1em;color:var(--muted)}.tree details[open]>summary::before{content:'▾'}
-.tree .tg{margin-left:1.2em}.tree .tt{margin-left:2.4em;display:grid;grid-template-columns:repeat(auto-fill,minmax(11em,1fr));gap:1px 8px}
+.tree details details{margin-left:1.1em}.tree .tt{margin-left:1.6em;display:grid;grid-template-columns:repeat(auto-fill,minmax(14em,1fr));gap:1px 8px}.tree .tt label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .tree label{cursor:pointer;font-size:.86rem!important;display:inline-flex;align-items:center;gap:4px}.tree .cnt{color:var(--muted);font-size:.75rem;font-family:var(--f-mono)}
 </style>
 </head>
@@ -279,7 +279,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     </div>
   </div></div></details>
 <details class="sec" id="s-sel" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-sel"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
-    <div class="body"><p class="hint">Không chọn = tất cả CH của NCC. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="stTree"></div></div></details>
+    <div class="body"><p class="hint">Danh sách từ Storeslist: Miền › GĐV › QLKV › CH. Không chọn = tất cả CH của NCC; chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="stTree"></div></div></details>
 <details class="sec" id="s-ky"><summary><span class="chev">▶</span><span class="num">C</span><h3>Các kỳ đã lưu</h3><span class="sum" id="sum-ky"></span></summary>
 <div class="body"><p class="hint">Tích chọn kỳ dùng để tính FC. Sale 1 tuần = tổng các kỳ chọn ÷ tổng số tuần. Tồn lấy theo kỳ mới nhất.</p><div class="plist" id="plist"><div class="sub">Đang tải…</div></div></div></details>
 <details class="sec" id="s-cfg"><summary><span class="chev">▶</span><span class="num">D</span><h3>Cấu hình đặt hàng</h3><span class="sum" id="sum-cfg"></span></summary>
@@ -332,8 +332,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <main class="right">
   <nav class="jump" id="jump"><a href="#s-min"><span class="dot"></span>Cài Min</a><a href="#s-fc"><span class="dot"></span>FC đặt hàng</a><a href="#s-det"><span class="dot"></span>Chi tiết CH</a><a href="#s-hub"><span class="dot"></span>MOQ & gom HUB</a><a href="#s-ov"><span class="dot"></span>Tổng quan FC</a></nav>
   <div class="gh"><h2>Khai báo</h2><span class="ln"></span></div>
-<details class="sec" id="s-min"><summary><span class="chev">▶</span><span class="num">1</span><h3>Sale & Hủy · Cài Min</h3><span class="sum" id="sum-min"></span><span class="act"><button class="btn sm ghost" id="resetMin" disabled>Bỏ thay đổi</button><button class="btn sm pri" id="saveMin" disabled>Lưu cài đặt</button></span></summary>
-<div class="body"><p class="hint">Ô nền vàng (Min, QC gói) và tím (Tăng trưởng) là chỗ anh chỉnh. Min tính theo gói (Min 2 với gói 0,8 kg = 1,6 kg). <b>Số đặt</b>: Min = 0 thì không đặt; Min &gt; 0 thì = Sale 1 tuần × (1 + tăng trưởng), không thấp hơn Min và không quá 3 × Min. Tăng trưởng áp theo %Hủy của từng cửa hàng: hủy càng cao, tăng trưởng càng thấp.</p><div id="minMsg"></div><div class="tw" style="max-height:62vh"><table id="minTbl"></table></div><div class="legend"><span><span class="sw" style="background:var(--k-sale)"></span>Bán</span><span><span class="sw" style="background:var(--k-huy)"></span>Hủy</span><span><span class="sw" style="background:var(--k-bq)"></span>Sale BQ</span><span><span class="sw" style="background:var(--k-min)"></span>Min (nhập)</span><span><span class="sw" style="background:var(--k-tt)"></span>Tăng trưởng (nhập)</span><span><span class="sw" style="background:var(--warn-soft)"></span>%Hủy ≥ 20%</span><span>Sale BQ/CH/tuần = SL bán nhóm ÷ số CH có bán ÷ số tuần (kg)</span></div></div></details>
+<details class="sec" id="s-min"><summary><span class="chev">▶</span><span class="num">1</span><h3>Sale & Hủy · Cài Min</h3><span class="sum" id="sum-min"></span><span class="act"><span class="seg" id="minView" role="group" aria-label="Kiểu xem"><button type="button" data-v="short">Rút gọn</button><button type="button" data-v="full">Đầy đủ</button></span><button class="btn sm" id="calcMin" type="button" title="Nhập ≥ 2 mốc Min (vd N1 và N8), app nội suy các nhóm ở giữa">Tính Min</button><button class="btn sm ghost" id="resetMin" disabled>Bỏ thay đổi</button><button class="btn sm pri" id="saveMin" disabled>Lưu cài đặt</button></span></summary>
+<div class="body"><p class="hint">Ô nền vàng (Min, QC gói) và tím (Tăng trưởng) là chỗ anh chỉnh. Min tính theo gói (Min 2 với gói 0,8 kg = 1,6 kg). <b>Số đặt</b>: Min = 0 thì không đặt; Min &gt; 0 thì = Sale 1 tuần × (1 + tăng trưởng), không thấp hơn Min và không quá 3 × Min. Tăng trưởng áp theo %Hủy của từng cửa hàng: hủy càng cao, tăng trưởng càng thấp.</p><div id="minMsg"></div><div class="tw" style="max-height:62vh"><table id="minTbl"></table></div><div class="legend"><span><span class="sw" style="background:var(--k-sale)"></span>Bán</span><span><span class="sw" style="background:var(--k-huy)"></span>Hủy</span><span><span class="sw" style="background:var(--k-bq)"></span>#CH PN</span><span><span class="sw" style="background:var(--k-min)"></span>Min (nhập)</span><span><span class="sw" style="background:var(--k-tt)"></span>Tăng trưởng (nhập)</span><span><span class="sw" style="background:var(--warn-soft)"></span>%Hủy ≥ 20%</span><span>SL bán = kg/tuần của nhóm · #CH PN = số CH thuộc nhóm có mã · Tính Min: nhập ≥ 2 mốc rồi bấm để nội suy</span></div></div></details>
   <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
 <details class="sec" id="s-fc"><summary><span class="chev">▶</span><span class="num">2</span><h3>FC đặt hàng · tổng hợp theo mã (kg)</h3><span class="sum" id="sum-fc"></span><span class="act"><button class="btn sm ghost" id="exportBtn">Tải Excel đầy đủ</button><button class="btn sm pri" id="orderBtn">Xuất file đặt hàng</button></span></summary>
 <div class="body"><div class="kpis" id="kpis"></div><div class="row fl"><label class="f">Tỉnh<select id="fTinh"><option value="">Tất cả</option></select></label>
@@ -444,23 +444,24 @@ function computeAll(M, cfg, periods) {
     });
   });
   // SKU overview
-  const ov = skus.map(s=>({ch:0,slb:0,slh:0,gtb:0,gth:0,bq:GROUPS.map(()=>0),_s:GROUPS.map(()=>0),_n:GROUPS.map(()=>0)}));
+  const ov = skus.map(s=>({ch:0,slb:0,slh:0,gtb:0,gth:0,bq:GROUPS.map(()=>0),_s:GROUPS.map(()=>0),_n:GROUPS.map(()=>0),_gb:GROUPS.map(()=>0),_gh:GROUPS.map(()=>0),pn:GROUPS.map(()=>0)}));
   Object.values(raw).forEach(a=>{
     const i=skuIdx[a.sk]; if(i===undefined) return; const o=ov[i];
     if(a.slb>0) o.ch++; o.slb+=a.slb;o.slh+=a.slh;o.gtb+=a.gtb;o.gth+=a.gth;
   });
   Object.entries(agg).forEach(([k,b])=>{
-    const q=k.split('|')[1]; const g=GROUPS.indexOf(b.nh||storeNhom[b.st]); if(g<0) return;
-    skus.forEach((s,i)=>{ if(s.qd===q){ ov[i]._s[g]+=b.slb; if(b.slb>0) ov[i]._n[g]++; } });
+    const q=k.split('|')[1]; const g=GROUPS.indexOf(storeNhom[b.st]||b.nh); if(g<0) return;
+    skus.forEach((s,i)=>{ if(s.qd===q){ ov[i]._s[g]+=b.slb; ov[i]._gb[g]+=b.gtb; ov[i]._gh[g]+=b.gth; if(b.slb>0) ov[i]._n[g]++; } });
   });
-  ov.forEach(o=>{ o.pct = o.gtb>0?o.gth/o.gtb:(o.gth>0?1:0); o.bq=o._s.map((v,g)=>o._n[g]?v/o._n[g]/W:0); });
+  (M.ss||[]).forEach(([si,ki])=>{ const st=M.stores[si]; const g=st?GROUPS.indexOf(st[4]):-1; if(g>=0&&ov[ki]) ov[ki].pn[g]++; });
+  ov.forEach(o=>{ o.gpct=o._gb.map((v,g)=>v>0?o._gh[g]/v:(o._gh[g]>0?1:0)); o.pct = o.gtb>0?o.gth/o.gtb:(o.gth>0?1:0); o.bq=o._s.map((v,g)=>o._n[g]?v/o._n[g]/W:0); });
   // %hủy CH (theo giá trị, mọi mã của NCC)
   const stW={}; Object.values(agg).forEach(b=>{ const o=stW[b.st]||(stW[b.st]={b:0,h:0}); o.b+=b.gtb; o.h+=b.gth; });
   // FC lines
   const th = cfg.thresholds, phuOv = cfg.phu||{}, gn = cfg.gn||{}, useGSku = cfg.useGSku!==0 && cfg.useGSku!==false, useGSt = !!cfg.useGSt;
   const tierOf = p => { let t=0; for(let j=0;j<th.length;j++) if(p>=th[j]) t=j; return t; };
   const SEL=M.sel&&M.sel.size?M.sel:null;
-  const lines = M.ss.filter(([si])=>{ if(!SEL) return true; const st=M.stores[si], t=st[2]||'(Khác)'; return SEL.has('||'+t)||SEL.has((st[3]||'(Không GĐV)')+'||'+t); }).map(([si,ki,lich,phu0])=>{
+  const lines = M.ss.filter(([si])=>{ if(!SEL) return true; const st=M.stores[si], t=st[2]||'(Khác)'; return SEL.has(st[0]); }).map(([si,ki,lich,phu0])=>{
     const st=M.stores[si], s=skus[ki]; const key=st[0]+'|'+s.code;
     const b=agg[st[0]+'|'+s.code]||{slb:0,gtb:0,slh:0,gth:0,ton:0};
     const phu = phuOv[key]!==undefined?phuOv[key]:phu0;
@@ -601,19 +602,24 @@ function recompute(){
 }
 
 // ---------- MIN table
+let MINV=(()=>{try{return localStorage.getItem('ncc_minv')||'short'}catch(e){return 'short'}})();
 function renderMin(){
-  const G=GROUPS, o=result.ov, S=cfg.skus;
-  const maxbq=Math.max(0.0001,...o.flatMap(x=>x.bq));
-  const B=(cls,n,first)=>cls+(first?' bs':'');
-  let h='<thead><tr class="grp"><th colspan="5" class="l k-info">Mã hàng</th><th colspan="3" class="k-sale bs">Bán ('+result.W+' tuần)</th><th colspan="2" class="k-huy bs">Hủy</th><th colspan="8" class="k-bq bs">Sale BQ / CH / tuần (kg)</th><th colspan="8" class="k-min bs">Min theo nhóm CH (gói) · nhập</th><th colspan="11" class="k-tt bs">Tăng trưởng theo %Hủy mã tại CH · nhập cột 0% và 100%, giữa tự tính</th></tr><tr>'+
-  '<th class="l stk s1">Mã SP</th><th class="l stk s2">Tên SP</th><th>QC gói (kg)</th><th class="l">Quy đổi về mã</th><th title="1 đơn vị mã bán = ? đơn vị mã đặt">Hệ số QĐ</th><th class="k-sale bs">Số CH bán</th><th class="k-sale">SL bán</th><th class="k-sale">GT bán (tr)</th><th class="k-huy bs">SL hủy</th><th class="k-huy">%Hủy</th>'+
-  G.map((g,j)=>'<th class="k-bq'+(j?'':' bs')+'">'+g+'</th>').join('')+G.map((g,j)=>'<th class="k-min'+(j?'':' bs')+'">'+g+'</th>').join('')+cfg.thresholds.map((t,j)=>'<th class="k-tt'+(j?'':' bs')+'">'+Math.round(t*100)+'%</th>').join('')+'</tr></thead><tbody>';
+  const G=GROUPS, o=result.ov, S=cfg.skus, W=result.W||1, full=MINV==='full';
+  {const sg=$('minView');if(sg)sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===MINV));}
+  const per=full?5:2, nT=full?3:1;
+  let h='<thead><tr class="grp"><th colspan="5" class="l k-info">Mã hàng</th><th colspan="'+nT+'" class="k-sale bs">Tổng (1 tuần)</th>'+
+    G.map(g=>'<th colspan="'+per+'" class="k-min bs">'+g+'</th>').join('')+(full?'<th colspan="'+cfg.thresholds.length+'" class="k-tt bs">Tăng trưởng theo %hủy mã (nhập 0% và 100%)</th>':'')+'</tr><tr>'+
+    '<th class="l stk s1">Mã SP</th><th class="l stk s2">Tên SP</th><th>QC gói (kg)</th><th class="l">Quy đổi về mã</th><th title="1 đơn vị mã bán = ? đơn vị mã đặt">Hệ số QĐ</th>'+
+    (full?'<th class="k-sale bs">#CH bán</th><th class="k-sale">SL bán</th><th class="k-huy">%Hủy</th>':'<th class="k-sale bs">SL bán</th>')+
+    G.map(()=>full?'<th class="k-sale bs" title="Số CH có bán trong nhóm">#CH bán</th><th class="k-sale" title="SL bán 1 tuần của nhóm">SL bán</th><th class="k-huy">%Hủy</th><th class="k-bq" title="Số CH thuộc nhóm có mã này">#CH PN</th><th class="k-min">Min</th>':'<th class="k-sale bs">SL bán</th><th class="k-min">Min</th>').join('')+
+    (full?cfg.thresholds.map((t,j)=>'<th class="k-tt'+(j?'':' bs')+'">'+Math.round(t*100)+'%</th>').join(''):'')+'</tr></thead><tbody>';
   S.forEach((s,i)=>{ const x=o[i], s0=cfgSaved.skus[i]||s;
     const inp=(f,j,v,v0,pct,cls)=>'<td class="in '+(cls||'')+'"><input aria-label="'+f+'" data-i="'+i+'" data-f="'+f+'" data-j="'+j+'" value="'+(pct?Math.round(v*100):v)+'" class="'+((+v)!==(+v0)?'dirty':'')+'" inputmode="decimal"></td>';
     h+='<tr><td class="l stk s1">'+s.code+'</td><td class="l name stk s2" title="'+esc(s.name)+'">'+esc(s.name)+'</td>'+inp('moq',0,s.moq,s0.moq)+'<td class="l">'+(s.qd!==s.code?s.qd+'</td>'+inp('qdf',0,(s.qdf===undefined?1:s.qdf),(s0.qdf===undefined?1:s0.qdf)):'<span class="zero">–</span></td><td></td>')+
-    '<td class="c-sale bs">'+nf(x.ch,0)+'</td><td class="c-sale">'+nf(x.slb)+'</td><td class="c-sale">'+nf(x.gtb)+'</td><td class="c-huy bs">'+nf(x.slh)+'</td><td class="c-huy'+(x.pct>=.2?' hi':'')+'">'+pf(x.pct)+'</td>'+
-    x.bq.map((v,j)=>'<td class="c-bq'+(j?'':' bs')+'">'+(v?'<span class="bar-bq" style="width:'+Math.max(2,Math.round(v/maxbq*28))+'px"></span>':'')+nf(v,2)+'</td>').join('')+
-    s.min.map((v,j)=>inp('min',j,v,s0.min[j],false,'c-min'+(j?'':' bs'))).join('')+s.tiers.map((v,j)=>(j===0||j===s.tiers.length-1)?inp('tier',j,v,(s0.tiers||[])[j],true,'c-tt'+(j?'':' bs')):'<td class="c-tt" style="color:var(--muted)">'+Math.round(v*100)+'</td>').join('')+'</tr>';
+    (full?'<td class="c-sale bs">'+nf(x.ch,0)+'</td><td class="c-sale">'+nf(x.slb/W)+'</td><td class="c-huy'+(x.pct>=.2?' hi':'')+'">'+pf(x.pct)+'</td>':'<td class="c-sale bs">'+nf(x.slb/W)+'</td>')+
+    G.map((g,j)=>full?'<td class="c-sale bs">'+nf(x._n[j],0)+'</td><td class="c-sale">'+nf(x._s[j]/W)+'</td><td class="c-huy'+(x.gpct[j]>=.2?' hi':'')+'">'+pf(x.gpct[j])+'</td><td class="c-bq">'+nf(x.pn[j],0)+'</td>'+inp('min',j,s.min[j],s0.min[j],false,'c-min')
+      :'<td class="c-sale bs">'+nf(x._s[j]/W)+'</td>'+inp('min',j,s.min[j],s0.min[j],false,'c-min')).join('')+
+    (full?s.tiers.map((v,j)=>(j===0||j===s.tiers.length-1)?inp('tier',j,v,(s0.tiers||[])[j],true,'c-tt'+(j?'':' bs')):'<td class="c-tt" style="color:var(--muted)">'+Math.round(v*100)+'</td>').join(''):'')+'</tr>';
   });
   $('minTbl').innerHTML=h+'</tbody>';
   $('truTon').checked=!!cfg.truTon; $('capX').value=cfg.capX===undefined?3:cfg.capX;
@@ -625,6 +631,9 @@ $('minTbl').addEventListener('change',e=>{ const t=e.target; if(!t.dataset.f) re
   const s=cfg.skus[+t.dataset.i];
   if(t.dataset.f==='moq') s.moq=v||s.moq; else if(t.dataset.f==='qdf') s.qdf=v>0?v:1; else if(t.dataset.f==='min') s.min[+t.dataset.j]=v; else { s.tiers[+t.dataset.j]=parseFloat(String(t.value).replace(',','.'))/100||0; s.tiers=linRow11(s.tiers); }
   recompute(); });
+{const sg=$('minView');if(sg)sg.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;MINV=b.dataset.v;try{localStorage.setItem('ncc_minv',MINV)}catch(_){}renderMin()});}
+if($('calcMin'))$('calcMin').onclick=()=>{let n=0;cfg.skus.forEach(s=>{const N=s.min.map(v=>+v||0);let i1=-1,i8=-1;N.forEach((v,i)=>{if(v){if(i1<0)i1=i;i8=i}});if(i1<0||i8<=i1+1)return;const st=(N[i8]-N[i1])/(i8-i1);for(let i=i1+1;i<i8;i++)s.min[i]=Math.round(N[i1]+(i-i1)*st);n++});
+  if(!n){$('minMsg').innerHTML='<div class="msg info">Cần ít nhất 2 mốc Min cách nhau (ví dụ N1 và N8) để nội suy.</div>';return}$('minMsg').innerHTML='<div class="msg ok">Đã tính Min cho '+n+' mã (nội suy giữa mốc đầu và mốc cuối). Bấm Lưu cài đặt để giữ.</div>';recompute()};
 $('truTon').onchange=e=>{cfg.truTon=e.target.checked?1:0; recompute();};
 $('capX').onchange=e=>{ let v=parseFloat(e.target.value); cfg.capX=isFinite(v)&&v>=0?v:3; recompute(); };
 $('resetMin').onclick=()=>{ cfg.skus=clone(cfgSaved.skus); cfg.truTon=cfgSaved.truTon; cfg.gn=clone(cfgSaved.gn||{}); cfg.useGSku=cfgSaved.useGSku; cfg.useGSt=cfgSaved.useGSt; recompute(); };
@@ -1001,6 +1010,7 @@ async function gviz(q){ const u='https://docs.google.com/spreadsheets/d/'+SHEET_
   try{ return csvRows(await go(u)); }catch(e){ return csvRows(await go('https://corsproxy.io/?url='+encodeURIComponent(u))); } }
 async function syncSheet(auto){ const el=$('sprev'); if(!auto) el.className='msg info'; if(!auto) el.textContent='Đang đọc Storeslist, PhanNhomCH ('+NCC.mch3+'), HUB từ Sheet gốc…';
   try{ const [st,pn,hb]=await Promise.all([gviz('gid=164583655'),gviz('gid=879484655'),gviz('sheet=HUB').catch(()=>[])]);
+    try{ stlLoad(st); }catch(_){}
     const K=v=>{ const s=String(v||'').trim().toUpperCase(); return s==='0'?'':s; }; const nh={}; pn.slice(1).forEach(r=>{ if(String(r[1]).trim()===NCC.mch3&&/^N[1-8]$/.test(String(r[2]).trim())) nh[K(r[0])]=String(r[2]).trim(); });
     const old={}; MASTER.stores.forEach((s,i)=>old[s[0]]=i); const oldSS={}; MASTER.ss.forEach(x=>{ const c=MASTER.stores[x[0]][0]; (oldSS[c]=oldSS[c]||[]).push([x[1],x[2],x[3]]); });
     const lc={}; MASTER.ss.forEach(x=>lc[x[2]]=(lc[x[2]]||0)+1); const defLich=Object.keys(lc).sort((a,b)=>lc[b]-lc[a])[0]||'37'; const std=stdSkus();
@@ -1238,35 +1248,42 @@ $('savePeriod').onclick=async()=>{
 fillFilters(); recompute(); loadAll().then(()=>syncSheet(true));
 })();
 </script>
-<script>// ---------- CHỌN STORES FC (dùng chung các app FC) ----------
+<script>// ---------- CHỌN STORES FC (dùng chung các app FC) · nguồn Storeslist: Miền › GĐV › QLKV › CH ----------
 const nT=t=>String(t||'').trim().replace(/^(TP\.|T\.|Tỉnh|Thành phố)\s*/i,'').normalize('NFC').toLowerCase();
 const MIEN_MAP=(()=>{const m={};
   'TP. Hà Nội,TP. Hải Phòng,T. Bắc Ninh,T. Thái Nguyên,T. Phú Thọ,T. Hòa Bình,T. Sơn La,T. Điện Biên,T. Lào Cai,T. Yên Bái,T. Tuyên Quang,T. Hà Giang,T. Lạng Sơn,T. Cao Bằng,T. Bắc Kạn,T. Thái Bình,T. Nam Định,T. Hà Nam,T. Ninh Bình,T. Hưng Yên,T. Hải Dương,T. Quảng Ninh,T. Bắc Giang,T. Vĩnh Phúc,T. Lai Châu'.split(',').forEach(t=>m[nT(t)]='Miền Bắc');
   'T. Thanh Hóa,T. Nghệ An,T. Hà Tĩnh,T. Quảng Bình,T. Quảng Trị,TP. Huế,T. Thừa Thiên Huế,TP. Đà Nẵng,T. Quảng Nam,T. Quảng Ngãi,T. Bình Định,T. Phú Yên,T. Khánh Hòa,T. Ninh Thuận,T. Bình Thuận,T. Kon Tum,T. Gia Lai,T. Đắk Lắk,T. Đắk Nông,T. Lâm Đồng'.split(',').forEach(t=>m[nT(t)]='Miền Trung');
   return m})();
 const mienOfT=t=>MIEN_MAP[nT(t)]||(t?'Miền Nam':'Khác');
-const stKey=(g,t)=>(g||'')+'||'+(t||'');
-/* opt: {el, list:()=>[{g,t}], get:()=>Set, set:(Set)=>void, glab:'GĐV'} */
+const SL_ACTIVE=s=>!s||/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s);
+/* Storeslist (Sheet gốc gid 164583655): A Mã · B Tên · C Tình trạng · D Khai trương · E Miền · F Tỉnh · G Huyện · H QLKV · I GĐV · L SPD · M Nhóm DT */
+const STL={map:new Map(),at:null};
+function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[1]||'').trim(),st:String(r[2]||'').trim(),m:String(r[4]||'').trim()||mienOfT(r[5]),t:String(r[5]||'').trim(),q:String(r[7]||'').trim(),g:String(r[8]||'').trim(),spd:r[11],ndt:String(r[12]||'').trim()})});STL.at=new Date();return STL.map}
+/* opt: {el, list:()=>[{c,n,m,g,q}], get:()=>Set(mã CH), set:(Set)=>void} — lá là từng CH */
 function StoreTree(opt){
   const el=opt.el,open=new Set(),E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  let T={},two=false;
-  const build=()=>{T={};const L=opt.list();two=!L.some(x=>x.g);L.forEach(x=>{const t=x.t||'(Khác)',g=two?'':(x.g||'(Không '+(opt.glab||'GĐV')+')'),m=mienOfT(x.t);const a=T[m]=T[m]||{},b=a[g]=a[g]||{};b[t]=(b[t]||0)+1})};
-  const keysOf=(m,g)=>Object.keys(T[m]||{}).filter(x=>g==null||x===g).flatMap(gg=>Object.keys(T[m][gg]).map(t=>stKey(gg,t)));
-  const allKeys=()=>Object.keys(T).flatMap(m=>keysOf(m));
-  const sum=o=>Object.values(o).reduce((a,v)=>a+(typeof v==='number'?v:sum(v)),0);
-  function render(){build();const S=opt.get(),ord=['Miền Bắc','Miền Trung','Miền Nam'];
-    const ms=Object.keys(T).sort((a,b)=>(ord.indexOf(a)+1||9)-(ord.indexOf(b)+1||9)||a.localeCompare(b,'vi'));
-    if(!ms.length){el.innerHTML='<div class="hint">Chưa có danh sách cửa hàng.</div>';return}
-    const stt=ks=>{const n=ks.filter(k=>S.has(k)).length;return n===0?'':n===ks.length?'checked':'data-mixed="1"'};
-    const leaf=(m,g)=>'<div class="tt">'+Object.keys(T[m][g]).sort((a,b)=>a.localeCompare(b,'vi')).map(t=>`<label><input type="checkbox" data-key="${E(stKey(g,t))}" ${S.has(stKey(g,t))?'checked':''}> ${E(t)} <span class="cnt">${T[m][g][t]}</span></label>`).join('')+'</div>';
-    el.innerHTML=ms.map(m=>`<details class="tm" ${open.has('m|'+m)?'open':''} data-tk="m|${E(m)}"><summary><label><input type="checkbox" data-mien="${E(m)}" ${stt(keysOf(m))}> <b>${E(m)}</b> <span class="cnt">${sum(T[m])}</span></label></summary>`+
-      (two?leaf(m,''):Object.keys(T[m]).sort((a,b)=>a.localeCompare(b,'vi')).map(g=>`<details class="tg" ${open.has('g|'+m+'|'+g)?'open':''} data-tk="g|${E(m)}|${E(g)}"><summary><label><input type="checkbox" data-mien="${E(m)}" data-g="${E(g)}" ${stt(keysOf(m,g))}> ${E(g)} <span class="cnt">${sum(T[m][g])}</span></label></summary>${leaf(m,g)}</details>`).join(''))+'</details>').join('');
-    el.querySelectorAll('input[data-mixed]').forEach(i=>i.indeterminate=true)}
-  el.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.tk){d.open?open.add(d.dataset.tk):open.delete(d.dataset.tk)}},true);
+  let T=null,ids=new Map(),uid=0;
+  const node=(lab,path)=>({lab,path,kids:new Map(),codes:[]});
+  const build=()=>{T=node('',[]);ids=new Map();uid=0;const seen=new Set();
+    opt.list().forEach(x=>{if(!x||!x.c||seen.has(x.c))return;seen.add(x.c);const ps=[x.m||mienOfT(x.t),x.g||'(Không GĐV)',x.q||'(Không QLKV)'];let nd=T;nd.codes.push(x.c);
+      ps.forEach((p,i)=>{if(!nd.kids.has(p))nd.kids.set(p,node(p,ps.slice(0,i+1)));nd=nd.kids.get(p);nd.codes.push(x.c)});(nd.st=nd.st||[]).push(x)});
+    const reg=nd=>{nd.id='n'+(uid++);ids.set(nd.id,nd);nd.kids.forEach(reg)};reg(T)};
+  const ord=['Miền Bắc','Miền Trung','Miền Nam'];
+  const sortK=(a,b,lv)=>lv===0?((ord.indexOf(a)+1||9)-(ord.indexOf(b)+1||9)||a.localeCompare(b,'vi')):a.localeCompare(b,'vi');
+  const pk=nd=>nd.path.join('|');
+  function inner(nd,S){
+    if(nd.st)return '<div class="tt">'+nd.st.slice().sort((a,b)=>a.c.localeCompare(b.c)).map(x=>`<label title="${E(x.n)}"><input type="checkbox" data-code="${E(x.c)}" ${S.has(x.c)?'checked':''}> <b>${E(x.c)}</b> ${E(String(x.n||'').replace(/^WM\+\s*/,''))}</label>`).join('')+'</div>';
+    const lv=nd.path.length;return [...nd.kids.keys()].sort((a,b)=>sortK(a,b,lv)).map(k=>{const c=nd.kids.get(k),n=c.codes.filter(x=>S.has(x)).length,st=n===0?'':n===c.codes.length?'checked':'data-mixed="1"',op=open.has(pk(c));
+      return `<details class="t${lv}" ${op?'open':''} data-nid="${c.id}"><summary><label><input type="checkbox" data-nid="${c.id}" ${st}> ${lv===0?'<b>'+E(k)+'</b>':E(k)} <span class="cnt">${n?n+'/':''}${c.codes.length}</span></label></summary>${op?inner(c,S):''}</details>`}).join('')}
+  function render(){build();const S=opt.get();if(!T.codes.length){el.innerHTML='<div class="hint">Chưa có danh sách cửa hàng (Storeslist).</div>';return}
+    el.innerHTML=inner(T,S);el.querySelectorAll('input[data-mixed]').forEach(i=>i.indeterminate=true)}
+  el.addEventListener('toggle',e=>{const d=e.target;if(!d.dataset||!d.dataset.nid)return;const nd=ids.get(d.dataset.nid);if(!nd)return;
+    if(d.open){open.add(pk(nd));const body=[...d.children].filter(x=>x.tagName!=='SUMMARY');if(!body.length){d.insertAdjacentHTML('beforeend',inner(nd,opt.get()));d.querySelectorAll('input[data-mixed]').forEach(i=>i.indeterminate=true)}}else open.delete(pk(nd))},true);
   el.addEventListener('click',e=>{if(e.target.matches('input[type=checkbox]'))e.stopPropagation()});
   el.addEventListener('change',e=>{const i=e.target;if(!i.matches('input[type=checkbox]'))return;const S=new Set(opt.get());
-    const ks=i.dataset.key!=null?[i.dataset.key]:keysOf(i.dataset.mien,i.dataset.g==null?null:i.dataset.g);ks.forEach(k=>i.checked?S.add(k):S.delete(k));opt.set(S)});
-  return {render,all(){build();opt.set(new Set(allKeys()))},none(){opt.set(new Set())},count(){build();const S=opt.get();if(!S.size)return null;return [...S].filter(k=>allKeys().includes(k)).length}};
+    const cs=i.dataset.code?[i.dataset.code]:((ids.get(i.dataset.nid)||{}).codes||[]);cs.forEach(c=>i.checked?S.add(c):S.delete(c));opt.set(S)});
+  return {render,all(){build();opt.set(new Set(T.codes))},none(){opt.set(new Set())},
+    count(){if(!T)build();const S=opt.get();if(!S.size)return null;return T.codes.filter(c=>S.has(c)).length},total(){if(!T)build();return T.codes.length}};
 }
 const lsSel=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'))}catch(e){return new Set()}};
 const lsSelSet=(k,S)=>{try{localStorage.setItem(k,JSON.stringify([...S]))}catch(e){}};
@@ -1289,10 +1306,10 @@ $('#fsSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(b)setFs(b.
 })();
 
 // ---------- CHỌN STORES FC ----------
-(function(){const K='fc_sel_ncc_'+(typeof NCC!=='undefined'&&NCC.id||'x');let S=lsSel(K);
-  const TREE=StoreTree({el:document.getElementById('stTree'),glab:'GĐV',list:()=>(MASTER.stores||[]).map(s=>({g:s[3],t:s[2]})),get:()=>S,set:x=>{S=x;lsSelSet(K,x);TREE.render();window.__nccRecompute&&window.__nccRecompute()}});
+(function(){const K='fc_sel2_ncc_'+(typeof NCC!=='undefined'&&NCC.id||'x');let S=lsSel(K);
+  const TREE=StoreTree({el:document.getElementById('stTree'),glab:'GĐV',list:()=>(MASTER.stores||[]).map(s=>{const x=STL.map.get(String(s[0]).toUpperCase());return {c:s[0],n:s[1],t:s[2],m:x?x.m:mienOfT(s[2]),g:x?x.g:s[3],q:x?x.q:s[5]}}),get:()=>S,set:x=>{S=x;lsSelSet(K,x);TREE.render();window.__nccRecompute&&window.__nccRecompute()}});
   window.__nccSel=()=>S;
-  let lastN=-1;window.__nccAfter=()=>{const n0=(MASTER.stores||[]).length;if(n0!==lastN){lastN=n0;TREE.render()}const el=document.getElementById('sum-sel');if(!el)return;const c=TREE.count(),r=window.__nccResult&&window.__nccResult();const n=r&&r.lines?new Set(r.lines.map(l=>l.store)).size:0;el.textContent=n+' CH · '+(c==null?'tất cả':c+' tỉnh')};
+  let lastN=-1,lastAt=null;window.__nccAfter=()=>{const n0=(MASTER.stores||[]).length;if(n0!==lastN||STL.at!==lastAt){lastN=n0;lastAt=STL.at;TREE.render()}const el=document.getElementById('sum-sel');if(!el)return;const c=TREE.count(),r=window.__nccResult&&window.__nccResult();const n=r&&r.lines?new Set(r.lines.map(l=>l.store)).size:0;el.textContent=n+' CH · '+(c==null?'tất cả':'đã chọn '+c)};
   document.getElementById('selAll').onclick=()=>TREE.all();document.getElementById('selNone').onclick=()=>TREE.none();
   TREE.render();if(S.size&&window.__nccRecompute)window.__nccRecompute();else if(window.__nccResult&&window.__nccResult())window.__nccAfter();
 })();
