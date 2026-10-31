@@ -767,7 +767,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
-    if (MS.phannhom) sh['Phân nhóm'] = [MS.phannhom.cols, ...MS.phannhom.rows];
+    // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (HB && Object.keys(HB).length) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
     return sh;
   }
@@ -1087,7 +1087,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
-    if (MS.phannhom) sh['Phân nhóm'] = [MS.phannhom.cols, ...MS.phannhom.rows];
+    // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (HB && Object.keys(HB).length) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
     return sh;
   }
@@ -1335,13 +1335,14 @@ async function onSaleFile(file){
   const p=await readFile(file);if(!p)return;
   if(p.sale){SA=p.sale;SALEFILE=file.name;SALELOG=p.log.filter(l=>/Data Sale/.test(l.msg));$('#fnSale').textContent=file.name+' · '+nf(file.size/1048576,1)+' MB'}
   else toast('File không có sheet "3. Data Sale".');
-  const ms=Object.keys(p.masters||{});
+  if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});
   if(ms.length){PENDING={masters:p.masters,log:p.log.filter(l=>!/Data Sale/.test(l.msg)),file:file.name};
     $('#masterOffer').hidden=false;$('#masterOffer').innerHTML=`File có kèm sheet master: <b>${ms.map(m=>LABEL[m]).join(', ')}</b>. <button class="btn pri" id="useM">Dùng các master này</button> <button class="btn" id="skipM">Bỏ qua</button>`;
     $('#useM').onclick=()=>{applyMasters(PENDING.masters,PENDING.log);$('#masterOffer').hidden=true};$('#skipM').onclick=()=>{$('#masterOffer').hidden=true;PENDING=null}}
   recompute();
 }
 function applyMasters(masters,log,only){
+  if(masters&&masters.phannhom)delete masters.phannhom;
   const got=[];if(masters.hub&&!only&&CH&&MS.lichve){MS.lichve.cfg.hub=masters.hub;META.lichve.dirty=true;got.push('HUB')}for(const m of MASTERS){if(only&&only!==m)continue;if(masters[m]){if(m==='lichve'&&MS.lichve){const o=MS.lichve,nw=masters[m];nw.cfg=CH?Object.assign({},o.cfg):Object.assign({},o.cfg,nw.cfg);if(!nw.growthFilled){['gSku','gSt','bSku','bSt'].forEach(k=>{if(o[k])nw[k]=o[k]});got.push('(giữ nguyên 2 bảng Growth đang dùng vì file để trống)')}}MS[m]=masters[m];META[m].src='import';META[m].dirty=true;got.push(LABEL[m])}}
   if(log)MLOG=log;if(!got.length){toast(only?'File không có sheet '+LABEL[only]+'.':'File không có sheet master nào.');return}
   toast('Đã nhập '+got.join(', ')+' — bấm "Lưu lên app" để lưu chung');renderSaveBar();recompute();
