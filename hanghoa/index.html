@@ -362,6 +362,7 @@ tr.xf{cursor:pointer}tr.xf:hover td{background:var(--soft)}tr.xsel td{background
 .tree label{cursor:pointer;font-size:.86rem!important;display:inline-flex;align-items:center;gap:0.3077rem}.tree .cnt{color:var(--muted);font-size:.75rem;font-family:var(--f-mono)}
 #ovGrid table{width:100%}#ovGrid th,#ovGrid td{padding:0.2308rem 0.3077rem!important}#ovGrid th{font-size:.64rem!important}#ovGrid td:first-child{white-space:nowrap;max-width:12em;overflow:hidden;text-overflow:ellipsis}
 #ovGrid .stt3{white-space:nowrap}
+.qdart{font-size:.74rem;color:var(--muted);font-weight:400;margin-top:1px}#tGSku td:first-child{min-width:14em}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -390,7 +391,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <div class="log" id="dLog"></div>
     </div></details>
 <details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
-    <div class="body"><p class="hint">Không chọn = tất cả CH có trong file Sale. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="tree"></div></div></details>
+    <div class="body"><p class="hint"><b>Chưa chọn CH nào = không tính FC CH nào</b>; chỉ CH được tick mới tính FC (lưu trên máy này). Bấm Tất cả để chọn hết.</p><div class="tree" id="tree"></div></div></details>
 
   <details class="sec" id="s-cfg"><summary><span class="chev">▶</span><span class="num">C</span><h3>Tham số chung</h3><span class="sum" id="sum-cfg"></span></summary>
     <div class="body">
@@ -538,7 +539,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   // MOV: gộp CH × NCC × Tỉnh theo GT FC (giá mua). ≥ MOV: giữ; ≥ %Min×MOV: nhân lên cho đủ MOV (làm tròn lên QC); còn lại: loại FC.
   function compute(M, cfg) {
     const { stores, skus, nhom, sale, recap, mov, sel } = M; const nd = Math.max(1, Number(cfg.ngayKD) || 30);
-    const rows = []; const pick = sale ? sale.stores.filter(c => stores[c] && (!sel || !sel.size || sel.has(c))) : [];
+    const rows = []; const pick = sale ? sale.stores.filter(c => stores[c] && (sel && sel.has(c))) : [];
     const noStore = sale ? sale.stores.filter(c => !stores[c]).length : 0;
     let defN = 0; const defNset = new Set();
     for (const c of pick) { const st = stores[c];
@@ -902,7 +903,7 @@ function renderSums(){const R=ST.R,rows=R?R.rows:[],G=R?R.groups:[],c={};G.forEa
   const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHTML=h};const dot=(k,cls,n)=>{const a=$('#jump a[data-d="'+k+'"]');if(!a)return;a.querySelector('.dot').className='dot '+cls;let x=a.querySelector('.n');if(n!=null){if(!x){x=document.createElement('span');x.className='n';a.appendChild(x)}x.textContent=n}else if(x)x.remove()};
   set('data',ST.sale?`${esc(ST.saleFile)} · ${nf(ST.recap.length)} SKU · ${nf(ST.sale.rows)} dòng`:(ST.recap.length?nf(ST.recap.length)+' SKU · chưa có Sale':'chưa Import'));
   set('cfg',`Ngày KD ${ST.cfg.ngayKD} · Cover ${ST.cfg.defCover} · Lock ${ST.cfg.defLock} · %Min ${ST.cfg.defPct}%`);
-  const sl=sel();set('vung',`${R?nf(R.stores):0} CH · ${sl.size?'đã chọn '+nf(sl.size):'tất cả'}`);
+  const sl=sel();set('vung',sl.size?`${R?nf(R.stores):0} CH được tính FC`:'<span style="color:var(--crit)">Chưa chọn CH nào → không tính FC</span>');
   const nccs=uniq(ST.recap.map(r=>r.ncc)),done=nccs.filter(n=>ST.mov.some(m=>m.ncc===n&&Number(m.allTinh||0)+Object.keys(m.tinhMOV||{}).length>0)).length;set('mov',`${done}/${nccs.length} NCC đã cài`);
   const noMin=ST.recap.filter(p=>!NG.some(n=>Number(p[n]))).length;set('ts',`${nf(ST.recap.length)} SKU${noMin?` · <span style="color:var(--high)">${noMin} chưa có Min</span>`:''}${META.params.dirty?' · chưa lưu':''}`);
   dot('ts',!ST.recap.length?'':noMin?'warn':'ok',noMin||null);

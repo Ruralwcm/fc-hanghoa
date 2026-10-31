@@ -373,7 +373,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <div class="kpis" id="saleKpi"></div>
       <div class="log" id="log-sale"></div><div class="log" id="perf"></div></div></details>
 <details class="sec" id="s-sel" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-sel"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
-    <div class="body"><p class="hint">Danh sách từ Storeslist: Miền › GĐV › QLKV › CH. Không chọn = tất cả CH; chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="stTree"></div></div></details>
+    <div class="body"><p class="hint">Danh sách từ Storeslist: Miền › GĐV › QLKV › CH. <b>Chưa chọn CH nào = không tính FC CH nào</b>; chỉ CH được tick mới tính FC (lưu trên máy này). Bấm Tất cả để chọn hết.</p><div class="tree" id="stTree"></div></div></details>
 <details class="sec" id="s-cfg"><summary><span class="chev">▶</span><span class="num">C</span><h3>Cấu hình FC</h3><span class="sum" id="sum-cfg"></span></summary>
     <div class="body"><div class="cfg4">
 
@@ -605,7 +605,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
     const DM = MS.danhmuc.skus; const dIdx = new Map(DM.map((x, i) => [x.wec, i]));
     const LV = MS.lichve; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
-    const selOn = opt.sel && opt.sel.size;
+    const selOn = !!opt.sel; // đã truyền danh sách chọn: chưa chọn CH nào = không tính FC CH nào
+    const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
     const sSet = new Map(stores.map((r, i) => [r[0], i]));
     const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map() };
@@ -614,7 +615,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const P = SA ? SA.pairs : [];
     const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art);
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; issues.unmappedArt.set(art, u); continue; }
-      if (!sSet.has(st)) { if (!opt.province && !selOn) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
+      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0 }; u.kg += P[i + 4] * f; issues.notInDM.set(w, u); continue; }
       let inner = agg.get(st); if (!inner) agg.set(st, inner = new Map()); let v = inner.get(w); if (!v) inner.set(w, v = [0, 0, 0, 0, 0, 0]);
       for (let j = 0; j < SW - 2; j++) v[j] += P[i + 2 + j] * f; }
@@ -905,7 +906,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
     const DM = MS.danhmuc.skus; const dIdx = new Map(DM.map((x, i) => [x.wec, i]));
     const LV = MS.lichve; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
-    const selOn = opt.sel && opt.sel.size;
+    const selOn = !!opt.sel; // đã truyền danh sách chọn: chưa chọn CH nào = không tính FC CH nào
+    const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
     const sSet = new Map(stores.map((r, i) => [r[0], i]));
     const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map() };
@@ -914,7 +916,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const P = SA ? SA.pairs : [];
     const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art);
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; issues.unmappedArt.set(art, u); continue; }
-      if (!sSet.has(st)) { if (!opt.province && !selOn) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
+      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0 }; u.kg += P[i + 4] * f; issues.notInDM.set(w, u); continue; }
       let inner = agg.get(st); if (!inner) agg.set(st, inner = new Map()); let v = inner.get(w); if (!v) inner.set(w, v = [0, 0, 0, 0, 0, 0]);
       for (let j = 0; j < SW - 2; j++) v[j] += P[i + 2 + j] * f; }
@@ -1468,7 +1470,7 @@ function renderResults(){
   if(CH)S.forEach(s=>s.__ncc=nccOf(s.tinh));const SF=S.filter(s=>xfPass(s)),AG=new Map(SF.map(s=>[s,sa(s)]));const sale=SF.reduce((a,s)=>a+AG.get(s).sale,0),huy=SF.reduce((a,s)=>a+AG.get(s).huy,0),fc=SF.reduce((a,s)=>a+AG.get(s).fc,0);
   const cnt=alertCounts(),crit=Object.entries(cnt).filter(([k])=>FLAG[k]&&FLAG[k][0]==='crit').reduce((a,[,v])=>a+v,0);
   const k=(l,v,d,c='')=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
-  $('#ovSub').textContent=`${ni(SF.length)}${SF.length!==S.length?' / '+ni(S.length):''} CH · ${ni(ROWS.length)} dòng CH × SKU · Sale ${SALEFILE}.`;
+  $('#ovSub').textContent=(!S.length?'Chưa chọn cửa hàng ở mục Chọn Stores FC — chưa tính FC CH nào. ':'')+`${ni(SF.length)}${SF.length!==S.length?' / '+ni(S.length):''} CH · ${ni(ROWS.length)} dòng CH × SKU · Sale ${SALEFILE}.`;
   $('#kpis').innerHTML=[k('Sale 1W',nf(sale,0)+' kg','SKU trong danh mục CH'),k('Hủy 1W',pf(sale?huy/sale:0,1),nf(huy,0)+' kg',sale&&huy/sale>=RES.cfg.rWaste?'bad':''),(()=>{let t=0,c=0;SF.forEach(s=>{const x=AG.get(s);t+=x.ton;c+=x.cg});return k('Tồn · Chờ giao',`<span class="kst">Tồn ${nf(t,0)} kg</span><span class="kst">CG ${nf(c,0)} kg</span>`,RES.cfg.useStock!==false?'trừ vào FC ở mã có Trừ Tồn CG = 1':'đang không trừ vào FC')})(),k('Total FC KG',nf(fc,0)+' kg','sau kẹp Min/Max, làm tròn QC, Min'),k('FC / Sale',sale?nf(fc/sale,2):'—','Thừa > '+(RES.cfg.thuaPct??130)+'% · Thiếu < '+(RES.cfg.thieuPct??110)+'%',sale&&fc/sale>1.15?'warn':''),(()=>{const c={thua:0,du:0,thieu:0};SF.forEach(s=>c[s.__stt]++);return k('Cảnh báo',`<span class="kst" style="color:var(--crit)">${c.thua} CH Thừa</span><span class="kst" style="color:var(--med)">${c.thieu} CH Thiếu</span>`,`${c.du} CH Đủ · so (FC + Tồn dự kiến) với Sale 1W: Thừa > ${RES.cfg.thuaPct??130}%, Thiếu < ${RES.cfg.thieuPct??110}%`,c.thua||c.thieu?'bad':'')})()].join('');
   const XR=(key,v)=>`class="xf${XF[key]===v?' xsel':''}" data-xf="${key}" data-v="${esc(v)}"`;
   const SN=S.filter(s=>xfPass(s,'N')),byN={};SN.forEach(s=>{const A=sa(s);if(XF.grp&&!A.n)return;const x=byN[s.N||'—']=byN[s.N||'—']||{c:0,sale:0,huy:0,fc:0,ton:0,cg:0,d:0,nd:0};x.c++;x.sale+=A.sale;x.huy+=A.huy;x.ton+=A.ton;x.cg+=A.cg;x.fc+=A.fc;x.d+=s.usedDays.length;x.nd+=s.nDays});
@@ -1701,7 +1703,7 @@ function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHT
   set('prov',`${MS.lichve.prov.length} tỉnh`);set('lv',`${MS.lichve.lichVe.length} kiểu lịch về × 8 nhóm`);
   set('growth',(c.useGSku!==false?'Nhóm SP: bật':'Nhóm SP: tắt')+(CH?'':' · Nhóm CH: '+(c.useGSt?'bật':'tắt')));
   const fl=E.NG.map((n,j)=>MS.danhmuc.skus.filter(x=>x.flags[j]).length);set('dm',`${MS.danhmuc.skus.length} SKU · N1–N8: ${fl.join('/')}`+(META.danhmuc.dirty?' · chưa lưu':''));
-  {const c=TREE.count();set('sel',`${RES?ni(RES.stores.length):0} CH · ${c==null?'tất cả':'đã chọn '+ni(c)}`);if(!$('#stTree').childElementCount||renderSums._pn!==MS.phannhom.rows.length){renderSums._pn=MS.phannhom.rows.length;TREE.render()}}
+  {const c=TREE.count();set('sel',c==null?'<span style="color:var(--crit)">Chưa chọn CH nào → không tính FC</span>':`${RES?ni(RES.stores.length):0} CH được tính FC`);if(!$('#stTree').childElementCount||renderSums._pn!==MS.phannhom.rows.length){renderSums._pn=MS.phannhom.rows.length;TREE.render()}}
   set('pn',`${ni(MS.phannhom.rows.length)} CH`);const bad=MS.quydoi.rows.filter(r=>E.BAD_WEC.has(r[3])||r[6]==null).length;set('qd',`${ni(MS.quydoi.rows.length)} Article${bad?` · <span style="color:var(--high)">${bad} lỗi</span>`:''}`);
   const sale=S.reduce((a,s)=>a+s.sale1w,0),fc=S.reduce((a,s)=>a+s.totalFC,0),st={thua:0,du:0,thieu:0};S.forEach(s=>st[s.__stt]=(st[s.__stt]||0)+1);
   set('ov',`${ni(S.length)} CH · Sale 1W ${nf(sale,0)} kg · FC ${nf(fc,0)} kg · <span style="color:var(--crit)">${st.thua} thừa</span> / ${st.thieu} thiếu`);
