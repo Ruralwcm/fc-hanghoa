@@ -389,8 +389,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <div class="log" id="mLog"></div><div class="row" style="margin:2px 0"><button class="btn sm ghost" id="mReload" type="button">Tải lại Sheet gốc</button></div>
       <div class="log" id="dLog"></div>
     </div></details>
+<details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
+    <div class="body"><p class="hint">Không chọn = tất cả CH có trong file Sale. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="tree"></div></div></details>
 
-  <details class="sec" id="s-cfg" open><summary><span class="chev">▶</span><span class="num">B</span><h3>Tham số chung</h3><span class="sum" id="sum-cfg"></span></summary>
+  <details class="sec" id="s-cfg"><summary><span class="chev">▶</span><span class="num">C</span><h3>Tham số chung</h3><span class="sum" id="sum-cfg"></span></summary>
     <div class="body">
       <div class="kv"><span>Số ngày của dữ liệu Sale (ngày KD)</span><input type="number" id="ngayKD" data-c="ngayKD" min="1" step="1"></div>
       <div class="kv"><span>Cover mặc định (ngày)</span><input type="number" data-c="defCover" min="0" step="1"></div>
@@ -399,10 +401,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       <p class="hint">Mặc định áp cho mã / NCC chưa khai báo riêng. Lưu trên máy này.</p>
     </div></details>
 
-  <details class="sec" id="s-vung" open><summary><span class="chev">▶</span><span class="num">C</span><h3>Chọn Stores FC</h3><span class="sum" id="sum-vung"></span><span class="act"><button class="btn sm" id="selAll" type="button">Tất cả</button><button class="btn sm" id="selNone" type="button">Bỏ</button></span></summary>
-    <div class="body"><p class="hint">Không chọn = tất cả CH có trong file Sale. Chỉ CH được chọn mới tính FC (lưu trên máy này).</p><div class="tree" id="tree"></div></div></details>
-
-  <details class="sec" id="s-mov" open><summary><span class="chev">▶</span><span class="num">D</span><h3>MOV NCC × Tỉnh</h3><span class="sum" id="sum-mov"></span><span class="act"><button class="btn sm sav" data-save="mov" type="button">Lưu</button></span></summary>
+  
+  <details class="sec" id="s-mov"><summary><span class="chev">▶</span><span class="num">D</span><h3>MOV NCC × Tỉnh</h3><span class="sum" id="sum-mov"></span><span class="act"><button class="btn sm sav" data-save="mov" type="button">Lưu</button></span></summary>
     <div class="body"><p class="hint">MOV tiền (GT FC theo giá mua) cho mỗi CH × NCC. Bấm ▸ để khai báo MOV riêng từng tỉnh; tỉnh để trống = dùng MOV tất cả tỉnh.</p><div class="srcline" id="src-mov"></div>
       <div class="tw" style="max-height:none"><table id="tMov"></table></div></div></details>
 
@@ -424,7 +424,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   </nav>
 
   <div class="gh"><h2>Khai báo</h2><span class="ln"></span></div>
-  <details class="sec" id="s-ts" open><summary><span class="chev">▶</span><span class="num">1</span><h3>Min & thông số SKU</h3><span class="sum" id="sum-ts"></span><span class="act"><button class="btn sm" id="btnMin" type="button" title="Nội suy Min giữa mốc đầu và mốc cuối đã nhập">Tính Min</button><button class="btn sm sav" data-save="params" type="button">Lưu</button></span></summary>
+  <details class="sec" id="s-ts"><summary><span class="chev">▶</span><span class="num">1</span><h3>Min & thông số SKU</h3><span class="sum" id="sum-ts"></span><span class="act"><button class="btn sm" id="btnMin" type="button" title="Nội suy Min giữa mốc đầu và mốc cuối đã nhập">Tính Min</button><button class="btn sm sav" data-save="params" type="button">Lưu</button></span></summary>
     <div class="body">
       <div class="row fl"><input type="text" id="qP" placeholder="Tìm mã / tên SP" aria-label="Tìm SKU" style="width:180px"><select id="pNcc" aria-label="NCC"></select><label class="chk"><input type="checkbox" id="pMin"> Chỉ mã có Min</label><label class="chk"><input type="checkbox" id="pRef" checked> Sale BQ/CH</label>
         <div class="seg" id="pView" role="group" aria-label="Kiểu xem"><button type="button" data-v="short" aria-pressed="true">Rút gọn</button><button type="button" data-v="full" aria-pressed="false">Đầy đủ</button></div><span class="srcline" id="src-params"></span></div>
@@ -433,9 +433,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     </div></details>
 
   <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
-  <details class="sec" id="s-kpi" open><summary><span class="chev">▶</span><span class="num">2</span><h3>Recap</h3><span class="sum" id="sum-kpi"></span></summary>
+  <details class="sec" id="s-kpi"><summary><span class="chev">▶</span><span class="num">2</span><h3>Recap</h3><span class="sum" id="sum-kpi"></span></summary>
     <div class="body"><p class="hint" id="ovSub"></p><div class="kp" id="kpis"></div></div></details>
-  <details class="sec" id="s-pv" open><summary><span class="chev">▶</span><span class="num">3</span><h3>Pivot</h3><span class="sum" id="sum-pv"></span><span class="act"><div class="seg" id="pvView" role="group" aria-label="Pivot"><button type="button" data-v="mien">Miền›Tỉnh</button><button type="button" data-v="gdv">GĐV›QLKV</button><button type="button" data-v="nhom">Nhóm N</button><button type="button" data-v="ncc">NCC›SKU</button><button type="button" data-v="mch3">MCH3›SKU</button><button type="button" data-v="store">CH</button></div></span></summary>
+  <details class="sec" id="s-pv"><summary><span class="chev">▶</span><span class="num">3</span><h3>Pivot</h3><span class="sum" id="sum-pv"></span><span class="act"><div class="seg" id="pvView" role="group" aria-label="Pivot"><button type="button" data-v="mien">Miền›Tỉnh</button><button type="button" data-v="gdv">GĐV›QLKV</button><button type="button" data-v="nhom">Nhóm N</button><button type="button" data-v="ncc">NCC›SKU</button><button type="button" data-v="mch3">MCH3›SKU</button><button type="button" data-v="store">CH</button></div></span></summary>
     <div class="body"><div class="row fl"><select id="pvMch3" aria-label="MCH3"></select><select id="pvNcc" aria-label="NCC"></select><select id="pvSku" aria-label="SKU"></select><span class="hint" style="margin:0">Bấm dòng ▸ để mở cấp dưới · bấm tiêu đề cột để sắp xếp</span></div>
       <div class="tw" style="max-height:62vh"><table id="tPv"></table></div><div class="pager" id="pgPv"></div></div></details>
 
@@ -864,7 +864,7 @@ $('#btnExport').onclick=()=>{if(!ST.R||!ST.R.rows.length){toast('Chưa có dữ 
 
 // ---------- 1 TRANG: section, cỡ chữ, tóm tắt ----------
 const OPENK='fchh_open';
-try{const o=JSON.parse(localStorage.getItem(OPENK)||'null');if(o)$$('details.sec').forEach(d=>{if(o[d.id]!=null)d.open=o[d.id]})}catch(e){}
+/* mở web: chỉ Data Sale + Chọn Stores FC mở */
 const saveOpen=()=>{const o={};$$('details.sec').forEach(d=>o[d.id]=d.open);try{localStorage.setItem(OPENK,JSON.stringify(o))}catch(e){}};
 $$('details.sec').forEach(d=>d.addEventListener('toggle',saveOpen));
 $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.isTrusted)return;const t=e.target;if(!t.closest('button,select,input,label,.btn'))return;e.preventDefault();const f=t.matches('input[type=file]')?t:(t.closest('.btn')&&t.closest('.btn').querySelector('input[type=file]'));if(f)setTimeout(()=>f.click())}));
