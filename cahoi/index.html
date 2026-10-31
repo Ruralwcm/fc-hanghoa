@@ -11,20 +11,20 @@
 <style>
 /* Layout: sticky toolbar + tabbed work surface; summary strip first, detail below. Palette from field crates: leaf green, soil brown, cool slate paper. */
 :root{
-  --bg:#f3f5f2; --panel:#ffffff; --ink:#18211b; --muted:#5d6b62; --line:#dbe2dc; --soft:#e9eee9;
-  --leaf:#1d6b43; --leaf-soft:#d9eee1; --soil:#7a5634;
-  --crit:#b3261e; --crit-soft:#fbe2df; --high:#b86200; --high-soft:#fdebd3; --med:#3d5a99; --med-soft:#e2e9f8; --ok:#1d6b43;
+  --bg:#FFFDFC; --panel:#ffffff; --ink:#231815; --muted:#6e605d; --line:#EADFDB; --soft:#F6EEEA;
+  --leaf:#E11219; --leaf-soft:#FDEBEC; --soil:#b45309;
+  --crit:#b3261e; --crit-soft:#fbe2df; --high:#c25a00; --high-soft:#ffecd1; --med:#1f4fa8; --med-soft:#e1eafb; --ok:#13834a;
   --f-body:"Be Vietnam Pro",system-ui,"Segoe UI",Roboto,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:8px;
+  --r:12px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111613; --panel:#19201b; --ink:#e4ebe5; --muted:#9aa89f; --line:#2c3630; --soft:#222a25;
-  --leaf:#5fc28b; --leaf-soft:#1f3a2a; --soil:#c69a6d;
-  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fc28b; color-scheme:dark}}
+  --bg:#151112; --panel:#1e1819; --ink:#f1e9e8; --muted:#b0a2a0; --line:#3a2f30; --soft:#2a2223;
+  --leaf:#ff5a5f; --leaf-soft:#3d1a1c; --soil:#d08a3e;
+  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fd08f; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111613; --panel:#19201b; --ink:#e4ebe5; --muted:#9aa89f; --line:#2c3630; --soft:#222a25;
-  --leaf:#5fc28b; --leaf-soft:#1f3a2a; --soil:#c69a6d;
-  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fc28b; color-scheme:dark}
+  --bg:#151112; --panel:#1e1819; --ink:#f1e9e8; --muted:#b0a2a0; --line:#3a2f30; --soft:#2a2223;
+  --leaf:#ff5a5f; --leaf-soft:#3d1a1c; --soil:#d08a3e;
+  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fd08f; color-scheme:dark}
 *{box-sizing:border-box} [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1.0769rem;line-height:1.5}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
