@@ -111,9 +111,9 @@ footer{margin-top:28px;color:var(--muted);font-size:12px}
 </div>
 <script>
 const $=s=>document.querySelector(s);
-const DEF='https://script.google.com/macros/s/AKfycbzz5xBX7jFDg-gL2evpY6-1S9v_dhjSIjnghMLv1NPSc-wNuxOgheXB3p4SBWqVZ8rjYg/exec';
-const get=()=>{try{return localStorage.getItem('fc_portal_gas')||DEF}catch(e){return DEF}};
-const set=v=>{try{v?localStorage.setItem('fc_portal_gas',v):localStorage.removeItem('fc_portal_gas')}catch(e){}};
+const DEF='https://script.google.com/macros/s/AKfycbxM-yFzIPsW-HG3RY5VRICeE04XVLMxZ8RBFYUs_lQqTF2NkDqUrzPmRGOjVIe6UIrbOQ/exec';
+const get=()=>{try{return localStorage.getItem('fc_portal_gas2')||DEF}catch(e){return DEF}};
+const set=v=>{try{v?localStorage.setItem('fc_portal_gas2',v):localStorage.removeItem('fc_portal_gas2')}catch(e){}};
 const pill=(t,c)=>{const p=$('#connPill');p.textContent=t;p.className='pill '+c};
 async function ping(u){const r=await fetch(u+(u.includes('?')?'&':'?')+'action=ping');const j=await r.json();if(!j.ok)throw new Error(j.error||'lỗi');return j}
 async function check(u,show){if(!u){pill('Chưa kết nối lưu chung','warn');if(show)$('#msg').textContent='Chưa có URL.';return false}
