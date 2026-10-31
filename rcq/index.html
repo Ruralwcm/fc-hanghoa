@@ -366,7 +366,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <aside class="left">
   <div class="colh">Cấu hình & dữ liệu</div>
 <details class="sec" id="s-sale" open><summary><span class="chev">▶</span><span class="num">A</span><h3>Data Sale · Tồn · <span data-only="rcq">Chờ giao</span><span data-only="ch">Hủy</span></h3><span class="sum" id="sum-sale"></span></summary>
-    <div class="body"><p class="hint" data-only="ch">File theo CH × Article: khối HỦY L2W và SALE L2W (Closing Quantity = Tồn, chỉ để theo dõi).</p><p class="hint" data-only="rcq">Sheet "3. Data Sale": Hủy & Sale L2W + Tồn · Hủy & Sale LY2W · Chờ giao (cột S–U).</p>
+    <div class="body"><p class="hint" data-only="ch">Sheet "3. Data Sale" theo CH × Article, 3 khối (không cần LY): <b>HỦY L2W</b> (A–C: Store · Article · Shrinkage Q.ty) · <b>SALE L2W</b> (E–H: Store · Article · Closing Quantity = Tồn · Sales Quantity) · <b>CHỜ GIAO</b> (J–L: Store · Article · SL giao). Bấm Template ở mục Sale để tải file mẫu.</p><p class="hint" data-only="rcq">Sheet "3. Data Sale": Hủy & Sale L2W + Tồn · Hủy & Sale LY2W · Chờ giao (cột S–U).</p>
       <label class="drop2" id="dropSale" for="inSale"><span>⇪ Kéo thả / bấm chọn file Data Sale</span><b class="fn" id="fnSale"></b></label>
       <div class="note2" id="masterOffer" hidden></div>
       <div class="kpis" id="saleKpi"></div>
@@ -574,17 +574,21 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   function parseSale(rows, log) {
     const m = new Map(); let nL = 0, nLY = 0, nCG = 0;
     // khối CHỜ GIAO (tùy chọn): tìm tiêu đề 'CHỜ GIAO' ở dòng 1 → Store | Article | Q.ty
-    let cgCol = -1; (rows[0] || []).forEach((h, j) => { if (cgCol < 0 && /chờ\s*giao|cho\s*giao/i.test(String(h || ''))) cgCol = j; });
+    // vị trí khối theo tiêu đề dòng 1 (thiếu tiêu đề thì dùng vị trí mẫu): HỦY L2W · SALE L2W · HỦY LY2W · SALE LY2W · CHỜ GIAO
+    const H0 = (rows[0] || []).map(h => String(h || '').trim().toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
+    const hasHdr = H0.some(h => h);
+    let cHL = at(/^HỦY L2W|^HUY L2W/), cSL = at(/^SALE L2W/), cHY = at(/^HỦY LY2W|^HUY LY2W/), cSY = at(/^SALE LY2W/), cgCol = at(/CHỜ\s*GIAO|CHO\s*GIAO/);
+    if (!hasHdr) { cHL = 0; cSL = 4; cHY = 9; cSY = 13; } else { if (cHL < 0) cHL = 0; if (cSL < 0) cSL = 4; }
     const slot = (st, a) => { let inner = m.get(st); if (!inner) m.set(st, inner = new Map()); let v = inner.get(a); if (!v) inner.set(a, v = [0, 0, 0, 0, 0, 0]); return v; };
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r) continue;
-      if (V(r[0]) != null && V(r[1]) != null) slot(K(r[0]), K(r[1]))[0] += n0(r[2]);
-      if (V(r[4]) != null && V(r[5]) != null) { const v = slot(K(r[4]), K(r[5])); v[1] += n0(r[6]); v[2] += n0(r[7]); nL++; }
-      if (V(r[9]) != null && V(r[10]) != null) slot(K(r[9]), K(r[10]))[3] += n0(r[11]);
-      if (V(r[13]) != null && V(r[14]) != null) { slot(K(r[13]), K(r[14]))[4] += n0(r[16]); nLY++; }
+      if (V(r[cHL]) != null && V(r[cHL + 1]) != null) slot(K(r[cHL]), K(r[cHL + 1]))[0] += n0(r[cHL + 2]);
+      if (V(r[cSL]) != null && V(r[cSL + 1]) != null) { const v = slot(K(r[cSL]), K(r[cSL + 1])); v[1] += n0(r[cSL + 2]); v[2] += n0(r[cSL + 3]); nL++; }
+      if (cHY >= 0 && V(r[cHY]) != null && V(r[cHY + 1]) != null) slot(K(r[cHY]), K(r[cHY + 1]))[3] += n0(r[cHY + 2]);
+      if (cSY >= 0 && V(r[cSY]) != null && V(r[cSY + 1]) != null) { slot(K(r[cSY]), K(r[cSY + 1]))[4] += n0(r[cSY + 3]); nLY++; }
       if (cgCol >= 0 && V(r[cgCol]) != null && V(r[cgCol + 1]) != null) { slot(K(r[cgCol]), K(r[cgCol + 1]))[5] += n0(r[cgCol + 2]); nCG++; } }
     const pairs = []; for (const [st, inner] of m) for (const [a, v] of inner) pairs.push(st, a, v[0], v[1], v[2], v[3], v[4], v[5]);
     let lyStores = 0; for (const [, inner] of m) { for (const [, v] of inner) if (v[4]) { lyStores++; break; } }
-    log.push({ lvl: 'ok', msg: `Data Sale: ${m.size} CH, ${(rows.length - 2).toLocaleString('vi-VN')} dòng, ${nL.toLocaleString('vi-VN')} dòng Sale L2W, ${nLY.toLocaleString('vi-VN')} dòng Sale LY2W (${lyStores} CH có số năm trước)` + (cgCol >= 0 ? `, ${nCG.toLocaleString('vi-VN')} dòng Chờ giao.` : '. File chưa có khối CHỜ GIAO (tùy chọn).') });
+    log.push({ lvl: 'ok', msg: `Data Sale: ${m.size} CH, ${(rows.length - 2).toLocaleString('vi-VN')} dòng, ${nL.toLocaleString('vi-VN')} dòng Sale L2W` + (cSY >= 0 ? `, ${nLY.toLocaleString('vi-VN')} dòng Sale LY2W (${lyStores} CH có số năm trước)` : '') + (cgCol >= 0 ? `, ${nCG.toLocaleString('vi-VN')} dòng Chờ giao.` : '. File chưa có khối CHỜ GIAO (tùy chọn).') });
     return { pairs, stride: 8, hasCG: cgCol >= 0, stores: m.size, lines: rows.length - 2 };
   }
 
@@ -757,7 +761,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   }
   function exportXlsx(XLSX, sheets) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: 'xlsx', compression: true }); }
 
-  function saleTemplateAoa() {
+  function saleTemplateAoa(noLY) {
+    if (noLY) { const h0 = new Array(12).fill(null), h1 = new Array(12).fill(null); h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'CHỜ GIAO';
+      [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, j) => h1[c + j] = t)); return [h0, h1]; }
     const h0 = new Array(21).fill(null), h1 = new Array(21).fill(null);
     h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'HỦY LY2W'; h0[13] = 'SALE LY2W'; h0[18] = 'CHỜ GIAO';
     [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'Shrinkage Q.ty']], [13, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [18, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, k) => h1[c + k] = t));
@@ -868,17 +874,21 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   function parseSale(rows, log) {
     const m = new Map(); let nL = 0, nLY = 0, nCG = 0;
     // khối CHỜ GIAO (tùy chọn): tìm tiêu đề 'CHỜ GIAO' ở dòng 1 → Store | Article | Q.ty
-    let cgCol = -1; (rows[0] || []).forEach((h, j) => { if (cgCol < 0 && /chờ\s*giao|cho\s*giao/i.test(String(h || ''))) cgCol = j; });
+    // vị trí khối theo tiêu đề dòng 1 (thiếu tiêu đề thì dùng vị trí mẫu): HỦY L2W · SALE L2W · HỦY LY2W · SALE LY2W · CHỜ GIAO
+    const H0 = (rows[0] || []).map(h => String(h || '').trim().toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
+    const hasHdr = H0.some(h => h);
+    let cHL = at(/^HỦY L2W|^HUY L2W/), cSL = at(/^SALE L2W/), cHY = at(/^HỦY LY2W|^HUY LY2W/), cSY = at(/^SALE LY2W/), cgCol = at(/CHỜ\s*GIAO|CHO\s*GIAO/);
+    if (!hasHdr) { cHL = 0; cSL = 4; cHY = 9; cSY = 13; } else { if (cHL < 0) cHL = 0; if (cSL < 0) cSL = 4; }
     const slot = (st, a) => { let inner = m.get(st); if (!inner) m.set(st, inner = new Map()); let v = inner.get(a); if (!v) inner.set(a, v = [0, 0, 0, 0, 0, 0]); return v; };
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r) continue;
-      if (V(r[0]) != null && V(r[1]) != null) slot(K(r[0]), K(r[1]))[0] += n0(r[2]);
-      if (V(r[4]) != null && V(r[5]) != null) { const v = slot(K(r[4]), K(r[5])); v[1] += n0(r[6]); v[2] += n0(r[7]); nL++; }
-      if (V(r[9]) != null && V(r[10]) != null) slot(K(r[9]), K(r[10]))[3] += n0(r[11]);
-      if (V(r[13]) != null && V(r[14]) != null) { slot(K(r[13]), K(r[14]))[4] += n0(r[16]); nLY++; }
+      if (V(r[cHL]) != null && V(r[cHL + 1]) != null) slot(K(r[cHL]), K(r[cHL + 1]))[0] += n0(r[cHL + 2]);
+      if (V(r[cSL]) != null && V(r[cSL + 1]) != null) { const v = slot(K(r[cSL]), K(r[cSL + 1])); v[1] += n0(r[cSL + 2]); v[2] += n0(r[cSL + 3]); nL++; }
+      if (cHY >= 0 && V(r[cHY]) != null && V(r[cHY + 1]) != null) slot(K(r[cHY]), K(r[cHY + 1]))[3] += n0(r[cHY + 2]);
+      if (cSY >= 0 && V(r[cSY]) != null && V(r[cSY + 1]) != null) { slot(K(r[cSY]), K(r[cSY + 1]))[4] += n0(r[cSY + 3]); nLY++; }
       if (cgCol >= 0 && V(r[cgCol]) != null && V(r[cgCol + 1]) != null) { slot(K(r[cgCol]), K(r[cgCol + 1]))[5] += n0(r[cgCol + 2]); nCG++; } }
     const pairs = []; for (const [st, inner] of m) for (const [a, v] of inner) pairs.push(st, a, v[0], v[1], v[2], v[3], v[4], v[5]);
     let lyStores = 0; for (const [, inner] of m) { for (const [, v] of inner) if (v[4]) { lyStores++; break; } }
-    log.push({ lvl: 'ok', msg: `Data Sale: ${m.size} CH, ${(rows.length - 2).toLocaleString('vi-VN')} dòng, ${nL.toLocaleString('vi-VN')} dòng Sale L2W, ${nLY.toLocaleString('vi-VN')} dòng Sale LY2W (${lyStores} CH có số năm trước)` + (cgCol >= 0 ? `, ${nCG.toLocaleString('vi-VN')} dòng Chờ giao.` : '. File chưa có khối CHỜ GIAO (tùy chọn).') });
+    log.push({ lvl: 'ok', msg: `Data Sale: ${m.size} CH, ${(rows.length - 2).toLocaleString('vi-VN')} dòng, ${nL.toLocaleString('vi-VN')} dòng Sale L2W` + (cSY >= 0 ? `, ${nLY.toLocaleString('vi-VN')} dòng Sale LY2W (${lyStores} CH có số năm trước)` : '') + (cgCol >= 0 ? `, ${nCG.toLocaleString('vi-VN')} dòng Chờ giao.` : '. File chưa có khối CHỜ GIAO (tùy chọn).') });
     return { pairs, stride: 8, hasCG: cgCol >= 0, stores: m.size, lines: rows.length - 2 };
   }
 
@@ -1051,7 +1061,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   }
   function exportXlsx(XLSX, sheets) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: 'xlsx', compression: true }); }
 
-  function saleTemplateAoa() {
+  function saleTemplateAoa(noLY) {
+    if (noLY) { const h0 = new Array(12).fill(null), h1 = new Array(12).fill(null); h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'CHỜ GIAO';
+      [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, j) => h1[c + j] = t)); return [h0, h1]; }
     const h0 = new Array(21).fill(null), h1 = new Array(21).fill(null);
     h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'HỦY LY2W'; h0[13] = 'SALE LY2W'; h0[18] = 'CHỜ GIAO';
     [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'Shrinkage Q.ty']], [13, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [18, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, k) => h1[c + k] = t));
@@ -1324,7 +1336,7 @@ function renderSale(){
   const S=RES.stores;const sale=S.reduce((a,s)=>a+s.sale1w,0),huy=S.reduce((a,s)=>a+s.huy1w,0),ly=S.reduce((a,s)=>a+s.saleLY1w,0),lyS=S.filter(s=>s.saleLY1w>0).length;
   const um=[...RES.issues.unmappedArt.values()],nd=[...RES.issues.notInDM.values()];
   $('#fnSale').textContent=SALEFILE;
-  $('#saleKpi').innerHTML=[k('File tuần',esc(SA?ni(SA.lines)+' dòng':'—'),esc(SALEFILE)),k('Sale 1W (danh mục)',nf(sale,0)+' kg',`${ni(S.length)} CH trong phạm vi`),k('Hủy 1W',pf(sale?huy/sale:0,1),nf(huy,0)+' kg',sale&&huy/sale>=0.4?'bad':''),k('Sale LY2W/2',nf(ly,0)+' kg',`${lyS} CH có số năm trước`),(()=>{let t=0,c=0;RES.stores.forEach(s=>s.rows.forEach(r=>{t+=r.ton||0;c+=r.cg||0}));return k('Tồn (Closing L2W)',nf(t,0)+' kg','tham khảo, chưa trừ vào FC')+k('Chờ giao',SA&&SA.hasCG?nf(c,0)+' kg':'—',SA&&SA.hasCG?'tham khảo, chưa trừ vào FC':'file chưa có khối CHỜ GIAO',SA&&SA.hasCG?'':'warn')})(),k('Article chưa quy đổi',ni(um.length),'bị bỏ qua',um.length?'warn':''),k('Mã WEC ngoài danh mục',ni(nd.length),nf(nd.reduce((a,x)=>a+x.kg,0),1)+' kg bán',nd.length?'warn':'')].join('');
+  $('#saleKpi').innerHTML=[k('File tuần',esc(SA?ni(SA.lines)+' dòng':'—'),esc(SALEFILE)),k('Sale 1W (danh mục)',nf(sale,0)+' kg',`${ni(S.length)} CH trong phạm vi`),k('Hủy 1W',pf(sale?huy/sale:0,1),nf(huy,0)+' kg',sale&&huy/sale>=0.4?'bad':''),(CH?'':k('Sale LY2W/2',nf(ly,0)+' kg',`${lyS} CH có số năm trước`)),(()=>{let t=0,c=0;RES.stores.forEach(s=>s.rows.forEach(r=>{t+=r.ton||0;c+=r.cg||0}));return k('Tồn (Closing L2W)',nf(t,0)+' kg','tham khảo, chưa trừ vào FC')+k('Chờ giao',SA&&SA.hasCG?nf(c,0)+' kg':'—',SA&&SA.hasCG?'tham khảo, chưa trừ vào FC':'file chưa có khối CHỜ GIAO',SA&&SA.hasCG?'':'warn')})(),k('Article chưa quy đổi',ni(um.length),'bị bỏ qua',um.length?'warn':''),k('Mã WEC ngoài danh mục',ni(nd.length),nf(nd.reduce((a,x)=>a+x.kg,0),1)+' kg bán',nd.length?'warn':'')].join('');
   $('#log-sale').innerHTML=[...SALELOG,...MLOG].map(l=>`<div class="${l.lvl}">${l.lvl==='ok'?'✓':'!'} ${esc(l.msg)}</div>`).join('')+([...RES.issues.saleNoStore.keys()].length?`<div class="warn">! CH có bán nhưng không có trong Phân nhóm: ${esc([...RES.issues.saleNoStore.keys()].join(', '))}</div>`:'');
   $('#tUnmap').innerHTML='<tr><th>Article</th><th>Tên</th><th class="n">SL bán L2W</th></tr>'+(um.sort((a,b)=>b.qty-a.qty).slice(0,200).map(x=>`<tr><td class="mono">${esc(x.art)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.qty,1)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
   $('#tNotDM').innerHTML='<tr><th>Mã WEC</th><th>Tên</th><th class="n">KG bán L2W</th></tr>'+(nd.sort((a,b)=>b.kg-a.kg).map(x=>`<tr><td class="mono">${esc(x.wec)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.kg,2)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
@@ -1629,7 +1641,7 @@ async function exportSheets(sheets,filename){
   try{await DL.save({filename,data:blob});toast('Đã lưu file')}catch(e){toast(e&&e.code==='declined'?'Đã hủy tải file':'Không tải được file ('+(e&&e.code||'lỗi')+')')}
 }
 const stamp=()=>new Date().toISOString().slice(0,10);
-$('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa()},'Template_Data_Sale.xlsx');
+$('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsx':'Template_Data_Sale.xlsx');
 $('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsx`);
 $('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES),`Du_lieu_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsx`);
 $('#cfgImport').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const p=await readFile(f);if(!p)return;if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});if(!ms.length){toast('File không có sheet dữ liệu nào (Quy đổi, Lịch về hàng, Danh mục, HUB) — không cập nhật gì');return}applyMasters(p.masters,p.log)});
