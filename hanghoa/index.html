@@ -719,7 +719,7 @@ function renderData(){
   $('#srcInfo').textContent=R&&R.rows.length?nf(R.stores)+' CH · '+nf(R.rows.length)+' dòng':'';
 }
 function treeData(){const T={},inSale=ST.sale?new Set(ST.sale.stores):null;
-  Object.values(ST.stores).forEach(s=>{if(inSale?!inSale.has(s.code):!/hoạt động/i.test(s.status))return;const a=T[s.mien]=T[s.mien]||{},b=a[s.gdv||'(Không GĐV)']=a[s.gdv||'(Không GĐV)']||{};b[s.tinh||'(Khác)']=(b[s.tinh||'(Khác)']||0)+1});return T}
+  Object.values(ST.stores).forEach(s=>{if(inSale?!inSale.has(s.code):!/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s.status))return;const a=T[s.mien]=T[s.mien]||{},b=a[s.gdv||'(Không GĐV)']=a[s.gdv||'(Không GĐV)']||{};b[s.tinh||'(Khác)']=(b[s.tinh||'(Khác)']||0)+1});return T}
 function renderTree(){const T=treeData(),S=sel(),el=$('#tree');const ord=['Miền Bắc','Miền Trung','Miền Nam'];
   const ms=Object.keys(T).sort((a,b)=>(ord.indexOf(a)+1||9)-(ord.indexOf(b)+1||9)||a.localeCompare(b,'vi'));
   if(!ms.length){el.innerHTML='<div class="smallnote">'+(Object.keys(ST.stores).length?'Không có CH nào khớp Storelist.':'Chưa đọc được Storelist.')+'</div>';return}

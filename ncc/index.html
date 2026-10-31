@@ -295,20 +295,20 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 <p class="hint">Tăng trưởng = mức theo mã + mức theo phân nhóm. Bậc %hủy CH 0%–100%: nhập cột 0% và 100%, các cột giữa tự tính. Lưu bằng nút Lưu ở mục Cài Min.</p>
 <div class="tw"><table id="gnTbl"></table></div></div></details>
 <details class="sec" id="s-ch"><summary><span class="chev">▶</span><span class="num">F</span><h3>Danh sách CH & phân nhóm</h3><span class="sum" id="sum-ch"></span></summary>
-<div class="body"><div class="row"><button class="btn sm pri" id="stSync" type="button">Đồng bộ từ Sheet gốc</button><span class="hint" style="margin:0">Storeslist + PhanNhomCH (theo MCH3 của NCC) + tab HUB — dùng chung cả Portal</span></div><span class="sub" id="stInfo"></span><div class="grid2" style="margin-top:12px">
+<div class="body"><div class="row"><button class="btn sm pri" id="stSync" type="button">Đồng bộ từ Sheet gốc</button><span class="hint" style="margin:0">Nhóm N, tên, tỉnh, GĐV, QLKV luôn lấy từ Storelist (Storeslist + PhanNhomCH theo MCH3 của NCC) + tab HUB, tự đọc mỗi lần mở app — không khai báo tay. File danh sách CH chỉ dùng để thêm/bớt CH, lịch giao, MOQ.</span></div><span class="sub" id="stInfo"></span><div class="grid2" style="margin-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="drop" id="sdrop" tabindex="0"><b>Kéo thả file danh sách CH</b><br>File RM030 (xlsb) hoặc file mẫu danh sách CH<input type="file" id="sfile" accept=".xlsx,.xlsb,.xls,.csv" hidden></div>
         <div class="row"><button class="btn ghost" id="stTpl">Tải file mẫu danh sách CH</button></div>
-        <div class="row"><button class="btn ghost" id="nTpl">Tải file mẫu phân nhóm</button><span class="sub">Có sẵn nhóm hiện tại, chỉ sửa cột Nhóm rồi upload lại.</span></div>
-        <div class="drop" id="ndrop" tabindex="0" style="padding:14px"><b>Upload phân nhóm mới</b><br>Sheet "Phân nhóm" của file RM030, hoặc file có cột Mã CH + Nhóm<input type="file" id="nfile" accept=".xlsx,.xlsb,.xls,.csv" hidden></div>
+        <div style="display:none" class="row"><button class="btn ghost" id="nTpl">Tải file mẫu phân nhóm</button><span class="sub">Có sẵn nhóm hiện tại, chỉ sửa cột Nhóm rồi upload lại.</span></div>
+        <div style="display:none" class="drop" id="ndrop" tabindex="0" style="padding:14px"><b>Upload phân nhóm mới</b><br>Sheet "Phân nhóm" của file RM030, hoặc file có cột Mã CH + Nhóm<input type="file" id="nfile" accept=".xlsx,.xlsb,.xls,.csv" hidden></div>
         <p class="sub">File mẫu có sẵn toàn bộ CH đang dùng: Mã CH, Tên CH, Tỉnh, GĐV, QLKV, Nhóm, Lịch GH, MOQ (kg), HUB cấp 1, HUB cấp 2, Mã SP. Thêm dòng để thêm CH mới, sửa dòng để cập nhật. Cột Mã SP để trống thì CH mới lấy bộ mã chuẩn.</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div id="sprev" class="msg info">Chưa có file mới.</div>
         <label class="f" style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" id="stReplace"> Thay toàn bộ danh sách (CH không có trong file sẽ bị bỏ)</label>
         <div class="row"><button class="btn" id="stApply" disabled>Cập nhật danh sách CH</button><span class="sub" id="stMsg"></span></div>
-        <div id="nprev" class="msg info" hidden></div>
-        <div class="row"><button class="btn" id="nApply" disabled hidden>Cập nhật phân nhóm</button><span class="sub" id="nMsg"></span></div>
+        <div style="display:none" id="nprev" class="msg info" hidden></div>
+        <div style="display:none" class="row"><button class="btn" id="nApply" disabled hidden>Cập nhật phân nhóm</button><span class="sub" id="nMsg"></span></div>
       </div>
     </div></div></details>
 <details class="sec" id="s-minup"><summary><span class="chev">▶</span><span class="num">G</span><h3>Upload Min từ Excel</h3><span class="sum" id="sum-minup"></span></summary>
@@ -1005,7 +1005,7 @@ async function syncSheet(auto){ const el=$('sprev'); if(!auto) el.className='msg
     const old={}; MASTER.stores.forEach((s,i)=>old[s[0]]=i); const oldSS={}; MASTER.ss.forEach(x=>{ const c=MASTER.stores[x[0]][0]; (oldSS[c]=oldSS[c]||[]).push([x[1],x[2],x[3]]); });
     const lc={}; MASTER.ss.forEach(x=>lc[x[2]]=(lc[x[2]]||0)+1); const defLich=Object.keys(lc).sort((a,b)=>lc[b]-lc[a])[0]||'37'; const std=stdSkus();
     const p={stores:{},ss:{},hub:{},mod:{},names:{},unknownSku:new Set(),src:'Sheet gốc'};
-    st.slice(1).forEach(r=>{ const c=K(r[0]); if(!c||!nh[c]) return; if(auto&&old[c]===undefined) return; if(r[2]&&!/hoạt động/i.test(r[2])) return;
+    st.slice(1).forEach(r=>{ const c=K(r[0]); if(!c||!nh[c]) return; if(auto&&old[c]===undefined) return; if(r[2]&&!/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(r[2])) return;
       p.stores[c]={code:c,name:String(r[1]||'').trim(),tinh:tinhClean(r[5]),gdv:String(r[8]||'').trim(),nhom:nh[c],qlkv:String(r[7]||'').trim()}; p.names[c]=p.stores[c].name;
       p.ss[c]=oldSS[c]||std.map(k=>[k,defLich,1]); if(HUB.mod[c]!==undefined) p.mod[c]=HUB.mod[c]; else p.mod[c]=NCC.modType==='gt'?(/Hà Nội/.test(r[5])?500:NCC.modDef):NCC.modDef; });
     let nh2=0; hb.slice(1).forEach(r=>{ const c=K(r[0]); if(!c) return; const lv=[K(r[1])||c,K(r[2])||K(r[1])||c,K(r[3])||K(r[2])||K(r[1])||c]; p.hub[c]=lv; nh2++; });
@@ -1039,7 +1039,7 @@ $('stSync').onclick=syncSheet;
 $('stApply').onclick=async()=>{ if(!stParsed||!db) return; const btn=$('stApply'); btn.disabled=true; $('stMsg').textContent='Đang lưu…';
   try{ await saveMaster(buildMaster(stParsed.p,stParsed.replace));
     stParsed=null; $('stMsg').textContent='Đã cập nhật danh sách CH.'; $('sprev').className='msg info'; $('sprev').textContent='Đã cập nhật. FC đã tính lại theo danh sách mới.';
-    fillFilters(); recompute(); }catch(e){ $('stMsg').textContent='Chưa lưu được: '+(e.code||e.message); btn.disabled=false; } };
+    fillFilters(); recompute(); syncSheet(true); }catch(e){ $('stMsg').textContent='Chưa lưu được: '+(e.code||e.message); btn.disabled=false; } };
 const ndrop=$('ndrop'); ndrop.onclick=()=>$('nfile').click(); ndrop.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')$('nfile').click();};
 $('nfile').onchange=e=>{ if(e.target.files[0]) readNhomFile(e.target.files[0]); e.target.value=''; };
 ['dragenter','dragover'].forEach(t=>ndrop.addEventListener(t,e=>{e.preventDefault();ndrop.classList.add('hot');}));
