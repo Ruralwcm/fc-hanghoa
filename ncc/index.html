@@ -381,8 +381,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-window.FC_GAS_URL="https://script.google.com/macros/s/AKfycbxM-yFzIPsW-HG3RY5VRICeE04XVLMxZ8RBFYUs_lQqTF2NkDqUrzPmRGOjVIe6UIrbOQ/exec";
-window.gasShim=async function(){let url='';try{const q=new URLSearchParams(location.search).get('gas');if(q){localStorage.setItem('fc_portal_gas2',q);url=q}else url=localStorage.getItem('fc_portal_gas2')||window.FC_GAS_URL||''}catch(e){url=window.FC_GAS_URL||''}
+window.FC_GAS_URL="https://script.google.com/macros/s/AKfycbz9yBDMSUKqnbC88_H830deQFFrElvvKqIbVQqeg68ULRB53i0ypOWD-lQ_H4aq-UVw/exec";
+window.gasShim=async function(){let url='';try{const q=new URLSearchParams(location.search).get('gas');if(q){localStorage.setItem('fc_portal_gas3',q);url=q}else url=localStorage.getItem('fc_portal_gas3')||window.FC_GAS_URL||''}catch(e){url=window.FC_GAS_URL||''}
  if(!url)return null;const ns=(typeof NCC!=='undefined'&&NCC.ns)||'basa/';let cache;
  try{const r=await fetch(url+(url.includes('?')?'&':'?')+'action=all&prefix='+encodeURIComponent(ns));const j=await r.json();if(!j.ok)return null;cache=j.data||{}}catch(e){return null}
  const put=async(k,v)=>{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'set',key:ns+k,value:v})});const j=await r.json();if(!j.ok)throw new Error(j.error||'Lưu thất bại');cache[ns+k]=v};
