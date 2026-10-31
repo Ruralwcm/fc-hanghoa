@@ -28,7 +28,7 @@ function doGet(e) {
   const p = (e && e.parameter) || {}, a = p.action || 'all';
   try {
     if (a === 'ping') return out_({ ok: true, time: new Date().toISOString(), sheet: SpreadsheetApp.getActive().getName() });
-    if (a === 'get') { const r = readAll_(p.key); return out_({ ok: true, value: r.data[p.key] ?? null }); }
+    if (a === 'get') { const r = readAll_(p.key); return out_({ ok: true, value: (p.key in r.data) ? r.data[p.key] : null }); }
     const r = readAll_(p.prefix || ''); return out_({ ok: true, data: r.data, updated: r.updated });
   } catch (err) { return out_({ ok: false, error: String(err) }); }
 }
