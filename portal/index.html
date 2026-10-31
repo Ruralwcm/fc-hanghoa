@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal FC Hàng Hóa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f2; --panel:#ffffff; --ink:#18211b; --muted:#5d6b62; --line:#dbe2dc; --soft:#e9eee9;
+  --leaf:#1d6b43; --leaf-soft:#d9eee1; --soil:#7a5634;
+  --crit:#b3261e; --crit-soft:#fbe2df; --high:#b86200; --high-soft:#fdebd3; --med:#3d5a99; --med-soft:#e2e9f8; --ok:#1d6b43;
+  --f-body:"Be Vietnam Pro",system-ui,"Segoe UI",Roboto,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111613; --panel:#19201b; --ink:#e4ebe5; --muted:#9aa89f; --line:#2c3630; --soft:#222a25;
+  --leaf:#5fc28b; --leaf-soft:#1f3a2a; --soil:#c69a6d;
+  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fc28b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --panel:#19201b; --ink:#e4ebe5; --muted:#9aa89f; --line:#2c3630; --soft:#222a25;
+  --leaf:#5fc28b; --leaf-soft:#1f3a2a; --soil:#c69a6d;
+  --crit:#ff8a80; --crit-soft:#3d1f1c; --high:#ffb35c; --high-soft:#3a2a14; --med:#9db4ff; --med-soft:#1f2740; --ok:#5fc28b; color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:26px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:4px 0 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.app{transition:border-color .15s,box-shadow .15s}
+.app:hover{border-color:var(--leaf);box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.app h2{font-size:17px;margin:0;display:flex;align-items:center;gap:10px}
+.ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex:none}
+.app p{margin:0;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.tag.on{background:var(--leaf-soft);color:var(--leaf)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.pri{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+.mt{margin-top:22px}
+h3{margin:0;font-size:15px}
+input[type=text]{flex:1 1 360px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-family:var(--f-mono);font-size:12.5px}
+.pill{font-size:12px;padding:3px 10px;border-radius:999px;font-weight:600}
+.pill.ok{background:var(--leaf-soft);color:var(--leaf)}.pill.warn{background:var(--high-soft);color:var(--high)}.pill.bad{background:var(--crit-soft);color:var(--crit)}
+ol{margin:4px 0 0;padding-left:20px;color:var(--muted)}ol li{margin:2px 0}
+a{color:var(--leaf)}
+footer{margin-top:28px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Portal FC Hàng Hóa</h1><p class="sub">Dự báo đặt hàng · WinMart+ Rural</p></div>
+    <span class="pill warn" id="connPill">Chưa kết nối lưu chung</span>
+  </header>
+
+  <div class="grid">
+    <a class="card app" href="../rcq/" style="text-decoration:none;color:inherit">
+      <h2><span class="ic" style="background:var(--leaf-soft)">🥬</span>FC Rau Củ Quả</h2>
+      <p>FC tuần theo Sale L2W/LY2W, %Growth theo hủy, Mix FC, trừ tồn dự kiến và chờ giao, chia ngày theo lịch giao.</p>
+      <div class="tags"><span class="tag on" data-shared>Lưu chung Google Sheet</span><span class="tag">Data Sale · Tồn · Chờ giao</span></div>
+    </a>
+    <a class="card app" href="../" style="text-decoration:none;color:inherit">
+      <h2><span class="ic" style="background:var(--med-soft)">📦</span>FC Hàng Hóa v9.2.8</h2>
+      <p>Bản FC hàng hóa đang dùng chính.</p>
+      <div class="tags"><span class="tag">Lưu trên máy</span></div>
+    </a>
+    <a class="card app" href="https://ruralwcm.github.io/fc-ca-hoi/" style="text-decoration:none;color:inherit">
+      <h2><span class="ic" style="background:var(--high-soft)">🐟</span>FC Cá Hồi</h2>
+      <p>Dự báo đặt hàng cá hồi cho CH WinRural.</p>
+      <div class="tags"><span class="tag">Lưu trên máy</span></div>
+    </a>
+    <a class="card app" href="../v3/" style="text-decoration:none;color:inherit">
+      <h2><span class="ic" style="background:var(--soft)">🧭</span>FC Hàng Hóa V3</h2>
+      <p>Bản thử quy trình 4 bước: Data → Danh mục → RECAP → Chi tiết.</p>
+      <div class="tags"><span class="tag">Lưu trên máy</span></div>
+    </a>
+  </div>
+
+  <section class="card mt" aria-labelledby="hConn">
+    <div class="row" style="justify-content:space-between"><h3 id="hConn">Kết nối lưu chung (Google Sheet)</h3><a href="https://docs.google.com/spreadsheets/d/1v3ij5RLe86KtA-IFPuJlHDnEG4BQBXeFCkfd3mFUcuw/edit" target="_blank" rel="noopener">Mở Google Sheet ↗</a></div>
+    <p class="sub" style="margin:0">Dán URL Web app của Apps Script (kết thúc bằng <code>/exec</code>). URL được nhớ trên trình duyệt này và dùng chung cho các app trong Portal.</p>
+    <div class="row"><input type="text" id="gas" placeholder="https://script.google.com/macros/s/…/exec" aria-label="URL Apps Script"><button class="btn" id="btnTest" type="button">Kiểm tra</button><button class="btn pri" id="btnSave" type="button">Lưu</button></div>
+    <div id="msg" class="sub" role="status"></div>
+    <details><summary style="cursor:pointer;font-weight:600">Cài đặt Apps Script (làm 1 lần)</summary>
+      <ol>
+        <li>Mở Google Sheet "FC Portal - Dữ liệu chung" → Tiện ích mở rộng → Apps Script.</li>
+        <li>Xóa code mẫu, dán toàn bộ file <b>Code.gs</b> → Lưu.</li>
+        <li>Triển khai → Tùy chọn triển khai mới → Ứng dụng web · Thực thi với tư cách: <b>Tôi</b> · Người có quyền truy cập: <b>Bất kỳ ai</b> → Triển khai, cấp quyền.</li>
+        <li>Sao chép URL <code>/exec</code>, dán vào ô trên rồi bấm Kiểm tra → Lưu.</li>
+      </ol>
+    </details>
+  </section>
+  <footer>ruralwcm.github.io/fc-hanghoa/portal</footer>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const DEF=window.FC_GAS_URL||'';
+const get=()=>{try{return localStorage.getItem('fc_portal_gas')||DEF}catch(e){return DEF}};
+const set=v=>{try{v?localStorage.setItem('fc_portal_gas',v):localStorage.removeItem('fc_portal_gas')}catch(e){}};
+const pill=(t,c)=>{const p=$('#connPill');p.textContent=t;p.className='pill '+c};
+async function ping(u){const r=await fetch(u+(u.includes('?')?'&':'?')+'action=ping');const j=await r.json();if(!j.ok)throw new Error(j.error||'lỗi');return j}
+async function check(u,show){if(!u){pill('Chưa kết nối lưu chung','warn');if(show)$('#msg').textContent='Chưa có URL.';return false}
+  try{const j=await ping(u);pill('Đã kết nối · '+(j.sheet||'Google Sheet'),'ok');if(show)$('#msg').textContent='Kết nối được: '+(j.sheet||'Google Sheet')+' · '+new Date(j.time).toLocaleString('vi-VN');return true}
+  catch(e){pill('Không kết nối được','bad');if(show)$('#msg').textContent='Không kết nối được ('+(e.message||e)+'). Kiểm tra lại URL và quyền "Bất kỳ ai".';return false}}
+$('#gas').value=get();
+$('#btnTest').onclick=()=>check($('#gas').value.trim(),true);
+$('#btnSave').onclick=async()=>{const u=$('#gas').value.trim();if(u&&!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(u)){$('#msg').textContent='URL phải có dạng https://script.google.com/macros/s/…/exec';return}set(u);$('#msg').textContent=u?'Đã lưu. Đang kiểm tra…':'Đã xóa kết nối.';if(u)check(u,true);else pill('Chưa kết nối lưu chung','warn')};
+check(get(),false);
+</script>
+</body>
+</html>
