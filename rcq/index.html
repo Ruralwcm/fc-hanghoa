@@ -369,8 +369,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="movRaise"> Tổng tuần dưới MOV: gộp 1 lần giao và nâng lên đủ MOV</label>
         <label class="chk"><input type="checkbox" data-set="minPerDelivery"> Min áp cho mỗi lần giao (SKU nhỏ dồn vào ít lần giao hơn)</label>
       </div></div></details>
-<details class="sec" id="s-pn"><summary><span class="chev">▶</span><span class="num">C</span><h3>Phân nhóm CH</h3><span class="sum" id="sum-pn"></span><span class="act"><span class="btn sm upl imp">Import<input type="file" data-import="phannhom" accept=".xlsx,.xlsb,.xlsm" aria-label="Nhập Phân nhóm từ Excel"></span><button class="btn sm tpl" data-export="phannhom" type="button">Template</button><button class="btn sm sav" data-save="phannhom" type="button">Lưu</button></span></summary>
-    <div class="body"><div class="srcline" id="src-phannhom"></div><div class="row"><input type="text" id="qPn" placeholder="Tìm mã / tên CH" aria-label="Tìm CH"><select id="pnProv" aria-label="Tỉnh"><option value="">Tất cả tỉnh</option></select></div>
+<details class="sec" id="s-pn"><summary><span class="chev">▶</span><span class="num">C</span><h3>Phân nhóm CH</h3><span class="sum" id="sum-pn"></span><span class="act"><button class="btn sm pri" id="pnSync" type="button" title="Cập nhật tên, QLKV, GĐV, tỉnh, nhóm N từ Storeslist + PhanNhomCH của Sheet gốc">Đồng bộ Sheet gốc</button><button class="btn sm" id="pnSyncAll" type="button" data-only="ch" title="Lấy toàn bộ CH đang hoạt động có nhóm Thủy hải sản">+ Toàn bộ CH</button><span class="btn sm upl imp">Import<input type="file" data-import="phannhom" accept=".xlsx,.xlsb,.xlsm" aria-label="Nhập Phân nhóm từ Excel"></span><button class="btn sm tpl" data-export="phannhom" type="button">Template</button><button class="btn sm sav" data-save="phannhom" type="button">Lưu</button></span></summary>
+    <div class="body"><p class="hint">Phân nhóm lấy từ <b>Sheet gốc</b> (Storeslist + PhanNhomCH theo MCH3 <b data-only="rcq">Rau củ</b><b data-only="ch">Thủy hải sản</b>), tự đọc mỗi lần mở app; bảng đã lưu chỉ dùng dự phòng khi không đọc được Sheet gốc.<span data-only="ch"> Cá hồi giữ danh sách CH hiện có, bấm "+ Toàn bộ CH" để lấy mọi CH có nhóm.</span></p><div class="srcline" id="src-phannhom"></div><div class="row"><input type="text" id="qPn" placeholder="Tìm mã / tên CH" aria-label="Tìm CH"><select id="pnProv" aria-label="Tỉnh"><option value="">Tất cả tỉnh</option></select></div>
     <div class="tw" style="max-height:420px"><table id="tPn"></table></div><div class="pager" id="pgPn"></div></div></details>
 <details class="sec" id="s-qd" data-qd="1"><summary><span class="chev">▶</span><span class="num">D</span><h3>Quy đổi KG (Article → Mã WEC)</h3><span class="sum" id="sum-qd"></span><span class="act"><span class="btn sm upl imp">Import<input type="file" data-import="quydoi" accept=".xlsx,.xlsb,.xlsm" aria-label="Nhập Quy đổi từ Excel"></span><button class="btn sm tpl" data-export="quydoi" type="button">Template</button><button class="btn sm sav" data-save="quydoi" type="button">Lưu</button></span></summary>
     <div class="body"><div class="srcline" id="src-quydoi"></div><div class="grid" style="grid-template-columns:minmax(0,1fr);gap:8px;margin:6px 0"><div><h4 style="margin:0 0 4px">Article có bán nhưng chưa quy đổi được</h4><div class="tw" style="max-height:260px"><table id="tUnmap"></table></div></div><div><h4 style="margin:0 0 4px">Mã WEC có bán nhưng không có trong Danh mục</h4><div class="tw" style="max-height:260px"><table id="tNotDM"></table></div></div></div>
@@ -1101,14 +1101,14 @@ async function initDb(){
   try{db=await window.claude?.use?.('db')}catch(e){db=null}
   if(!db&&GAS_URL){try{const g=gasDb(GAS_URL,CH?'cahoi/':'rcq/');await g.ping();db=g;DBKIND='gas'}catch(e){toast('Không kết nối được kho chung Google Sheet — đang lưu trên máy này');db=null}}
   try{DL=await window.claude?.use?.('downloads')}catch(e){DL=null}
-  if(!db){lsLoad();$('#dbState').textContent='Lưu trên máy này';$('#dbState').className='pill high';$('#dbState').title='Không kết nối được kho dữ liệu chung của app. Thay đổi chỉ lưu trên trình duyệt này.';recompute();return}
+  if(!db){lsLoad();$('#dbState').textContent='Lưu trên máy này';$('#dbState').className='pill high';$('#dbState').title='Không kết nối được kho dữ liệu chung của app. Thay đổi chỉ lưu trên trình duyệt này.';recompute();syncPn(false);return}
   $('#dbState').textContent='Đang tải master…';busy(true,'Đang tải dữ liệu master từ app…');
   let any=false;for(const m of MASTERS){try{if(await dbLoad(m))any=true}catch(err){toast('Không tải được '+LABEL[m]+': '+(err.message||err.code))}}
   busy(false);$('#dbState').textContent=(DBKIND==='gas'?'Google Sheet · ':'')+(any?'Master lưu chung':'Master mặc định (chưa lưu lên kho chung)');$('#dbState').className='pill '+(any?'leaf':'high');
   MASTERS.forEach(m=>db.doc('master/'+m).onSnapshot(snap=>{if(!snap.exists||snap.metadata.hasPendingWrites)return;const d=snap.data();if(d.savedAt===META[m].savedAt)return;
     if(META[m].dirty){META[m].remote=d.savedAt;renderSaveBar();return}
     dbLoad(m).then(()=>{toast(LABEL[m]+' vừa được cập nhật trên app');recompute()}).catch(()=>{})},()=>{}));
-  recompute();
+  recompute();syncPn(false);
 }
 function markDirty(m){META[m].dirty=true;renderSaveBar();later()}
 async function save(m){
@@ -1128,7 +1128,7 @@ function renderSaveBar(){
 }
 $$('[data-save]').forEach(b=>b.addEventListener('click',async()=>{await save(b.dataset.save);recompute()}));
 function renderSrc(){MASTERS.forEach(m=>{const x=META[m],el=$('#src-'+m);if(!el)return;const t=x.savedAt?new Date(x.savedAt).toLocaleString('vi-VN'):'';
-  el.innerHTML='Nguồn: '+(x.src==='db'?`<span class="pill leaf">Lưu chung trên app · ${esc(t)}</span>`:x.src==='local'?`<span class="pill high">Lưu trên máy này · ${esc(t)}</span>`:x.src==='import'?`<span class="pill high">Import · chưa lưu</span>`:`<span class="pill">Mặc định từ file ${esc(DEF.file)}</span>`)+(x.dirty?' <span class="pill high">Có thay đổi chưa lưu</span>':'')})}
+  el.innerHTML='Nguồn: '+(x.src==='db'?`<span class="pill leaf">Lưu chung trên app · ${esc(t)}</span>`:x.src==='local'?`<span class="pill high">Lưu trên máy này · ${esc(t)}</span>`:x.src==='import'?`<span class="pill high">Import · chưa lưu</span>`:x.src==='sheet'?`<span class="pill leaf">Sheet gốc · Storeslist + PhanNhomCH (${esc(SG.mch3)}) · ${SG.at?SG.at.toLocaleTimeString('vi-VN'):''}</span>`:`<span class="pill">Mặc định từ file ${esc(DEF.file)}</span>`)+(x.dirty?' <span class="pill high">Có thay đổi chưa lưu</span>':'')})}
 
 // ---------- ĐỌC FILE (Worker) ----------
 let worker=null,workerOk=null;
@@ -1477,11 +1477,44 @@ $('#btnExportM').onclick=()=>exportSheets(E.mastersAoa(MS,RES),`Master_FC_${CH?'
 $$('[data-export]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.export,all=E.mastersAoa(MS,RES),key={quydoi:'1.Quy đổi KG',lichve:'2. Lịch về hàng',danhmuc:'4. Danh mục',phannhom:'Phân nhóm'}[m];exportSheets({[key]:all[key]},`${key.replace(/[^\p{L}\p{N}]+/gu,'_')}_${stamp()}.xlsx`)}));
 
 
+
+// ===== Master dùng chung: Storeslist + PhanNhomCH (theo MCH3) từ Sheet gốc =====
+const SG={id:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',mch3:CH?'Thủy hải sản':'Rau củ',all:!CH,at:null,ok:false};
+function sgCsv(t){const rows=[];let row=[],cur='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c;continue}
+  if(c==='"'){q=true;continue}if(c===','){row.push(cur);cur='';continue}if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;row.push(cur);cur='';if(row.length>1||row[0]!=='')rows.push(row);row=[];continue}cur+=c}
+  row.push(cur);if(row.length>1||row[0]!=='')rows.push(row);return rows}
+async function sgGet(q){const u='https://docs.google.com/spreadsheets/d/'+SG.id+'/gviz/tq?tqx=out:csv&'+q;const go=async x=>{const r=await fetch(x,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.text()};
+  try{return sgCsv(await go(u))}catch(e){return sgCsv(await go('https://corsproxy.io/?url='+encodeURIComponent(u)))}}
+async function syncPn(manual,all){
+  try{if(manual)busy(true,'Đang đọc Storeslist + PhanNhomCH ('+SG.mch3+') từ Sheet gốc…');
+    const [st,pn]=await Promise.all([sgGet('gid=164583655'),sgGet('gid=879484655')]);
+    const K=v=>String(v||'').trim().toUpperCase();const nh={};pn.slice(1).forEach(r=>{const n=String(r[2]||'').trim().toUpperCase();if(String(r[1]).trim()===SG.mch3&&/^N[1-8]$/.test(n))nh[K(r[0])]=n});
+    if(!Object.keys(nh).length)throw new Error('PhanNhomCH không có MCH3 "'+SG.mch3+'"');
+    const stM=new Map(st.slice(1).map(r=>[K(r[0]),r]));const cur=new Map(MS.phannhom.rows.map(r=>[K(r[0]),r]));
+    const useAll=all!=null?all:SG.all;const keys=useAll?[...new Set([...cur.keys(),...Object.keys(nh)])]:[...cur.keys()];
+    let add=0,chg=0,del=0;const out=[];
+    for(const k of keys){const s=stM.get(k),n=nh[k],old=cur.get(k);
+      if(s&&s[2]&&!/hoạt động/i.test(s[2])){if(old)del++;continue}
+      if(!old&&(!s||!n))continue;
+      const row=old?old.slice():[k,'','','','',null,null,null,''];row[0]=k;
+      if(s){row[1]=String(s[1]||row[1]||'').trim();row[2]=String(s[7]||row[2]||'').trim();if(!CH)row[3]=String(s[8]||row[3]||'').trim();row[4]=String(s[5]||row[4]||'').trim()}
+      if(CH&&!old){row[3]=k;row[6]=row[1]}
+      if(n)row[8]=n;
+      if(!old)add++;else if(old[8]!==row[8]||old[1]!==row[1]||old[2]!==row[2]||old[3]!==row[3]||old[4]!==row[4])chg++;
+      out.push(row)}
+    MS.phannhom.rows=out;SG.ok=true;SG.at=new Date();META.phannhom.src='sheet';
+    if(manual){markDirty('phannhom');toast(`Sheet gốc: ${ni(out.length)} CH · thêm ${add} · đổi ${chg} · bỏ ${del} (CH ngừng hoạt động) — bấm Lưu để giữ làm dự phòng`)}
+    else{recompute()}
+    renderSrc();
+  }catch(e){SG.ok=false;if(manual)toast('Không đọc được Sheet gốc ('+(e.message||e)+'). Đang dùng phân nhóm đã lưu.')}
+  finally{if(manual)busy(false)}}
+
 // ===== 1 TRANG: section, cỡ chữ, tóm tắt =====
 const OPENK='fc_open_'+APP;
 try{const o=JSON.parse(localStorage.getItem(OPENK)||'null');if(o)$$('details.sec').forEach(d=>{if(o[d.id]!=null)d.open=o[d.id]})}catch(e){}
 $$('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const o={};$$('details.sec').forEach(x=>o[x.id]=x.open);try{localStorage.setItem(OPENK,JSON.stringify(o))}catch(e){}}));
 $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.isTrusted)return;const t=e.target;if(!t.closest('button,select,input,label,.btn'))return;e.preventDefault();const f=t.matches('input[type=file]')?t:(t.closest('.btn')&&t.closest('.btn').querySelector('input[type=file]'));if(f)setTimeout(()=>f.click())}));
+{const b=$('#pnSync');if(b)b.addEventListener('click',()=>syncPn(true));const b2=$('#pnSyncAll');if(b2)b2.addEventListener('click',()=>syncPn(true,true));}
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
 $$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goSec(a.getAttribute('href').slice(1))}));
 {const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d))}
