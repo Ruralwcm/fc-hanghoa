@@ -355,6 +355,9 @@ html[data-app="cahoi"] #tGSku th:first-child{z-index:2}
 .minc .cellin{width:3.5385rem}.minc.on{background:var(--high-soft)}.minc.on .cellin{font-weight:700}
 #tNcc{width:100%}#tNcc tr.ncch td{background:var(--soft);white-space:normal}
 .salesum{font-size:.84rem;line-height:1.6;color:var(--muted);margin:2px 0 0.3077rem}.salesum b{color:var(--ink);font-weight:700}.salesum b.w{color:var(--high)}
+#s-growth .card.off>:not(.row){display:none!important}#s-growth .card.off{padding-bottom:0!important}
+#s-cfg .cfg4 label.chk{order:2}#s-cfg .cfg4 label.f{order:1}#s-cfg .cfg4>*:not(label){order:3}
+details.sec.cur{border-color:var(--leaf);box-shadow:0 0 0 2px var(--leaf-soft)}details.sec.cur>summary{background:var(--leaf-soft)}details.sec.cur>summary h3{color:var(--leaf)}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -1170,6 +1173,9 @@ function StoreTree(opt){
 }
 const lsSel=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'))}catch(e){return new Set()}};
 const lsSelSet=(k,S)=>{try{localStorage.setItem(k,JSON.stringify([...S]))}catch(e){}};
+// highlight section đang thao tác
+(function(){const mark=e=>{const d=e.target&&e.target.closest&&e.target.closest('details.sec');if(!d)return;document.querySelectorAll('details.sec.cur').forEach(x=>{if(x!==d)x.classList.remove('cur')});d.classList.add('cur')};
+  document.addEventListener('focusin',mark);document.addEventListener('pointerdown',mark)})();
 
 // ---------- MOQ CH & GOM HUB (dùng chung Cá hồi · Cá basa HTX · Bánh mỳ) ----------
 // Mỗi CH × ngày giao = 1 PO. PO ≥ MOQ → giao thẳng. Còn lại gom theo HUB cấp 1 rồi cấp 2 (nhóm ≥ 2 CH và đủ MOQ của HUB).
@@ -1782,7 +1788,7 @@ function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHT
   set('prov',`${MS.lichve.prov.length} tỉnh`);set('lv',`${MS.lichve.lichVe.length} kiểu lịch về × 8 nhóm`);
   set('growth',(c.useGSku!==false?'Nhóm SP: bật':'Nhóm SP: tắt')+(CH?'':' · Nhóm CH: '+(c.useGSt?'bật':'tắt')));
   const fl=E.NG.map((n,j)=>MS.danhmuc.skus.filter(x=>x.flags[j]).length);set('dm',`${MS.danhmuc.skus.length} SKU · N1–N8: ${fl.join('/')}`+(META.danhmuc.dirty?' · chưa lưu':''));
-  {const c=TREE.count();set('sel',c==null?'<span style="color:var(--crit)">Chưa chọn CH nào → không tính FC</span>':`${RES?ni(RES.stores.length):0} CH được tính FC`);if(!$('#stTree').childElementCount||renderSums._pn!==MS.phannhom.rows.length){renderSums._pn=MS.phannhom.rows.length;TREE.render()}}
+  {const c=TREE.count();set('sel',c==null?'<span style="color:var(--crit)">Chưa chọn CH nào</span>':`${RES?ni(RES.stores.length):0} CH được tính FC`);if(!$('#stTree').childElementCount||renderSums._pn!==MS.phannhom.rows.length){renderSums._pn=MS.phannhom.rows.length;TREE.render()}}
   set('pn',`${ni(MS.phannhom.rows.length)} CH`);const bad=MS.quydoi.rows.filter(r=>E.BAD_WEC.has(r[3])||r[6]==null).length;set('qd',`${ni(MS.quydoi.rows.length)} Article${bad?` · <span style="color:var(--high)">${bad} lỗi</span>`:''}`);
   const sale=S.reduce((a,s)=>a+s.sale1w,0),fc=S.reduce((a,s)=>a+s.totalFC,0),st={thua:0,du:0,thieu:0};S.forEach(s=>st[s.__stt]=(st[s.__stt]||0)+1);
   set('ov',`${ni(S.length)} CH · Sale 1W ${nf(sale,0)} kg · FC ${nf(fc,0)} kg · <span style="color:var(--crit)">${st.thua} thừa</span> / ${st.thieu} thiếu`);
