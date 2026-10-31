@@ -352,6 +352,7 @@ html[data-app="cahoi"] #tGSku th:first-child,html[data-app="cahoi"] #tGSku td:fi
 html[data-app="cahoi"] #tGSku th:first-child{z-index:2}
 .gtab{width:max-content;min-width:100%}#s-growth .tw{overflow-x:auto}
 #tDm .fz{position:sticky;z-index:2;background:var(--panel)}#tDm th.fz{z-index:4;background:var(--soft)}#tDm .fzl{box-shadow:inset -1px 0 0 var(--line),4px 0 6px -4px rgba(0,0,0,.18)}#tDm td.fz.mixc,#tDm tr:hover td.fz{background:var(--panel)}
+.minc .cellin{width:3.5385rem}.minc.on{background:var(--high-soft)}.minc.on .cellin{font-weight:700}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -394,6 +395,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="useStock"> Áp dụng cột "Trừ Tồn CG" (mã = 1: FC trừ Tồn + Chờ giao)</label>
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="movRaise"> Tổng tuần dưới MOV: gộp 1 lần giao và nâng lên đủ MOV</label>
         <label class="chk"><input type="checkbox" data-set="minPerDelivery"> Min áp cho mỗi lần giao (SKU nhỏ dồn vào ít lần giao hơn)</label>
+        <label class="chk" title="Khi FC của CH đủ cho nhiều lần giao hơn lịch giao theo phân nhóm (mỗi lần vẫn đủ MOV/MOQ và Min), giao thêm các ngày có trong lịch tuyến (lịch về của tỉnh)"><input type="checkbox" data-set="maxFreq"> Tối đa tần suất giao hàng (giao thêm ngày trong lịch tuyến khi FC đủ)</label>
       </div></div></details>
 <details class="sec" id="s-pn"><summary><span class="chev">▶</span><span class="num">D</span><h3>Phân nhóm CH</h3><span class="sum" id="sum-pn"></span><span class="act"><button class="btn sm" id="pnSync" type="button" title="Đọc lại Storeslist + PhanNhomCH từ Sheet gốc">Tải lại</button></span></summary>
     <div class="body"><p class="hint">Danh sách CH và nhóm N lấy tự động từ <b>Storelist</b> trên Sheet gốc (Storeslist: tên, QLKV, GĐV, tỉnh, chỉ CH đang hoạt động · PhanNhomCH theo MCH3 <b data-only="rcq">Rau củ</b><b data-only="ch">Thủy hải sản</b>), đọc lại mỗi lần mở app — không khai báo tay. Muốn đổi nhóm thì sửa trên Sheet gốc.<span data-only="ch"> Danh sách CH = mọi CH đang hoạt động có nhóm MCH3 của app trên PhanNhomCH; dùng mục Chọn Stores FC để giới hạn CH được tính FC.</span></p><div class="srcline" id="src-phannhom"></div><div class="row"><input type="text" id="qPn" placeholder="Tìm mã / tên CH" aria-label="Tìm CH"><select id="pnProv" aria-label="Tỉnh"><option value="">Tất cả tỉnh</option></select></div>
@@ -550,6 +552,13 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { prov, matrix, lichVe: lv, gSku, gSt, bSku, bSt, cfg, growthFilled: filled > 0 };
   }
   function parseDanhmuc(rows, log) {
+    { const h = (rows[1] || []).map(v => String(v || '').trim().toUpperCase());
+      if (h[0] === 'MÃ WEC') { // mẫu Cá hồi / Basa / Bánh mỳ: Min N1–N8 > 0 = xác nhận đặt hàng ở nhóm đó
+        const ci = t => h.indexOf(t), cW = 0, cN = ci('TÊN SKU'), cD = ci('ĐVT'), cQ = h.findIndex(v => /^QC/.test(v)), cG = ci('GIÁ'), mc = NG.map(g => ci('MIN ' + g));
+        const skus = []; for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[cW]) == null) continue; const o = {}; NG.forEach((g, j) => { const v = mc[j] >= 0 ? n(r[mc[j]]) : null; o[g] = v != null && v > 0 ? v : null; });
+          skus.push({ grp: s(r[cN]), wec: K(r[cW]), name: s(r[cN]), dvt: s(r[cD]) || 'KG', qc: n(r[cQ]), min: null, qd: 1, block: 0, flags: NG.map(g => o[g] > 0), minN: o, gia: cG >= 0 ? n(r[cG]) : null, mixFix: null }); }
+        log.push({ lvl: 'ok', msg: `Danh mục: ${skus.length} mã. Số mã có Min (xác nhận đặt) theo N1–N8: ${NG.map((g, j) => skus.filter(x => x.flags[j]).length).join(' / ')}.` });
+        return { targets: NG.map(() => null), skus }; } }
     const head = rows[0] || []; const targets = NG.map((g, j) => n(head[15 + j]));
     const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => h2.findIndex(v => String(v || '').trim().toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[1]) == null) continue;
@@ -600,6 +609,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   // ================= TÍNH FC =================
   const band = (w, b) => { b = b || BANDS; let j = 0; for (let k = 0; k < b.length; k++) if (w >= b[k] - 1e-9) j = k; return j; };
   const daysOf = code => String(code || '').split('').map(d => d === '8' ? 6 : Number(d) - 2).filter(d => d >= 0 && d < 7);
+  // ngày giao của lịch tuyến: lịch về dạng "2,3,5,7,CN"; nếu không phải dạng ngày thì lấy hợp các lịch giao N1–N8 của lịch về đó
+  let TUY_MATRIX = {};
+  const tuyenDays = lv => { const s = String(lv || '').toUpperCase(); if (/^[\d,\sCN]+$/.test(s) && /\d|CN/.test(s)) { const o = new Set(); s.split(/[,\s]+/).forEach(t => { if (t === 'CN') o.add(6); else if (/^[2-8]$/.test(t)) o.add(t === '8' ? 6 : +t - 2); }); return [...o].sort((a, b) => a - b); }
+    const row = TUY_MATRIX[lv] || {}; const o = new Set(); Object.values(row).forEach(v => daysOf(v).forEach(d => o.add(d))); return [...o].sort((a, b) => a - b); };
   function defaultCfg() { return { minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
@@ -608,7 +621,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const cfg = Object.assign(defaultCfg(), MS.lichve ? MS.lichve.cfg : {}, cfgIn || {});
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
     const DM = MS.danhmuc.skus; const dIdx = new Map(DM.map((x, i) => [x.wec, i]));
-    const LV = MS.lichve; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
+    const LV = MS.lichve; TUY_MATRIX = LV.matrix || {}; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
     const selOn = !!opt.sel; // đã truyền danh sách chọn: chưa chọn CH nào = không tính FC CH nào
     const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
@@ -677,7 +690,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
       // 4) chia ngày theo tuyến giao, bảo đảm MOV/lần giao
-      const D = daysOf(lich); let kgTot = R.reduce((a, r) => a + r.kg, 0);
+      let D = daysOf(lich); const DN0 = D.length; let kgTot = R.reduce((a, r) => a + r.kg, 0);
       S.nDays = D.length; S.usedDays = [];
       if (kgTot > 0 && D.length) {
         // MOV tính theo số QC (gói/kiện theo quy cách) mỗi lần giao của CH
@@ -685,6 +698,11 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         let packTot = R.reduce((a, r) => a + pk(r), 0);
         if (packTot < cfg.mov && cfg.movRaise) { const cand = R.filter(r => r.pcs > 0).sort((a, b) => (b.mix || 0) - (a.mix || 0)); let j = 0; while (packTot < cfg.mov && cand.length) { const r = cand[j % cand.length], qc = r.sku.qc || 1, qd = r.sku.qd || 1; r.pcs = +(r.pcs + qc).toFixed(6); r.kg = r.pcs * qd; packTot++; j++; } kgTot = R.reduce((a, r) => a + r.kg, 0); S.flags.push(['S_MOVUP', 'high', `Tổng tuần dưới ${cfg.mov} QC — gộp 1 lần giao và nâng lên đủ MOV`]); }
         let nEff = Math.max(1, Math.min(D.length, Math.floor(packTot / cfg.mov + 1e-9)));
+        // Tối đa tần suất giao: FC đủ cho nhiều lần giao hơn lịch phân nhóm → giao thêm ngày trong lịch tuyến (lịch về của tỉnh)
+        if (cfg.maxFreq) { const DT = tuyenDays(lichVe);
+          let cap = cfg.mov > 0 ? Math.floor(packTot / cfg.mov + 1e-9) : Infinity;
+          if (opt.moq) { const m = opt.moq.of(code); if (m > 0) { const val = R.reduce((a, r) => a + (opt.moq.gt ? r.kg * (r.sku.gia || 0) / 1000 : r.kg), 0); cap = Math.min(cap, Math.floor(val / m + 1e-9)); } }
+          if (DT.length > D.length && cap > D.length) { D = DT; nEff = Math.max(1, Math.min(DT.length, cap)); S.freqUp = nEff - DN0; S.flags.push(['S_FREQUP', 'med', `Tối đa tần suất: tăng từ ${DN0} lên ${nEff} lần giao (trong lịch tuyến ${lichVe})`]); } }
         const pickDays = k => Array.from({ length: k }, (_, j) => D[Math.min(D.length - 1, Math.round(j * D.length / k))]);
         let used = [...new Set(pickDays(nEff))]; nEff = used.length;
         const load = new Map(used.map(d => [d, 0])), pload = new Map(used.map(d => [d, 0])); const gl = {}, gc = {}; const gMap = (o, g) => o[g] || (o[g] = new Map(used.map(d => [d, 0])));
@@ -699,7 +717,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
           while (rem > 0) { let best = ds[0], bs = Infinity; for (const d of ds) { const v = score(d, (cnt.get(d) + 1) * u); if (v < bs - 1e-9) { bs = v; best = d; } } cnt.set(best, cnt.get(best) + 1); rem--; }
           for (const [d, p] of cnt) { r.days[d] = +(p * qc).toFixed(6); load.set(d, load.get(d) + p * u); pload.set(d, pload.get(d) + p); GL.set(d, GL.get(d) + p * u); GC.set(d, GC.get(d) + 1); } }
         S.usedDays = used; S.dayKg = DAYS.map((_, d) => load.get(d) || 0); S.dayQC = DAYS.map((_, d) => pload.get(d) || 0);
-        if (nEff < D.length) S.flags.push(['S_MOVDAYS', 'med', `Giảm từ ${D.length} xuống ${nEff} lần giao để mỗi lần ≥ ${cfg.mov} QC`]);
+        if (!S.freqUp && nEff < D.length) S.flags.push(['S_MOVDAYS', 'med', `Giảm từ ${D.length} xuống ${nEff} lần giao để mỗi lần ≥ ${cfg.mov} QC`]);
         const low = used.filter(d => pload.get(d) < cfg.mov - 1e-9); if (low.length) S.flags.push(['S_MOVLOW', 'high', `${low.length} lần giao dưới ${cfg.mov} QC sau khi chia`]);
       } else S.dayKg = [0, 0, 0, 0, 0, 0, 0];
       S.totalFC = kgTot; S.n = R.length;
@@ -730,7 +748,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return aoa;
   }
   // Xuất master về đúng bố cục Excel gốc (để sửa hàng loạt rồi upload lại)
-  function mastersAoa(MS, res) {
+  function mastersAoa(MS, res, fam) {
     const sh = {};
     if (MS.quydoi) sh['1.Quy đổi KG'] = [['MCH4 - SubCategory', 'MCH5 - MC', 'MCH6 - Ext. MC', 'Article', 'Tên SP', 'Base Unit', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'Quy đổi KG'], ...MS.quydoi.rows.map(r => ['', '', '', r[0], r[1], r[2], r[3], r[4], r[5], r[6]])];
     if (MS.lichve) { const L = MS.lichve; const a = []; const W = 30; const put = (i, j, v) => { while (a.length <= i) a.push(new Array(W).fill(null)); a[i][j] = v; };
@@ -743,7 +761,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       NG.forEach((g, i) => { put(11 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(11 + i, 15 + j, x)); });
       [['FC', 'Min Q.ty (%)', L.cfg.minPct], ['FC', 'Max Q.ty (%)', L.cfg.maxPct], ['MOV', 'Min Total FC/Day (QC)', L.cfg.mov], ['Sale Mix', '%LY2W trong Sale Mix FC', L.cfg.lyWeight], ['Chia ngày', '%Tăng rau ăn lá T6/T7/CN', L.cfg.wkUp != null ? L.cfg.wkUp : 15]].forEach((c, i) => { put(2 + i, 27, c[0]); put(2 + i, 28, c[1]); put(2 + i, 29, c[2]); });
       sh['2. Lịch về hàng'] = a; }
-    if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
+    if (MS.danhmuc && fam) { const D = MS.danhmuc; const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null, o = res && res.dmN ? res.dmN[i] : null;
+        return [x.wec, x.name, x.dvt, x.qc, x.gia != null ? x.gia : null, c ? r4(c.sale) : null, c ? r4(c.wasteSku) : null, ...NG.flatMap((g, j) => { const sl = o ? o.s[j] : 0, hy = o ? o.h[j] : 0; return [o ? r4(sl) : null, sl ? r4(hy / sl) : null, x.minN && x.minN[g] > 0 ? x.minN[g] : null]; })]; });
+      sh['4. Danh mục'] = [['DANH MỤC · Min theo nhóm N (Min > 0 = xác nhận đặt hàng; SL bán, %Hủy chỉ để tham khảo)'], ['Mã WEC', 'Tên SKU', 'ĐVT', 'QC (kg)', 'Giá', 'Sale L2W', '%Hủy L2W', ...NG.flatMap(g => ['SL bán ' + g, '%Hủy ' + g, 'Min ' + g])], ...rows]; }
+    else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     if (MS.phannhom) sh['Phân nhóm'] = [MS.phannhom.cols, ...MS.phannhom.rows];
@@ -851,6 +872,13 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { prov, matrix, lichVe: lv, gSku, gSt, bSku, bSt, cfg, growthFilled: filled > 0 };
   }
   function parseDanhmuc(rows, log) {
+    { const h = (rows[1] || []).map(v => String(v || '').trim().toUpperCase());
+      if (h[0] === 'MÃ WEC') { // mẫu Cá hồi / Basa / Bánh mỳ: Min N1–N8 > 0 = xác nhận đặt hàng ở nhóm đó
+        const ci = t => h.indexOf(t), cW = 0, cN = ci('TÊN SKU'), cD = ci('ĐVT'), cQ = h.findIndex(v => /^QC/.test(v)), cG = ci('GIÁ'), mc = NG.map(g => ci('MIN ' + g));
+        const skus = []; for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[cW]) == null) continue; const o = {}; NG.forEach((g, j) => { const v = mc[j] >= 0 ? n(r[mc[j]]) : null; o[g] = v != null && v > 0 ? v : null; });
+          skus.push({ grp: s(r[cN]), wec: K(r[cW]), name: s(r[cN]), dvt: s(r[cD]) || 'KG', qc: n(r[cQ]), min: null, qd: 1, block: 0, flags: NG.map(g => o[g] > 0), minN: o, gia: cG >= 0 ? n(r[cG]) : null, mixFix: null }); }
+        log.push({ lvl: 'ok', msg: `Danh mục: ${skus.length} mã. Số mã có Min (xác nhận đặt) theo N1–N8: ${NG.map((g, j) => skus.filter(x => x.flags[j]).length).join(' / ')}.` });
+        return { targets: NG.map(() => null), skus }; } }
     const head = rows[0] || []; const targets = NG.map((g, j) => n(head[15 + j]));
     const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => h2.findIndex(v => String(v || '').trim().toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[1]) == null) continue;
@@ -901,6 +929,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   // ================= TÍNH FC =================
   const band = (w, b) => { b = b || BANDS; let j = 0; for (let k = 0; k < b.length; k++) if (w >= b[k] - 1e-9) j = k; return j; };
   const daysOf = code => String(code || '').split('').map(d => d === '8' ? 6 : Number(d) - 2).filter(d => d >= 0 && d < 7);
+  // ngày giao của lịch tuyến: lịch về dạng "2,3,5,7,CN"; nếu không phải dạng ngày thì lấy hợp các lịch giao N1–N8 của lịch về đó
+  let TUY_MATRIX = {};
+  const tuyenDays = lv => { const s = String(lv || '').toUpperCase(); if (/^[\d,\sCN]+$/.test(s) && /\d|CN/.test(s)) { const o = new Set(); s.split(/[,\s]+/).forEach(t => { if (t === 'CN') o.add(6); else if (/^[2-8]$/.test(t)) o.add(t === '8' ? 6 : +t - 2); }); return [...o].sort((a, b) => a - b); }
+    const row = TUY_MATRIX[lv] || {}; const o = new Set(); Object.values(row).forEach(v => daysOf(v).forEach(d => o.add(d))); return [...o].sort((a, b) => a - b); };
   function defaultCfg() { return { minPct: 70, maxPct: 130, mov: 3, lyWeight: 50, movRaise: true, minPerDelivery: true, rWaste: 0.4, rDev: 0.5, wkUp: 15, useGSku: true, useGSt: false, plan: [32, 35, 38, 41, 44, 47, 50, 53], thuaPct: 130, thieuPct: 110, useStock: true, leadDays: 7 }; }
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
@@ -909,7 +941,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const cfg = Object.assign(defaultCfg(), MS.lichve ? MS.lichve.cfg : {}, cfgIn || {});
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
     const DM = MS.danhmuc.skus; const dIdx = new Map(DM.map((x, i) => [x.wec, i]));
-    const LV = MS.lichve; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
+    const LV = MS.lichve; TUY_MATRIX = LV.matrix || {}; const provLv = new Map(LV.prov.map(p => [p[1], p[2]]));
     const selOn = !!opt.sel; // đã truyền danh sách chọn: chưa chọn CH nào = không tính FC CH nào
     const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
@@ -978,7 +1010,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
       // 4) chia ngày theo tuyến giao, bảo đảm MOV/lần giao
-      const D = daysOf(lich); let kgTot = R.reduce((a, r) => a + r.kg, 0);
+      let D = daysOf(lich); const DN0 = D.length; let kgTot = R.reduce((a, r) => a + r.kg, 0);
       S.nDays = D.length; S.usedDays = [];
       if (kgTot > 0 && D.length) {
         // MOV tính theo số QC (gói/kiện theo quy cách) mỗi lần giao của CH
@@ -986,6 +1018,11 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         let packTot = R.reduce((a, r) => a + pk(r), 0);
         if (packTot < cfg.mov && cfg.movRaise) { const cand = R.filter(r => r.pcs > 0).sort((a, b) => (b.mix || 0) - (a.mix || 0)); let j = 0; while (packTot < cfg.mov && cand.length) { const r = cand[j % cand.length], qc = r.sku.qc || 1, qd = r.sku.qd || 1; r.pcs = +(r.pcs + qc).toFixed(6); r.kg = r.pcs * qd; packTot++; j++; } kgTot = R.reduce((a, r) => a + r.kg, 0); S.flags.push(['S_MOVUP', 'high', `Tổng tuần dưới ${cfg.mov} QC — gộp 1 lần giao và nâng lên đủ MOV`]); }
         let nEff = Math.max(1, Math.min(D.length, Math.floor(packTot / cfg.mov + 1e-9)));
+        // Tối đa tần suất giao: FC đủ cho nhiều lần giao hơn lịch phân nhóm → giao thêm ngày trong lịch tuyến (lịch về của tỉnh)
+        if (cfg.maxFreq) { const DT = tuyenDays(lichVe);
+          let cap = cfg.mov > 0 ? Math.floor(packTot / cfg.mov + 1e-9) : Infinity;
+          if (opt.moq) { const m = opt.moq.of(code); if (m > 0) { const val = R.reduce((a, r) => a + (opt.moq.gt ? r.kg * (r.sku.gia || 0) / 1000 : r.kg), 0); cap = Math.min(cap, Math.floor(val / m + 1e-9)); } }
+          if (DT.length > D.length && cap > D.length) { D = DT; nEff = Math.max(1, Math.min(DT.length, cap)); S.freqUp = nEff - DN0; S.flags.push(['S_FREQUP', 'med', `Tối đa tần suất: tăng từ ${DN0} lên ${nEff} lần giao (trong lịch tuyến ${lichVe})`]); } }
         const pickDays = k => Array.from({ length: k }, (_, j) => D[Math.min(D.length - 1, Math.round(j * D.length / k))]);
         let used = [...new Set(pickDays(nEff))]; nEff = used.length;
         const load = new Map(used.map(d => [d, 0])), pload = new Map(used.map(d => [d, 0])); const gl = {}, gc = {}; const gMap = (o, g) => o[g] || (o[g] = new Map(used.map(d => [d, 0])));
@@ -1000,7 +1037,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
           while (rem > 0) { let best = ds[0], bs = Infinity; for (const d of ds) { const v = score(d, (cnt.get(d) + 1) * u); if (v < bs - 1e-9) { bs = v; best = d; } } cnt.set(best, cnt.get(best) + 1); rem--; }
           for (const [d, p] of cnt) { r.days[d] = +(p * qc).toFixed(6); load.set(d, load.get(d) + p * u); pload.set(d, pload.get(d) + p); GL.set(d, GL.get(d) + p * u); GC.set(d, GC.get(d) + 1); } }
         S.usedDays = used; S.dayKg = DAYS.map((_, d) => load.get(d) || 0); S.dayQC = DAYS.map((_, d) => pload.get(d) || 0);
-        if (nEff < D.length) S.flags.push(['S_MOVDAYS', 'med', `Giảm từ ${D.length} xuống ${nEff} lần giao để mỗi lần ≥ ${cfg.mov} QC`]);
+        if (!S.freqUp && nEff < D.length) S.flags.push(['S_MOVDAYS', 'med', `Giảm từ ${D.length} xuống ${nEff} lần giao để mỗi lần ≥ ${cfg.mov} QC`]);
         const low = used.filter(d => pload.get(d) < cfg.mov - 1e-9); if (low.length) S.flags.push(['S_MOVLOW', 'high', `${low.length} lần giao dưới ${cfg.mov} QC sau khi chia`]);
       } else S.dayKg = [0, 0, 0, 0, 0, 0, 0];
       S.totalFC = kgTot; S.n = R.length;
@@ -1031,7 +1068,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return aoa;
   }
   // Xuất master về đúng bố cục Excel gốc (để sửa hàng loạt rồi upload lại)
-  function mastersAoa(MS, res) {
+  function mastersAoa(MS, res, fam) {
     const sh = {};
     if (MS.quydoi) sh['1.Quy đổi KG'] = [['MCH4 - SubCategory', 'MCH5 - MC', 'MCH6 - Ext. MC', 'Article', 'Tên SP', 'Base Unit', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'Quy đổi KG'], ...MS.quydoi.rows.map(r => ['', '', '', r[0], r[1], r[2], r[3], r[4], r[5], r[6]])];
     if (MS.lichve) { const L = MS.lichve; const a = []; const W = 30; const put = (i, j, v) => { while (a.length <= i) a.push(new Array(W).fill(null)); a[i][j] = v; };
@@ -1044,7 +1081,10 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       NG.forEach((g, i) => { put(11 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(11 + i, 15 + j, x)); });
       [['FC', 'Min Q.ty (%)', L.cfg.minPct], ['FC', 'Max Q.ty (%)', L.cfg.maxPct], ['MOV', 'Min Total FC/Day (QC)', L.cfg.mov], ['Sale Mix', '%LY2W trong Sale Mix FC', L.cfg.lyWeight], ['Chia ngày', '%Tăng rau ăn lá T6/T7/CN', L.cfg.wkUp != null ? L.cfg.wkUp : 15]].forEach((c, i) => { put(2 + i, 27, c[0]); put(2 + i, 28, c[1]); put(2 + i, 29, c[2]); });
       sh['2. Lịch về hàng'] = a; }
-    if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
+    if (MS.danhmuc && fam) { const D = MS.danhmuc; const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null, o = res && res.dmN ? res.dmN[i] : null;
+        return [x.wec, x.name, x.dvt, x.qc, x.gia != null ? x.gia : null, c ? r4(c.sale) : null, c ? r4(c.wasteSku) : null, ...NG.flatMap((g, j) => { const sl = o ? o.s[j] : 0, hy = o ? o.h[j] : 0; return [o ? r4(sl) : null, sl ? r4(hy / sl) : null, x.minN && x.minN[g] > 0 ? x.minN[g] : null]; })]; });
+      sh['4. Danh mục'] = [['DANH MỤC · Min theo nhóm N (Min > 0 = xác nhận đặt hàng; SL bán, %Hủy chỉ để tham khảo)'], ['Mã WEC', 'Tên SKU', 'ĐVT', 'QC (kg)', 'Giá', 'Sale L2W', '%Hủy L2W', ...NG.flatMap(g => ['SL bán ' + g, '%Hủy ' + g, 'Min ' + g])], ...rows]; }
+    else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
       const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
       sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     if (MS.phannhom) sh['Phân nhóm'] = [MS.phannhom.cols, ...MS.phannhom.rows];
@@ -1188,6 +1228,7 @@ const FLAG={
   MINUP:['med','Min lớn hơn nhu cầu','Min > 2 lần nhu cầu tuần'],
   DEV:['med','FC lệch bán nhiều','|FC − Sale 1W| ≥ ngưỡng'],
   S_MOVDAYS:['med','Giảm số lần giao','Để mỗi lần giao ≥ MOV'],
+  S_FREQUP:['med','Tăng tần suất giao','FC đủ cho nhiều lần giao hơn lịch phân nhóm → giao thêm ngày trong lịch tuyến'],
 };
 const SEVTXT={crit:'Nghiêm trọng',high:'Cao',med:'Trung bình'},SEVO={crit:0,high:1,med:2};
 
@@ -1319,8 +1360,8 @@ function ensureHub(){const c=MS.lichve&&MS.lichve.cfg;if(!c||c.hub)return;const 
 let rt;function later(){clearTimeout(rt);rt=setTimeout(recompute,300)}
 function recompute(){
   const t=performance.now();
-  if(CH)ensureHub();
-  try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL()})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
+  if(CH){ensureHub();(MS.danhmuc.skus||[]).forEach(x=>{const mn=x.minN||{};x.flags=E.NG.map(g=>+mn[g]>0)})}
+  try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL(),moq:CH?{gt:!!AC.gt,of:(()=>{const c=MS.lichve.cfg,H=c.hub||{},d=c.modDef!=null?+c.modDef:(AC.modDef||0);return k=>{const v=(H[String(k).toUpperCase()]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:d}})()}:null})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
   if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
   ROWS=[];for(const S of RES.stores)for(const r of S.rows)ROWS.push({S,r});
   perf('Tính FC',performance.now()-t,ni(ROWS.length)+' dòng CH × SKU');st.aIdx=null;
@@ -1410,7 +1451,7 @@ function renderDm(){
 }
 $('#tDm').addEventListener('change',e=>{const t=e.target,tr=t.closest('tr[data-i]');if(!tr)return;DMV.keep.add(+tr.dataset.i);const x=MS.danhmuc.skus[+tr.dataset.i];
   if(t.dataset.flag!=null){const j=+t.dataset.flag,P=planOf();if(t.checked){const c=MS.danhmuc.skus.filter(y=>y.flags[j]).length+1;if(c>planMax(P[j])){t.checked=false;toast(`${E.NG[j]}: quy hoạch ${P[j]} mã, tối đa ${planMax(P[j])} (+10%) — không cài thêm được`);return}}x.flags[j]=t.checked;const n=MS.danhmuc.skus.filter(y=>y.flags[j]).length,el=document.querySelector('#tDm [data-cnt="'+j+'"]');if(el){el.textContent=n+'/'+P[j]+' SKU';el.style.color=n>planMax(P[j])?'var(--crit)':n>P[j]?'var(--high)':'inherit'}}
-  else if(t.dataset.minn!=null){const raw=String(t.value).replace(',','.').trim(),g=E.NG[+t.dataset.minn];if(!x.minN)x.minN={};if(raw===''){x.minN[g]=null}else{const v=Number(raw);if(!isFinite(v)||v<0){toast('Min phải ≥ 0');setTimeout(renderDm);return}x.minN[g]=v}}
+  else if(t.dataset.minn!=null){const raw=String(t.value).replace(',','.').trim(),g=E.NG[+t.dataset.minn];if(!x.minN)x.minN={};if(raw===''){x.minN[g]=null}else{const v=Number(raw);if(!isFinite(v)||v<0){toast('Min phải ≥ 0');setTimeout(renderDm);return}x.minN[g]=v}if(CH){const j=+t.dataset.minn;x.flags[j]=+x.minN[g]>0;t.closest('td').classList.toggle('on',x.flags[j])}}
   else if(t.dataset.f==='block'){x.block=Number(t.value)===1?1:0}
   else if(t.dataset.f==='mixFix'){const raw=String(t.value).replace(/[%\s]/g,'').replace(',','.');if(raw===''){x.mixFix=null;x.mixLock=false}else{const v=Number(raw);if(!isFinite(v)||v<0||v>100){toast('Mix FC phải từ 0 đến 100%');setTimeout(renderDm);return}x.mixFix=v/100;rebalanceFix(x)}setTimeout(()=>{if(document.activeElement===t)t.blur()})}
   else return;markDirty('danhmuc')});
@@ -1608,16 +1649,16 @@ function freezeDm(){const t=$('#tDm');if(!t||!t.rows.length)return;const h=t.row
 function renderDmCH(){
   const D=MS.danhmuc,C=RES.dmCalc||[],DN=RES.dmN||[],q=$('#qDm').value.trim().toLowerCase(),full=DMVCH==='full';
   $$('#dmViewCH button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===DMVCH));
-  const sub=full?['#CH bán','SL bán','%Hủy','#CH PN','Min']:['SL bán','Min'];
-  const head='<tr><th rowspan="2">Mã WEC</th><th rowspan="2">Tên SKU</th><th rowspan="2">ĐVT</th><th class="n" rowspan="2">QC (kg)</th><th class="n" rowspan="2">Giá</th><th class="n" rowspan="2">Sale L2W</th><th class="n" rowspan="2">%Hủy L2W</th>'+E.NG.map(n=>`<th class="n ngh" colspan="${sub.length}">${n}</th>`).join('')+'</tr><tr>'+E.NG.map(n=>sub.map((t,k)=>`<th class="n${k===0?' ngs':''}" title="${t==='#CH PN'?'Số CH thuộc phân nhóm '+n:t==='Min'?'Tick = bán ở '+n+'; ô số = Min (kg) mỗi tuần':t+' nhóm '+n+(t==='SL bán'?' (kg/tuần)':'')}">${t}</th>`).join('')).join('')+'</tr>';
+  const sub=full?['#CH bán','SL bán','%Hủy','#CH PN','Min']:['SL bán','%Hủy','Min'];
+  const head='<tr><th rowspan="2">Mã WEC</th><th rowspan="2">Tên SKU</th><th rowspan="2">ĐVT</th><th class="n" rowspan="2">QC (kg)</th><th class="n" rowspan="2">Giá</th><th class="n" rowspan="2">Sale L2W</th><th class="n" rowspan="2">%Hủy L2W</th>'+E.NG.map(n=>`<th class="n ngh" colspan="${sub.length}">${n}</th>`).join('')+'</tr><tr>'+E.NG.map(n=>sub.map((t,k)=>`<th class="n${k===0?' ngs':''}" title="${t==='#CH PN'?'Số CH thuộc phân nhóm '+n:t==='Min'?'Min (kg) mỗi tuần ở '+n+' — mã có Min > 0 là xác nhận đặt hàng ở '+n:t+' nhóm '+n+(t==='SL bán'?' (kg/tuần)':'')}">${t}</th>`).join('')).join('')+'</tr>';
   $('#tDm').innerHTML=head+D.skus.map((x,i)=>{if(q&&!(x.wec+' '+x.name).toLowerCase().includes(q))return '';const c=C[i]||{},mn=x.minN||{},o=DN[i]||{s:[],h:[],c:[],p:[]};
     return `<tr data-i="${i}"><td class="mono">${esc(x.wec)}</td><td>${esc(x.name)}</td><td>${esc(x.dvt)}</td><td class="n${x.qc?'':' ed'}">${x.qc??'—'}</td><td class="n">${x.gia?ni(x.gia):'—'}</td><td class="n">${nf(c.sale,1)}</td><td class="n">${pf(c.wasteSku,1)}</td>`+
-    E.NG.map((g,j)=>{const sl=o.s[j]||0,hy=o.h[j]||0,mi=`<td class="n"><div class="chmin"><input type="checkbox" data-flag="${j}" ${x.flags[j]?'checked':''} aria-label="${esc(x.name)} bán ở ${g}"><input data-minn="${j}" type="text" inputmode="decimal" class="cellin" aria-label="Min ${g} ${esc(x.name)}" value="${mn[g]!=null?mn[g]:''}" placeholder="—"></div></td>`;
-      return full?`<td class="n ngs">${o.c[j]?ni(o.c[j]):'·'}</td><td class="n">${sl?nf(sl,1):'·'}</td><td class="n" style="color:${sl&&hy/sl>=0.2?'var(--crit)':'inherit'}">${sl?pf(hy/sl,0):'·'}</td><td class="n">${o.p[j]?ni(o.p[j]):'·'}</td>${mi}`:`<td class="n ngs">${sl?nf(sl,1):'·'}</td>${mi}`}).join('')+'</tr>'}).join('');
+    E.NG.map((g,j)=>{const sl=o.s[j]||0,hy=o.h[j]||0,mi=`<td class="n minc${+mn[g]>0?' on':''}"><input data-minn="${j}" type="text" inputmode="decimal" class="cellin" aria-label="Min ${g} ${esc(x.name)}" value="${mn[g]!=null&&mn[g]!==0?mn[g]:''}" placeholder="—"></td>`,hc=`<td class="n" style="color:${sl&&hy/sl>=0.2?'var(--crit)':'inherit'}">${sl?pf(hy/sl,0):'·'}</td>`;
+      return full?`<td class="n ngs">${o.c[j]?ni(o.c[j]):'·'}</td><td class="n">${sl?nf(sl,1):'·'}</td>${hc}<td class="n">${o.p[j]?ni(o.p[j]):'·'}</td>${mi}`:`<td class="n ngs">${sl?nf(sl,1):'·'}</td>${hc}${mi}`}).join('')+'</tr>'}).join('');
 }
 $('#dmViewCH')&&$('#dmViewCH').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;DMVCH=b.dataset.v;try{localStorage.setItem('fc_dmv_'+APP,DMVCH)}catch(_){}renderDmCH()});
 $('#dmCalcMin')&&$('#dmCalcMin').addEventListener('click',()=>{let n=0;MS.danhmuc.skus.forEach(x=>{const mn=x.minN||{},N=E.NG.map(g=>mn[g]!=null&&mn[g]!==''?+mn[g]:0);let i1=-1,i8=-1;N.forEach((v,i)=>{if(v){if(i1<0)i1=i;i8=i}});if(i1<0||i8<=i1+1)return;
-  const u=(x.qc||1)*(x.qd||1),st=(N[i8]-N[i1])/(i8-i1);x.minN=Object.assign({},mn);for(let i=i1+1;i<i8;i++){x.minN[E.NG[i]]=+(Math.max(u,Math.round((N[i1]+(i-i1)*st)/u)*u)).toFixed(4);x.flags[i]=true}n++});
+  const u=(x.qc||1)*(x.qd||1),st=(N[i8]-N[i1])/(i8-i1);x.minN=Object.assign({},mn);for(let i=i1+1;i<i8;i++){x.minN[E.NG[i]]=+(Math.max(u,Math.round((N[i1]+(i-i1)*st)/u)*u)).toFixed(4)}x.flags=E.NG.map(g=>+x.minN[g]>0);n++});
   if(!n){toast('Cần ít nhất 2 mốc Min cách nhau (ví dụ N1 và N8) để nội suy');return}markDirty('danhmuc');toast('Đã tính Min cho '+n+' mã — bấm Lưu để giữ')});
 
 function renderNcc(){const N=nccList(),cfg=MS.lichve.cfg;
@@ -1660,11 +1701,11 @@ async function exportSheets(sheets,filename){
 const stamp=()=>new Date().toISOString().slice(0,10);
 $('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsx':'Template_Data_Sale.xlsx');
 $('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsx`);
-$('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES),`Du_lieu_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsx`);
+$('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Du_lieu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsx`);
 $('#cfgImport').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const p=await readFile(f);if(!p)return;if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});if(!ms.length){toast('File không có sheet dữ liệu nào (Quy đổi, Lịch về hàng, Danh mục, HUB) — không cập nhật gì');return}applyMasters(p.masters,p.log)});
 $('#cfgSave').onclick=async()=>{const d=MASTERS.filter(m=>META[m].dirty);if(!d.length){toast('Không có thay đổi cần lưu');return}for(const m of d)await save(m);recompute()};
-{const b=$('#btnExportM');if(b)b.onclick=()=>exportSheets(E.mastersAoa(MS,RES),`Master_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsx`)};
-$$('[data-export]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.export,all=E.mastersAoa(MS,RES),key={quydoi:'1.Quy đổi KG',lichve:'2. Lịch về hàng',danhmuc:'4. Danh mục',phannhom:'Phân nhóm'}[m];exportSheets({[key]:all[key]},`${key.replace(/[^\p{L}\p{N}]+/gu,'_')}_${stamp()}.xlsx`)}));
+{const b=$('#btnExportM');if(b)b.onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Master_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsx`)};
+$$('[data-export]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.export,all=E.mastersAoa(MS,RES,CH),key={quydoi:'1.Quy đổi KG',lichve:'2. Lịch về hàng',danhmuc:'4. Danh mục',phannhom:'Phân nhóm'}[m];exportSheets({[key]:all[key]},`${key.replace(/[^\p{L}\p{N}]+/gu,'_')}_${stamp()}.xlsx`)}));
 
 
 
