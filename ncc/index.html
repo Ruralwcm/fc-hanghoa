@@ -487,7 +487,7 @@ function computeMOD(res, H, cfg){
   let rest=POs.filter(p=>p.st===4);
   for(let lv=0;lv<MAXLV;lv++){
     const grp={};
-    rest.forEach(p=>{ const h=(H.hub[p.store]||[])[lv]; if(!h) return; const k=h+'|'+p.day;
+    rest.forEach(p=>{ const h=(H.hub[p.store]||[])[lv]; if(!h||h==='0') return; const k=h+'|'+p.day;
       const g=grp[k]||(grp[k]={hub:h,lv:lv+1,day:p.day,kg:0,gt:0,via:new Set(),viaKg:0,list:[]}); g.kg+=p.kg; g.gt+=p.gt; g.list.push(p); });
     Object.values(grp).forEach(g=>{ const m=modOf(g.hub); g.mod=m;
       if(g.list.length>1 && val(g)>=m-1e-9){ g.list.forEach(p=>{ p.st=lv+1; p.dest=g.hub; g.via.add(p.store); g.viaKg+=p.kg; }); hubs.push(g); } });
@@ -495,7 +495,7 @@ function computeMOD(res, H, cfg){
   }
   // Cụm còn thiếu sau cấp 2: gom theo HUB cấp 2 (không có thì cấp 1, không có thì chính CH)
   const sg={};
-  rest.forEach(p=>{ const h=H.hub[p.store]||[]; const hub=h[1]||h[0]||p.store; const k=hub+'|'+p.day;
+  rest.forEach(p=>{ const h=(H.hub[p.store]||[]).map(x=>x==='0'?'':x); const hub=h[1]||h[0]||p.store; const k=hub+'|'+p.day;
     const g=sg[k]||(sg[k]={key:k,hub,day:p.day,kg:0,gt:0,list:[],mod:modOf(hub)}); g.kg+=p.kg; g.gt+=p.gt; g.list.push(p); });
   const shorts=Object.values(sg);
   shorts.forEach(g=>{ g.need=Math.max(0,g.mod-val(g)); g.needPct=val(g)>0?g.need/val(g):9; const auto=cfg.autoUp===undefined?0.2:+cfg.autoUp; g.auto=!dec[g.key]&&g.needPct<auto-1e-9;
@@ -986,7 +986,7 @@ async function gviz(q){ const u='https://docs.google.com/spreadsheets/d/'+SHEET_
   try{ return csvRows(await go(u)); }catch(e){ return csvRows(await go('https://corsproxy.io/?url='+encodeURIComponent(u))); } }
 async function syncSheet(){ const el=$('sprev'); el.className='msg info'; el.textContent='Đang đọc Storeslist, PhanNhomCH ('+NCC.mch3+'), HUB từ Sheet gốc…';
   try{ const [st,pn,hb]=await Promise.all([gviz('gid=164583655'),gviz('gid=879484655'),gviz('sheet=HUB').catch(()=>[])]);
-    const K=v=>String(v||'').trim().toUpperCase(); const nh={}; pn.slice(1).forEach(r=>{ if(String(r[1]).trim()===NCC.mch3&&/^N[1-8]$/.test(String(r[2]).trim())) nh[K(r[0])]=String(r[2]).trim(); });
+    const K=v=>{ const s=String(v||'').trim().toUpperCase(); return s==='0'?'':s; }; const nh={}; pn.slice(1).forEach(r=>{ if(String(r[1]).trim()===NCC.mch3&&/^N[1-8]$/.test(String(r[2]).trim())) nh[K(r[0])]=String(r[2]).trim(); });
     const old={}; MASTER.stores.forEach((s,i)=>old[s[0]]=i); const oldSS={}; MASTER.ss.forEach(x=>{ const c=MASTER.stores[x[0]][0]; (oldSS[c]=oldSS[c]||[]).push([x[1],x[2],x[3]]); });
     const lc={}; MASTER.ss.forEach(x=>lc[x[2]]=(lc[x[2]]||0)+1); const defLich=Object.keys(lc).sort((a,b)=>lc[b]-lc[a])[0]||'37'; const std=stdSkus();
     const p={stores:{},ss:{},hub:{},mod:{},names:{},unknownSku:new Set(),src:'Sheet gốc'};
