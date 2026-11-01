@@ -1248,6 +1248,19 @@ function hubMod(RES,o){
   const K=c=>String(c||'').toUpperCase();
   const lv=(c,i)=>{const v=(H[K(c)]||[])[i];return v&&v!=='0'&&K(v)!==K(c)?K(v):''};
   const modOf=o.modOf||(c=>{const v=(H[K(c)]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:defMod});
+  // Dàn sản lượng theo cụm HUB: số lần giao của cụm = tổng tuần ÷ MOD (≥ số lần HSD yêu cầu, ≤ số ngày giao có thể) → mọi CH trong cụm giao cùng các ngày đó
+  if(o.rebalance!==false){const dOf=c=>String(c||'').split('').map(d=>d==='8'?6:Number(d)-2).filter(d=>d>=0&&d<7);
+    const CL=new Map();RES.stores.forEach(S=>{const h=lv(S.code,0)||K(S.code);if(!CL.has(h))CL.set(h,[]);CL.get(h).push(S)});
+    CL.forEach((L,h)=>{const mod=modOf(h);if(!(mod>0))return;const V=L.reduce((a,S)=>a+S.rows.reduce((b,r)=>b+(r.kg||0)*(GT?(r.sku.gia||0)/1000:1),0),0);if(!(V>0))return;
+      const allow=S=>{const a=new Set([...dOf(S.lich),...(S.usedDays||[])]);return a};const U=new Set();L.forEach(S=>allow(S).forEach(d=>U.add(d)));const Us=[...U].sort((a,b)=>a-b);if(!Us.length)return;
+      const nMin=Math.max(1,...L.flatMap(S=>S.rows.filter(r=>r.pcs>0).map(r=>{const x=Number(r.sku.hsd);return x>0&&x<7?Math.ceil(7/x):1})));
+      const n=Math.max(1,Math.min(Us.length,Math.max(nMin,Math.floor(V/mod+1e-9))));const pick=[];for(let j=0;j<n;j++)pick.push(Us[Math.min(Us.length-1,Math.round(j*Us.length/n))]);const P=[...new Set(pick)];
+      L.forEach(S=>{const A=allow(S);let ds=P.filter(d=>A.has(d));if(!ds.length){const near=[...A].sort((a,b)=>Math.abs(a-P[0])-Math.abs(b-P[0]))[0];ds=near!=null?[near]:[]}if(!ds.length)return;
+        let ch=false;S.rows.forEach(r=>{if(!(r.pcs>0))return;const qc=r.sku.qc||1,packs=Math.round(r.pcs/qc);const mEff=r.minEff||0,per=Math.max(1,Math.ceil(mEff/qc-1e-9));const x=Number(r.sku.hsd),kH=x>0&&x<7?Math.min(ds.length,Math.ceil(7/x)):1;
+          const k=Math.max(1,Math.min(ds.length,Math.max(Math.min(kH,packs),Math.floor(packs/per))));const use=[];for(let j=0;j<k;j++)use.push(ds[Math.min(ds.length-1,Math.round(j*ds.length/k))]);const u=[...new Set(use)];
+          const nd=[0,0,0,0,0,0,0];const base=Math.floor(packs/u.length);let rem=packs-base*u.length;u.forEach(d=>{nd[d]=base+(rem>0?1:0);if(rem>0)rem--});const nv=nd.map(p=>+(p*qc).toFixed(6));
+          if(nv.some((v,i)=>v!==(r.days[i]||0))){r.days=nv;ch=true}});
+        if(ch){S.usedDays=[...new Set(S.rows.flatMap(r=>r.days.map((v,i)=>v>0?i:-1)).filter(i=>i>=0))].sort((a,b)=>a-b);S.dayKg=[0,0,0,0,0,0,0];S.rows.forEach(r=>r.days.forEach((u2,d)=>S.dayKg[d]+=u2*(r.sku.qd||1)))}})})}
   const po={};
   for(const S of RES.stores)for(const r of S.rows){const qd=r.sku.qd||1,gia=(r.sku.gia||0)/1000;(r.days||[]).forEach((u,d)=>{if(!(u>0))return;const k=S.code+'|'+d;
     const p=po[k]||(po[k]={store:S.code,name:S.name,tinh:S.tinh,day:d,kg:0,gt:0,refs:[]});const kg=u*qd;p.kg+=kg;p.gt+=kg*gia;p.refs.push([r,d,S])})}
@@ -1303,8 +1316,8 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
         const parts=grp.map((g,i)=>({hub:medoid(g),list:g})).filter(p=>p.list.length);parts.forEach(p=>{p.peak=peak(p.list);p.wk=val(p.list).reduce((a,b)=>a+b,0);p.km=radius(p.hub,p.list)});
         if(parts.length>=2&&parts.every(p=>p.peak>=mod&&p.km<=R)){res=parts;break}}
       if(res)splits.push({key:'S|'+h,hub:h,n:ms.length,peak:pk,wk,mod,parts:res})}
-    else if(pk<mod){let best=null,bd=Infinity;cl.forEach((m2,h2)=>{if(h2===h)return;const d=kmDist(o.pos(h),o.pos(h2));if(d<=R&&d<bd&&peak([...ms,...m2])>=mod){bd=d;best=h2}});
-      if(best)merges.push({key:'M|'+h,hub:h,n:ms.length,peak:pk,mod,to:best,km:bd,list:ms})}});
+    else if(wk<mod){let best=null,bd=Infinity;cl.forEach((m2,h2)=>{if(h2===h)return;const d=kmDist(o.pos(h),o.pos(h2));const w2=val(m2).reduce((a,b)=>a+b,0);if(d<=R&&d<bd&&wk+w2>=mod){bd=d;best=h2}});
+      if(best)merges.push({key:'M|'+h,hub:h,n:ms.length,peak:pk,wk,mod,to:best,km:bd,list:ms})}});
   return {splits,merges,clusters:cl.size};
 }
 
@@ -1814,7 +1827,7 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   rows=rows.filter(r=>(!q||(r.h+' '+((pos(r.h)||{}).n||'')+' '+r.L.map(x=>x.code+' '+x.name).join(' ')).toLowerCase().includes(q))&&(!fl||(fl==='short'?r.sh.length:fl==='thua'?r.A.st.thua:fl==='thieu'?r.A.st.thieu:r.hs===fl)));
   const ordS={tach:0,huy:1,gop:2,du:3};rows.sort((a,b)=>ordS[a.hs]-ordS[b.hs]||b.wk-a.wk);
   const cnt={tach:0,gop:0,huy:0,du:0};[...CL.keys()].forEach(()=>{});rows.forEach(r=>cnt[r.hs]++);
-  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%), mỗi HUB mới đủ MOD/lần, bán kính ≤ ${R} km · Gộp khi đơn/lần < MOD và có HUB gần cho đủ MOD. Tick đề xuất rồi bấm Xác nhận.`;
+  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%), mỗi HUB mới đủ MOD/lần, bán kính ≤ ${R} km · Gộp khi tổng tuần < MOD và có HUB gần cho đủ. Mỗi HUB dàn sản lượng vào số lần giao = tổng tuần ÷ MOD (≥ số lần theo HSD); vẫn thiếu thì tăng FC mã bán chạy, hủy thấp (trong Lock Max). Tick đề xuất rồi bấm Xác nhận.`;
   const HS={tach:['high','Tách'],du:['stt-du','Đủ'],gop:['','Gộp'],huy:['crit','Hủy']};const nm=k=>{const x=pos(k);return String((x&&x.n)||(S.find(y=>K(y.code)===K(k))||{}).name||'').replace(/^WM\+\s*/,'')};
   const f=x=>gt?nf(x,0):nf(x,1),num=(x,d=1)=>x?nf(x,d):'·',P=40,pages=Math.max(1,Math.ceil(rows.length/P));if(HV.page>=pages)HV.page=0;
   const dd=d=>d.map((v,i)=>v>0?E.DAYVN[i]:'').filter(Boolean).join('·');
@@ -1840,7 +1853,7 @@ $('#hvQ')&&$('#hvQ').addEventListener('input',()=>{HV.page=0;renderHubView()});$
 $('#hvOpen')&&$('#hvOpen').addEventListener('click',e=>{HV.all=!HV.all;HV.open.clear();e.target.textContent=HV.all?'Thu hết':'Mở hết';renderHubView()});
 ['#hR','#hX'].forEach(id=>{const el=$(id);if(el)el.addEventListener('change',()=>{const v=Number(el.value);if(!isFinite(v)||v<=0)return;MS.lichve.cfg[id==='#hR'?'hubR':'hubSplitX']=v;markDirty('lichve');HPSEL.clear();renderHubPlan();renderHubView()})});
 $('#hpApply')&&$('#hpApply').addEventListener('click',()=>{if(!HP)return;const c=MS.lichve.cfg,H=c.hub=c.hub||{},K=x=>String(x).toUpperCase(),get=k=>H[K(k)]||['','',null];let ns=0,nm=0;
-  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),K(p.hub)===K(sp.hub)?(o[1]||''):K(sp.hub),o[2]]}))});
+  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),'',o[2]]}))});
   HP.merges.filter(m=>HPSEL.has(m.key)).forEach(m=>{nm++;m.list.forEach(k=>{const o=get(k);H[K(k)]=[K(m.to),o[1]||'',o[2]]})});
   HPSEL.clear();markDirty('lichve');toast(`Đã cập nhật danh sách HUB: tách ${ns}, gộp ${nm} — bấm Lưu để lưu chung`);recompute()});
 function renderMov(){
