@@ -1289,8 +1289,8 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
   const radius=(h,ms)=>Math.max(0,...ms.map(c=>{const d=kmDist(o.pos(h),o.pos(c));return isFinite(d)?d:0}));
   const splits=[],merges=[];
   cl.forEach((ms,h)=>{const mod=o.modOf(h);if(!(mod>0))return;const pk=peak(ms);
-    if(pk>=0.9*X*mod&&ms.length>=4&&ms.every(c=>isFinite((o.pos(c)||{}).la))){
-      let k=Math.max(2,Math.floor(pk/(2*mod)));let res=null;
+    if(pk>=0.9*X*mod&&ms.length>=2&&ms.every(c=>isFinite((o.pos(c)||{}).la))){
+      let k=Math.min(ms.length,Math.max(2,Math.floor(pk/(2*mod))));let res=null;
       for(;k>=2;k--){ // k-medoids
         let meds=[ms.reduce((a,b)=>peak([b])>peak([a])?b:a)];while(meds.length<k){let far=null,fd=-1;ms.forEach(c=>{const d=Math.min(...meds.map(m=>kmDist(o.pos(c),o.pos(m))));if(d>fd){fd=d;far=c}});meds.push(far)}
         let grp;for(let it=0;it<12;it++){grp=meds.map(()=>[]);ms.forEach(c=>{let bi=0,bd=Infinity;meds.forEach((m,i)=>{const d=kmDist(o.pos(c),o.pos(m));if(d<bd){bd=d;bi=i}});grp[bi].push(c)});const nm=grp.map((g,i)=>g.length?medoid(g):meds[i]);if(nm.every((m,i)=>m===meds[i]))break;meds=nm}
@@ -1827,7 +1827,7 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;c
   el.innerHTML=head+rows.slice(HV.page*P,(HV.page+1)*P).map(r=>{const op=HV.all||HV.open.has(r.h),multi=r.L.length>1;
     const sttH=['thua','du','thieu'].filter(k=>r.A.st[k]).map(k=>`<span class="pill stt-${k}">${r.A.st[k]} ${STX[k]}</span>`).join(' ');
     const hw=r.hw?`<span class="pill ${HW[r.hw][0]}" title="${esc(HW[r.hw][2])}">${HW[r.hw][1]}</span>`:'';
-    const lab=`${multi?`<span class="tg">${op?'▾':'▸'}</span> `:''}<b>${esc(r.h)}</b> <span class="smallnote">${esc(((pos(r.h)||{}).n||(r.L.find(x=>K(x.code)===r.h)||{}).name||'').replace(/^WM\+\s*/,''))}</span> <span class="smallnote">· ${r.L.length} CH · đỉnh ${gt?nf(r.pk,0):nf(r.pk,1)} ${U}/ngày</span>`;
+    const lab=`${multi?`<span class="tg">${op?'▾':'▸'}</span> `:''}<b>${esc(r.h)}</b> <span class="smallnote">${esc(((pos(r.h)||{}).n||(r.L.find(x=>K(x.code)===r.h)||{}).name||'').replace(/^WM\+\s*/,''))}</span> <span class="smallnote">· ${r.L.length} CH · đỉnh ${gt?nf(r.pk,0):nf(r.pk,1)} ${U}/ngày${r.mod>0?' = '+nf(r.pk/r.mod,1)+' × MOD':''}</span>`;
     const gs=[...new Set(r.L.flatMap(x=>[...((st.get(K(x.code))||{}).s||[])]))].sort().map(i=>HUB_ST[i]).join(', ');
     let h=cells(r.A,'','',r.mod,gs,sttH,hw,lab,'hvh'+(multi?' click':''),`data-h="${esc(r.h)}"`);
     if(multi&&op)h+=r.L.slice().sort((a,b)=>(K(a.code)===r.h?-1:K(b.code)===r.h?1:b.totalFC-a.totalFC)).map(x=>{const k=K(x.code),A=agg([x]),km=k===r.h?'HUB':(()=>{const d=kmDist(pos(r.h),pos(k));return isFinite(d)?nf(d,1):'—'})();
