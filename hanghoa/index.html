@@ -400,6 +400,9 @@ details.sec>summary .num{background:var(--yel)!important;color:#3a2a00!important
 .jump a.on{background:var(--brand)!important;border-color:var(--brand)!important;color:#fff!important}.jump a.on .dot{box-shadow:0 0 0 2px #fff}
 th{background:color-mix(in srgb,var(--brand) 7%,var(--panel))!important;color:color-mix(in srgb,var(--brand) 50%,var(--ink))!important}
 .ver b{color:var(--brand)!important}
+.hsdin{width:3.2308rem!important}
+.gone{display:none!important}
+.ovcol{display:flex;flex-direction:column;gap:0.7692rem;min-width:0}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -412,7 +415,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="sp"></div>
   <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost" id="exAll" type="button">Mở tất cả</button><button class="btn ghost" id="coAll" type="button">Thu tất cả</button>
-  <label class="btn imp" for="inFile">Import</label><button class="btn tpl" id="btnTpl" type="button">Template</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
+  <label class="btn imp" for="inFile">Import</label><button class="btn tpl" id="btnTpl" type="button">Template</button><button class="btn" id="btnSaveWork" type="button" title="Lưu toàn bộ dữ liệu đang thao tác (SKUs + thông số, MOV, Sale, FC) thành file Excel offline; mở lại bằng Import">Lưu Data FC</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
 </div></header>
 <input type="file" id="inFile" accept=".xlsx,.xlsb,.xlsm,.xls" hidden>
 
@@ -642,7 +645,7 @@ const mienOfT=t=>MIEN_MAP[nT(t)]||(t?'Miền Nam':'Khác');
 const SL_ACTIVE=s=>!s||/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s);
 /* Storeslist (Sheet gốc gid 164583655): A Mã · B Tên · C Tình trạng · D Khai trương · E Miền · F Tỉnh · G Huyện · H QLKV · I GĐV · L SPD · M Nhóm DT */
 const STL={map:new Map(),at:null};
-function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[1]||'').trim(),st:String(r[2]||'').trim(),m:String(r[4]||'').trim()||mienOfT(r[5]),t:String(r[5]||'').trim(),q:String(r[7]||'').trim(),g:String(r[8]||'').trim(),spd:r[11],ndt:String(r[12]||'').trim()})});STL.at=new Date();return STL.map}
+function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[1]||'').trim(),st:String(r[2]||'').trim(),m:String(r[4]||'').trim()||mienOfT(r[5]),t:String(r[5]||'').trim(),q:String(r[7]||'').trim(),g:String(r[8]||'').trim(),spd:r[11],ndt:String(r[12]||'').trim(),la:parseFloat(String(r[9]||'').replace(',','.')),lo:parseFloat(String(r[10]||'').replace(',','.'))})});STL.at=new Date();return STL.map}
 /* opt: {el, list:()=>[{c,n,m,g,q}], get:()=>Set(mã CH), set:(Set)=>void} — lá là từng CH */
 function StoreTree(opt){
   const el=opt.el,open=new Set(),E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -926,6 +929,11 @@ async function exportSheets(sheets,filename){
   if(DL){try{await DL.save({filename,data:blob});toast('Đã lưu file');return}catch(e){if(e&&e.code==='declined'){toast('Đã hủy tải file');return}}}
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Đã tải file');
 }
+$('#btnSaveWork').onclick=()=>{try{const NG=H.NG,P=ST.params||{};const head=['Mã SP','Tên SP','ĐVT','QC','Giá mua','Giá thường','Giá KM','Diễn giải CTKM','Thời gian KM','NCC','','','NCC','Tỉnh','Mov','%Min',...NG,'Cover','Lock','+Stock','+CG','Growth%'];
+  const mv=[];(ST.mov||[]).forEach(x=>{mv.push([x.ncc,'Tất cả',x.allTinh||0,x.pctMinMOV]);Object.entries(x.tinhMOV||{}).forEach(([t,v])=>mv.push([x.ncc,t,v,x.pctMinMOV]))});
+  const src=ST.recapSrc||[],n=Math.max(src.length,mv.length),rows=[head];for(let i=0;i<n;i++){const o=src[i],p=o?(P[o.maSP]||{}):{},m2=mv[i]||['','','',''];rows.push([...(o?[o.maSP,o.tenSP,o.dvt,p.qc||o.qc,o.giaMua,o.giaThuong,o.giaKM,o.dienGiai,o.tgKM,o.ncc]:['','','','','','','','','','']),'','',...m2,...(o?[...NG.map(g=>p[g]??null),p.coverDay??null,p.lockMax??null,p.plusStock??null,p.plusCG??null,p.growth??null]:[])])}
+  const sale=[['Store','Article','Sales Quantity','Closing Quantity','Chờ giao']];if(ST.sale&&ST.sale.map)for(const [k,v] of ST.sale.map){const [s2,a]=k.split('|');sale.push([s2,a,v.ban,v.ton,v.cg])}
+  const sh={SKUs:rows,Sale:sale};if(ST.R&&ST.R.rows&&ST.R.rows.length)Object.assign(sh,H.exportAoa(ST.R,ST.recap,ST.mov));exportSheets(sh,`Luu_FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Đã lưu file offline — mở lại bằng nút Import')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}};
 $('#btnExport').onclick=()=>{if(!ST.R||!ST.R.rows.length){toast('Chưa có dữ liệu FC');return}exportSheets(H.exportAoa(ST.R,ST.recap,ST.mov),`FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsx`)};
 
 // ---------- 1 TRANG: section, cỡ chữ, tóm tắt ----------
