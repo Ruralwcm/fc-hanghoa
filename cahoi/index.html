@@ -676,7 +676,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art); const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
       if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
@@ -1013,7 +1013,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art); const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
       if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
