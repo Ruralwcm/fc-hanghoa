@@ -596,7 +596,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { prov, matrix, lichVe: lv, gSku, gSt, bSku, bSt, cfg, growthFilled: filled > 0 };
   }
   function parseDanhmuc(rows, log) {
-    { const h = (rows[1] || []).map(v => String(v || '').trim().toUpperCase());
+    { const h = [...(rows[1] || [])].map(v => s(v).normalize('NFC').toUpperCase());
       if (h[0] === 'MÃ WEC') { // mẫu Cá hồi / Basa / Bánh mỳ: Min N1–N8 > 0 = xác nhận đặt hàng ở nhóm đó
         const ci = t => h.indexOf(t), cW = 0, cN = ci('TÊN SKU'), cD = ci('ĐVT'), cQ = h.findIndex(v => /^QC/.test(v)), cH = h.findIndex(v => /^HSD/.test(v)), cG = ci('GIÁ'), mc = NG.map(g => ci('MIN ' + g));
         const skus = []; for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[cW]) == null) continue; const o = {}; NG.forEach((g, j) => { const v = mc[j] >= 0 ? n(r[mc[j]]) : null; o[g] = v != null && v > 0 ? v : null; });
@@ -604,7 +604,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         log.push({ lvl: 'ok', msg: `Danh mục: ${skus.length} mã. Số mã có Min (xác nhận đặt) theo N1–N8: ${NG.map((g, j) => skus.filter(x => x.flags[j]).length).join(' / ')}.` });
         return { targets: NG.map(() => null), skus }; } }
     const head = rows[0] || []; const targets = NG.map((g, j) => n(head[15 + j]));
-    const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => h2.findIndex(v => String(v || '').trim().toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
+    const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => [...h2].findIndex(v => s(v).toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[1]) == null) continue;
       const fix = n(r[14]); // cột O Sale Mix FC nếu anh nhập sẵn
       skus.push({ grp: s(r[0]), wec: K(r[1]), name: s(r[2]), dvt: s(r[3]), qc: n(r[4]), min: n(r[5]), qd: n(r[6]), block: n(r[7]), flags: NG.map((g, j) => n0(r[15 + j]) === 1), mixFix: fix != null && fix > 0 ? fix : null }); if (hasMn) { const o = {}; NG.forEach((g, j) => { o[g] = mnCol[j] >= 0 ? n(r[mnCol[j]]) : null; }); skus[skus.length - 1].minN = o; } }
@@ -634,7 +634,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const m = new Map(); let nL = 0, nLY = 0, nCG = 0;
     // khối CHỜ GIAO (tùy chọn): tìm tiêu đề 'CHỜ GIAO' ở dòng 1 → Store | Article | Q.ty
     // vị trí khối theo tiêu đề dòng 1 (thiếu tiêu đề thì dùng vị trí mẫu): HỦY L2W · SALE L2W · HỦY LY2W · SALE LY2W · CHỜ GIAO
-    const H0 = (rows[0] || []).map(h => String(h || '').trim().toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
+    const H0 = Array.from(rows[0] || [], h => s(h).normalize('NFC').toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
     const hasHdr = H0.some(h => h);
     let cHL = at(/^HỦY L2W|^HUY L2W/), cSL = at(/^SALE L2W/), cHY = at(/^HỦY LY2W|^HUY LY2W/), cSY = at(/^SALE LY2W/), cgCol = at(/CHỜ\s*GIAO|CHO\s*GIAO/);
     if (!hasHdr) { cHL = 0; cSL = 4; cHY = 9; cSY = 13; } else { if (cHL < 0) cHL = 0; if (cSL < 0) cSL = 4; }
@@ -693,7 +693,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     let fixSum = 0, freeSum = 0; DM.forEach((x, i) => { const f = ovMix[x.wec] !== undefined ? ovMix[x.wec] : x.mixFix; dmCalc[i].fixed = f != null ? f : null; if (f != null) fixSum += f; else freeSum += dmCalc[i].mixAuto; });
     const scale = freeSum > 0 ? Math.max(0, 1 - fixSum) / freeSum : 0;
     DM.forEach((x, i) => { const c = dmCalc[i]; c.mixFC = c.fixed != null ? c.fixed : c.mixAuto * scale; });
-    const mixWarn = fixSum > 1 + 1e-9 ? `Tổng Sale Mix cố định = ${(fixSum * 100).toFixed(1)}% > 100%` : null;
+    const mixWarn = fixSum > 1.0005 ? `Tổng Sale Mix cố định = ${(fixSum * 100).toFixed(1)}% > 100%` : null;
     // 3) tính từng CH
     const rows = []; const out = []; const dmN = DM.map(() => ({ s: new Array(8).fill(0), h: new Array(8).fill(0), c: new Array(8).fill(0), p: new Array(8).fill(0) }));
     const gSku = linMap(LV.gSku), gSt = linMap(LV.gSt); const dg = defaultGrowth(); dg.sku = linRow(dg.sku); dg.st = linRow(dg.st);
@@ -815,8 +815,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       L.prov.forEach((p, i) => { put(2 + i, 0, p[0]); put(2 + i, 1, p[1]); put(2 + i, 2, p[2]); });
       L.lichVe.forEach((l, i) => { put(2 + i, 4, l); NG.forEach((g, j) => put(2 + i, 5 + j, (L.matrix[l] || {})[g] || null)); });
       Object.entries(L.gSku).forEach(([g, v], i) => { put(2 + i, 14, g); v.forEach((x, j) => put(2 + i, 15 + j, x)); });
-      put(9, 14, '%GROWTH BASE ON TOTAL SHRINAKGE - BY MCH3 GROUP'); put(10, 14, 'Phân nhóm/%Hủy'); (L.bSt || BANDS).forEach((b, j) => put(10, 15 + j, b));
-      NG.forEach((g, i) => { put(11 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(11 + i, 15 + j, x)); });
+      const g0 = Math.max(9, 3 + Object.keys(L.gSku).length); // bảng %Growth theo nhóm CH nằm dưới bảng theo mã (không ghi đè khi > 7 mã)
+      put(g0, 14, '%GROWTH BASE ON TOTAL SHRINAKGE - BY MCH3 GROUP'); put(g0 + 1, 14, 'Phân nhóm/%Hủy'); (L.bSt || BANDS).forEach((b, j) => put(g0 + 1, 15 + j, b));
+      NG.forEach((g, i) => { put(g0 + 2 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(g0 + 2 + i, 15 + j, x)); });
       [['FC', 'Min Q.ty (%)', L.cfg.minPct], ['FC', 'Max Q.ty (%)', L.cfg.maxPct], ['MOV', 'Min Total FC/Day (QC)', L.cfg.mov], ['Sale Mix', '%LY2W trong Sale Mix FC', L.cfg.lyWeight], ['Chia ngày', '%Tăng rau ăn lá T6/T7/CN', L.cfg.wkUp != null ? L.cfg.wkUp : 15]].forEach((c, i) => { put(2 + i, 27, c[0]); put(2 + i, 28, c[1]); put(2 + i, 29, c[2]); });
       sh['2. Lịch về hàng'] = a; }
     if (MS.danhmuc && fam) { const D = MS.danhmuc; const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null, o = res && res.dmN ? res.dmN[i] : null;
@@ -932,7 +933,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { prov, matrix, lichVe: lv, gSku, gSt, bSku, bSt, cfg, growthFilled: filled > 0 };
   }
   function parseDanhmuc(rows, log) {
-    { const h = (rows[1] || []).map(v => String(v || '').trim().toUpperCase());
+    { const h = [...(rows[1] || [])].map(v => s(v).normalize('NFC').toUpperCase());
       if (h[0] === 'MÃ WEC') { // mẫu Cá hồi / Basa / Bánh mỳ: Min N1–N8 > 0 = xác nhận đặt hàng ở nhóm đó
         const ci = t => h.indexOf(t), cW = 0, cN = ci('TÊN SKU'), cD = ci('ĐVT'), cQ = h.findIndex(v => /^QC/.test(v)), cH = h.findIndex(v => /^HSD/.test(v)), cG = ci('GIÁ'), mc = NG.map(g => ci('MIN ' + g));
         const skus = []; for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[cW]) == null) continue; const o = {}; NG.forEach((g, j) => { const v = mc[j] >= 0 ? n(r[mc[j]]) : null; o[g] = v != null && v > 0 ? v : null; });
@@ -940,7 +941,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         log.push({ lvl: 'ok', msg: `Danh mục: ${skus.length} mã. Số mã có Min (xác nhận đặt) theo N1–N8: ${NG.map((g, j) => skus.filter(x => x.flags[j]).length).join(' / ')}.` });
         return { targets: NG.map(() => null), skus }; } }
     const head = rows[0] || []; const targets = NG.map((g, j) => n(head[15 + j]));
-    const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => h2.findIndex(v => String(v || '').trim().toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
+    const skus = []; const h2 = rows[1] || []; const mnCol = NG.map(g => [...h2].findIndex(v => s(v).toUpperCase() === ('MIN ' + g))); const hasMn = mnCol.some(c => c >= 0);
     for (let i = 2; i < rows.length; i++) { const r = rows[i]; if (!r || V(r[1]) == null) continue;
       const fix = n(r[14]); // cột O Sale Mix FC nếu anh nhập sẵn
       skus.push({ grp: s(r[0]), wec: K(r[1]), name: s(r[2]), dvt: s(r[3]), qc: n(r[4]), min: n(r[5]), qd: n(r[6]), block: n(r[7]), flags: NG.map((g, j) => n0(r[15 + j]) === 1), mixFix: fix != null && fix > 0 ? fix : null }); if (hasMn) { const o = {}; NG.forEach((g, j) => { o[g] = mnCol[j] >= 0 ? n(r[mnCol[j]]) : null; }); skus[skus.length - 1].minN = o; } }
@@ -970,7 +971,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const m = new Map(); let nL = 0, nLY = 0, nCG = 0;
     // khối CHỜ GIAO (tùy chọn): tìm tiêu đề 'CHỜ GIAO' ở dòng 1 → Store | Article | Q.ty
     // vị trí khối theo tiêu đề dòng 1 (thiếu tiêu đề thì dùng vị trí mẫu): HỦY L2W · SALE L2W · HỦY LY2W · SALE LY2W · CHỜ GIAO
-    const H0 = (rows[0] || []).map(h => String(h || '').trim().toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
+    const H0 = Array.from(rows[0] || [], h => s(h).normalize('NFC').toUpperCase().replace(/\s+/g, ' ')); const at = re => H0.findIndex(h => re.test(h));
     const hasHdr = H0.some(h => h);
     let cHL = at(/^HỦY L2W|^HUY L2W/), cSL = at(/^SALE L2W/), cHY = at(/^HỦY LY2W|^HUY LY2W/), cSY = at(/^SALE LY2W/), cgCol = at(/CHỜ\s*GIAO|CHO\s*GIAO/);
     if (!hasHdr) { cHL = 0; cSL = 4; cHY = 9; cSY = 13; } else { if (cHL < 0) cHL = 0; if (cSL < 0) cSL = 4; }
@@ -1029,7 +1030,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     let fixSum = 0, freeSum = 0; DM.forEach((x, i) => { const f = ovMix[x.wec] !== undefined ? ovMix[x.wec] : x.mixFix; dmCalc[i].fixed = f != null ? f : null; if (f != null) fixSum += f; else freeSum += dmCalc[i].mixAuto; });
     const scale = freeSum > 0 ? Math.max(0, 1 - fixSum) / freeSum : 0;
     DM.forEach((x, i) => { const c = dmCalc[i]; c.mixFC = c.fixed != null ? c.fixed : c.mixAuto * scale; });
-    const mixWarn = fixSum > 1 + 1e-9 ? `Tổng Sale Mix cố định = ${(fixSum * 100).toFixed(1)}% > 100%` : null;
+    const mixWarn = fixSum > 1.0005 ? `Tổng Sale Mix cố định = ${(fixSum * 100).toFixed(1)}% > 100%` : null;
     // 3) tính từng CH
     const rows = []; const out = []; const dmN = DM.map(() => ({ s: new Array(8).fill(0), h: new Array(8).fill(0), c: new Array(8).fill(0), p: new Array(8).fill(0) }));
     const gSku = linMap(LV.gSku), gSt = linMap(LV.gSt); const dg = defaultGrowth(); dg.sku = linRow(dg.sku); dg.st = linRow(dg.st);
@@ -1151,8 +1152,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       L.prov.forEach((p, i) => { put(2 + i, 0, p[0]); put(2 + i, 1, p[1]); put(2 + i, 2, p[2]); });
       L.lichVe.forEach((l, i) => { put(2 + i, 4, l); NG.forEach((g, j) => put(2 + i, 5 + j, (L.matrix[l] || {})[g] || null)); });
       Object.entries(L.gSku).forEach(([g, v], i) => { put(2 + i, 14, g); v.forEach((x, j) => put(2 + i, 15 + j, x)); });
-      put(9, 14, '%GROWTH BASE ON TOTAL SHRINAKGE - BY MCH3 GROUP'); put(10, 14, 'Phân nhóm/%Hủy'); (L.bSt || BANDS).forEach((b, j) => put(10, 15 + j, b));
-      NG.forEach((g, i) => { put(11 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(11 + i, 15 + j, x)); });
+      const g0 = Math.max(9, 3 + Object.keys(L.gSku).length); // bảng %Growth theo nhóm CH nằm dưới bảng theo mã (không ghi đè khi > 7 mã)
+      put(g0, 14, '%GROWTH BASE ON TOTAL SHRINAKGE - BY MCH3 GROUP'); put(g0 + 1, 14, 'Phân nhóm/%Hủy'); (L.bSt || BANDS).forEach((b, j) => put(g0 + 1, 15 + j, b));
+      NG.forEach((g, i) => { put(g0 + 2 + i, 14, g); (L.gSt[g] || []).forEach((x, j) => put(g0 + 2 + i, 15 + j, x)); });
       [['FC', 'Min Q.ty (%)', L.cfg.minPct], ['FC', 'Max Q.ty (%)', L.cfg.maxPct], ['MOV', 'Min Total FC/Day (QC)', L.cfg.mov], ['Sale Mix', '%LY2W trong Sale Mix FC', L.cfg.lyWeight], ['Chia ngày', '%Tăng rau ăn lá T6/T7/CN', L.cfg.wkUp != null ? L.cfg.wkUp : 15]].forEach((c, i) => { put(2 + i, 27, c[0]); put(2 + i, 28, c[1]); put(2 + i, 29, c[2]); });
       sh['2. Lịch về hàng'] = a; }
     if (MS.danhmuc && fam) { const D = MS.danhmuc; const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null, o = res && res.dmN ? res.dmN[i] : null;
@@ -1468,7 +1470,7 @@ async function onSaleFile(file){
 }
 function applyMasters(masters,log,only){
   if(masters&&masters.phannhom)delete masters.phannhom;
-  const got=[];if(masters.hub&&!only&&CH&&MS.lichve){MS.lichve.cfg.hub=masters.hub;META.lichve.dirty=true;got.push('HUB')}if(masters.ncc&&!only&&CH&&MS.lichve){MS.lichve.cfg.ncc=masters.ncc;META.lichve.dirty=true;got.push('NCC × tỉnh')}for(const m of MASTERS){if(only&&only!==m)continue;if(masters[m]){if(m==='lichve'&&MS.lichve){const o=MS.lichve,nw=masters[m];nw.cfg=CH?Object.assign({},o.cfg):Object.assign({},o.cfg,nw.cfg);if(!nw.growthFilled){['gSku','gSt','bSku','bSt'].forEach(k=>{if(o[k])nw[k]=o[k]});got.push('(giữ nguyên 2 bảng Growth đang dùng vì file để trống)')}}MS[m]=masters[m];META[m].src='import';META[m].dirty=true;got.push(LABEL[m])}}
+  const got=[];if(masters.hub&&!only&&CH&&MS.lichve){MS.lichve.cfg.hub=masters.hub;META.lichve.dirty=true;got.push('HUB')}if(masters.ncc&&!only&&CH&&MS.lichve){const old=new Map((MS.lichve.cfg.ncc||[]).map(x=>[x.name,x]));MS.lichve.cfg.ncc=masters.ncc.map(x=>Object.assign({},old.get(x.name)||{},x));META.lichve.dirty=true;got.push('NCC × tỉnh')}for(const m of MASTERS){if(only&&only!==m)continue;if(masters[m]){if(m==='lichve'&&MS.lichve){const o=MS.lichve,nw=masters[m];nw.cfg=CH?Object.assign({},o.cfg):Object.assign({},o.cfg,nw.cfg);if(!nw.growthFilled){['gSku','gSt','bSku','bSt'].forEach(k=>{if(o[k])nw[k]=o[k]});got.push('(giữ nguyên 2 bảng Growth đang dùng vì file để trống)')}}MS[m]=masters[m];META[m].src='import';META[m].dirty=true;got.push(LABEL[m])}}
   if(log)MLOG=log;if(!got.length){toast(only?'File không có sheet '+LABEL[only]+'.':'File không có sheet master nào.');return}
   toast('Đã nhập '+got.join(', ')+' — bấm "Lưu lên app" để lưu chung');renderSaveBar();recompute();
 }
