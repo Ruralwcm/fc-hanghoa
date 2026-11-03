@@ -1919,8 +1919,11 @@ const stamp=()=>new Date().toISOString().slice(0,10);
 $('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsx':'Template_Data_Sale.xlsx');
 // Lưu Data FC: toàn bộ dữ liệu đang thao tác (Sale + master + HUB/NCC + Data FC) thành 1 file Excel offline; mở lại bằng Import Sale
 $('#btnSaveWork')&&($('#btnSaveWork').onclick=()=>{try{const sh=E.mastersAoa(MS,RES,CH);const T=E.saleTemplateAoa(CH),rows=[...T];
-  if(SA&&SA.pairs){const P=SA.pairs,W=SA.stride||8;for(let i=0;i<P.length;i+=W){const st=P[i],a=P[i+1],huy=P[i+2],ton=P[i+3],sale=P[i+4],hly=P[i+5],sly=P[i+6],cg=P[i+7]||0;
-    rows.push(CH?[huy?st:null,huy?a:null,huy||null,null,st,a,ton,sale,null,cg?st:null,cg?a:null,cg||null]:[huy?st:null,huy?a:null,huy||null,null,st,a,ton,sale,null,hly?st:null,hly?a:null,hly||null,null,sly?st:null,sly?a:null,null,sly||null,null,cg?st:null,cg?a:null,cg||null])}}
+  if(SA&&SA.pairs){const P=SA.pairs,W=SA.stride||8,B={h:[],s:[],hy:[],sy:[],cg:[]};// mỗi khối dồn sát lên đầu cột của khối đó
+    for(let i=0;i<P.length;i+=W){const st=P[i],a=P[i+1],huy=P[i+2],ton=P[i+3],sale=P[i+4],hly=P[i+5],sly=P[i+6],cg=P[i+7]||0;
+      if(huy)B.h.push([st,a,huy]);if(ton||sale)B.s.push([st,a,ton,sale]);if(!CH&&hly)B.hy.push([st,a,hly]);if(!CH&&sly)B.sy.push([st,a,null,sly]);if(cg)B.cg.push([st,a,cg])}
+    const blk=CH?[[0,B.h],[4,B.s],[9,B.cg]]:[[0,B.h],[4,B.s],[9,B.hy],[13,B.sy],[18,B.cg]],Wd=CH?12:21,n=Math.max(...blk.map(x=>x[1].length));
+    for(let j=0;j<n;j++){const r=new Array(Wd).fill(null);blk.forEach(([c,L])=>{const x=L[j];if(x)x.forEach((v,k)=>r[c+k]=v)});rows.push(r)}}
   const out={'3. Data Sale':rows,...sh};if(RES&&RES.stores.length)out['5. Data FC']=E.dataFcAoa(RES,true);
   exportSheets(out,`Luu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsx`);toast('Đã lưu file offline — mở lại bằng nút Import ở mục Sale')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}});
 $('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsx`);
