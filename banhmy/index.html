@@ -672,14 +672,14 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
     const sSet = new Map(stores.map((r, i) => [r[0], i]));
-    const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map() };
+    const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map(), cg: { noQD: 0, noQDn: 0, notInDM: 0, noStore: 0 } };
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art);
-      if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; issues.unmappedArt.set(art, u); continue; }
-      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
-      const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0 }; u.kg += P[i + 4] * f; issues.notInDM.set(w, u); continue; }
+    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art); const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+      if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
+      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
+      const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
       let inner = agg.get(st); if (!inner) agg.set(st, inner = new Map()); let v = inner.get(w); if (!v) inner.set(w, v = [0, 0, 0, 0, 0, 0]);
       for (let j = 0; j < SW - 2; j++) v[j] += P[i + 2 + j] * f; }
     // 2) Danh mục I–O: tổng theo SKU trên các CH trong phạm vi
@@ -707,7 +707,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       const inner = agg.get(code) || new Map();
       if (ni >= 0) DM.forEach((x, i) => { const o = dmN[i]; o.p[ni]++; const v = inner.get(x.wec); if (v) { o.s[ni] += v[2] / 2; o.h[ni] += v[0] / 2; if (v[2] > 0) o.c[ni]++; } });
       let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni] || (cfg.minFloor && cfg.fcMin0 && (inner.get(DM[i].wec) || [0, 0, 0])[2] > 0));
-      S.flagCount = idx.length;
+      S.flagCount = idx.length; { const on = new Set(idx.map(i => DM[i].wec)); let off = 0, all = 0; for (const [w, v] of inner) { all += v[5] || 0; if (!on.has(w)) off += v[5] || 0; } S.cgAll = all; S.cgOff = off; }
       let sale = 0, huy = 0, ton = 0, saleLY = 0, mixSum = 0;
       const R = idx.map(i => { const x = DM[i], v = inner.get(x.wec) || [0, 0, 0, 0, 0, 0]; const r = { i, sku: x, sale1w: v[2] / 2, huy1w: v[0] / 2, ton: v[1], cg: v[5] || 0, saleLY1w: v[4] / 2, mixFC: dmCalc[i].mixFC };
         sale += r.sale1w; huy += r.huy1w; ton += r.ton; saleLY += r.saleLY1w; mixSum += r.mixFC; return r; });
@@ -1009,14 +1009,14 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const pnAll = new Set(MS.phannhom.rows.map(r => r[0]));
     const stores = MS.phannhom.rows.filter(r => (!opt.province || r[4] === opt.province) && (!selOn || opt.sel.has(r[0])));
     const sSet = new Map(stores.map((r, i) => [r[0], i]));
-    const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map() };
+    const issues = { unmappedArt: new Map(), notInDM: new Map(), saleNoStore: new Map(), cg: { noQD: 0, noQDn: 0, notInDM: 0, noStore: 0 } };
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art);
-      if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; issues.unmappedArt.set(art, u); continue; }
-      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); continue; }
-      const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0 }; u.kg += P[i + 4] * f; issues.notInDM.set(w, u); continue; }
+    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; const q = QD.get(art); const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+      if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
+      if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
+      const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
       let inner = agg.get(st); if (!inner) agg.set(st, inner = new Map()); let v = inner.get(w); if (!v) inner.set(w, v = [0, 0, 0, 0, 0, 0]);
       for (let j = 0; j < SW - 2; j++) v[j] += P[i + 2 + j] * f; }
     // 2) Danh mục I–O: tổng theo SKU trên các CH trong phạm vi
@@ -1044,7 +1044,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       const inner = agg.get(code) || new Map();
       if (ni >= 0) DM.forEach((x, i) => { const o = dmN[i]; o.p[ni]++; const v = inner.get(x.wec); if (v) { o.s[ni] += v[2] / 2; o.h[ni] += v[0] / 2; if (v[2] > 0) o.c[ni]++; } });
       let idx = ni < 0 ? [] : DM.map((x, i) => i).filter(i => DM[i].flags[ni] || (cfg.minFloor && cfg.fcMin0 && (inner.get(DM[i].wec) || [0, 0, 0])[2] > 0));
-      S.flagCount = idx.length;
+      S.flagCount = idx.length; { const on = new Set(idx.map(i => DM[i].wec)); let off = 0, all = 0; for (const [w, v] of inner) { all += v[5] || 0; if (!on.has(w)) off += v[5] || 0; } S.cgAll = all; S.cgOff = off; }
       let sale = 0, huy = 0, ton = 0, saleLY = 0, mixSum = 0;
       const R = idx.map(i => { const x = DM[i], v = inner.get(x.wec) || [0, 0, 0, 0, 0, 0]; const r = { i, sku: x, sale1w: v[2] / 2, huy1w: v[0] / 2, ton: v[1], cg: v[5] || 0, saleLY1w: v[4] / 2, mixFC: dmCalc[i].mixFC };
         sale += r.sale1w; huy += r.huy1w; ton += r.ton; saleLY += r.saleLY1w; mixSum += r.mixFC; return r; });
@@ -1513,7 +1513,9 @@ function renderSale(){
   const um=[...RES.issues.unmappedArt.values()],nd=[...RES.issues.notInDM.values()];
   {const f=$('#fnSale');if(f)f.textContent=SALEFILE}
   {let t=0,cg=0;RES.stores.forEach(st=>st.rows.forEach(r=>{t+=r.ton||0;cg+=r.cg||0}));const w=(c,x)=>c?`<b class="w">${x}</b>`:`<b>${x}</b>`,ndk=nd.reduce((a,x)=>a+x.kg,0);
-    $('#saleKpi').innerHTML=`<div>${SA?ni(SA.lines)+' dòng · ':''}Sale 1W <b>${nf(sale,0)} kg</b> (${ni(S.length)} CH) · Hủy 1W ${w(sale&&huy/sale>=0.4,pf(sale?huy/sale:0,1))} (${nf(huy,0)} kg)${CH?'':` · Sale LY2W/2 <b>${nf(ly,0)} kg</b> (${lyS} CH)`}</div><div>Tồn <b>${nf(t,0)} kg</b> · Chờ giao ${SA&&SA.hasCG?'<b>'+nf(cg,0)+' kg</b>':'<b class="w">—</b> (file chưa có khối)'} · Article chưa quy đổi ${w(um.length,ni(um.length))}${nd.length?` · Mã WEC ngoài danh mục <b class="w">${ni(nd.length)}</b> (${nf(ndk,1)} kg)`:''}</div>`}
+    $('#saleKpi').innerHTML=`<div>${SA?ni(SA.lines)+' dòng · ':''}Sale 1W <b>${nf(sale,0)} kg</b> (${ni(S.length)} CH) · Hủy 1W ${w(sale&&huy/sale>=0.4,pf(sale?huy/sale:0,1))} (${nf(huy,0)} kg)${CH?'':` · Sale LY2W/2 <b>${nf(ly,0)} kg</b> (${lyS} CH)`}</div><div>Tồn <b>${nf(t,0)} kg</b> · Chờ giao ${SA&&SA.hasCG?'<b>'+nf(cg,0)+' kg</b> (mã đang đặt)':'<b class="w">—</b> (file chưa có khối)'} · Article chưa quy đổi ${w(um.length,ni(um.length))}${nd.length?` · Mã WEC ngoài danh mục <b class="w">${ni(nd.length)}</b> (${nf(ndk,1)} kg)`:''}</div>`}
+  {const C=RES.issues.cg||{},off=S.reduce((a,x)=>a+(x.cgOff||0),0),el=$('#saleKpi');if(el&&SA&&SA.hasCG&&(off>0.05||C.notInDM>0.05||C.noQD>0)){const top=S.filter(x=>x.cgOff>0.05).sort((a,b)=>b.cgOff-a.cgOff).slice(0,5).map(x=>esc(x.code)+' '+nf(x.cgOff,1)).join(', ');
+    el.insertAdjacentHTML('beforeend',`<div class="w">Chờ giao không trừ vào FC: <b>${nf(off,1)} kg</b> mã có trong danh mục nhưng CH không đặt (nhóm N chưa bật)${top?' — nhiều nhất: '+top:''}${C.notInDM>0.05?` · <b>${nf(C.notInDM,1)} kg</b> Mã WEC ngoài danh mục`:''}${C.noQD?` · <b>${nf(C.noQD,1)}</b> (đơn vị gốc, ${ni(C.noQDn)} dòng) Article chưa quy đổi KG`:''}</div>`)}}
   $('#log-sale').innerHTML=[...SALELOG,...MLOG].filter(l=>l.lvl!=='ok').map(l=>`<div class="${l.lvl}">${l.lvl==='ok'?'✓':'!'} ${esc(l.msg)}</div>`).join('')+([...RES.issues.saleNoStore.keys()].length?`<div class="warn">! CH có bán nhưng không có trong Phân nhóm: ${esc([...RES.issues.saleNoStore.keys()].join(', '))}</div>`:'');
   $('#tUnmap').innerHTML='<tr><th>Article</th><th>Tên</th><th class="n">SL bán L2W</th></tr>'+(um.sort((a,b)=>b.qty-a.qty).slice(0,200).map(x=>`<tr><td class="mono">${esc(x.art)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.qty,1)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
   $('#tNotDM').innerHTML='<tr><th>Mã WEC</th><th>Tên</th><th class="n">KG bán L2W</th></tr>'+(nd.sort((a,b)=>b.kg-a.kg).map(x=>`<tr><td class="mono">${esc(x.wec)}</td><td>${esc(x.name)}</td><td class="n">${nf(x.kg,2)}</td></tr>`).join('')||'<tr><td colspan="3">Không có.</td></tr>');
@@ -1682,7 +1684,7 @@ function renderStoresTbl(){
   STF.forEach(([id,k,all])=>{const o=[...new Set(RES.stores.filter(s=>pass(s,k)).map(s=>s[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'vi'));$('#'+id).innerHTML=`<option value="">${all}</option>`+o.map(x=>`<option ${x===v[k]?'selected':''}>${esc(x)}</option>`).join('')});
   const q=$('#qSt').value.trim().toLowerCase(),L0=RES.stores.filter(s=>pass(s)&&(!XF.grp||s.rows.some(r=>r.sku.grp===XF.grp))&&(!XF.__ncc||s.__ncc===XF.__ncc)&&(!q||(s.code+' '+s.name).toLowerCase().includes(q)));
   GET['#tSt']=[x=>x.code,x=>x.N,x=>x.lich,x=>x.n,x=>x.sale1w,x=>x.wStore,x=>x.gStore,x=>x.ton||0,x=>x.__cg||0,x=>x.totalFC,x=>x.totalFC-x.sale1w,x=>x.sale1w?x.totalFC/x.sale1w:null,x=>x.usedDays.length,x=>({thua:0,du:1,thieu:2})[x.__stt]];const L=sortArr('#tSt',L0);
-  $('#tSt').innerHTML='<tr><th>CH</th><th>Nhóm</th><th>Lịch giao</th><th class="n">SKU</th><th class="n">Sale 1W</th><th class="n">%Hủy</th><th class="n">Growth</th><th class="n">Tồn kg</th><th class="n">Chờ giao kg</th><th class="n">Total FC KG</th><th class="n">SL vượt (+/-) KG</th><th class="n">FC/Sale</th><th>Lần giao (kg)</th><th>Cảnh báo</th></tr>'+L.slice(st.stPage*PG,(st.stPage+1)*PG).map(s=>`<tr class="click" data-store="${esc(s.code)}"><td><b>${esc(s.code)}</b> <span style="color:var(--muted)">${esc(s.name.replace(/^WM\+ /,''))}</span></td><td>${esc(s.N)}</td><td class="mono">${esc(s.lich)}</td><td class="n">${s.n}${s.flagCount&&s.flagCount!==s.n?' / '+s.flagCount:''}</td><td class="n">${nf(s.sale1w,1)}</td><td class="n">${pf(s.wStore)}</td><td class="n">${pf(s.gStore)}</td><td class="n">${nf(s.ton||0,1)}</td><td class="n">${s.__cg?nf(s.__cg,1):'·'}</td><td class="n"><b>${nf(s.totalFC,1)}</b></td><td class="n">${sgn(s.totalFC-s.sale1w,1)}</td><td class="n" style="color:${s.sale1w&&s.totalFC/s.sale1w>1.5?'var(--crit)':'inherit'}">${s.sale1w?nf(s.totalFC/s.sale1w,2):'—'}</td><td class="mono" style="font-size:12px">${s.usedDays.map(d=>E.DAYVN[d]+' '+nf(s.dayKg[d],1)).join(' · ')}</td><td title="(FC ${nf(s.totalFC,1)} + Tồn dự kiến ${nf(supplyOf(s)-s.totalFC,1)}) / Sale 1W ${nf(s.sale1w,1)} = ${s.sale1w?nf(supplyOf(s)/s.sale1w,2):'—'}">${sttPill(s.__stt)}</td></tr>`).join('');
+  $('#tSt').innerHTML='<tr><th>CH</th><th>Nhóm</th><th>Lịch giao</th><th class="n">SKU</th><th class="n">Sale 1W</th><th class="n">%Hủy</th><th class="n">Growth</th><th class="n">Tồn kg</th><th class="n">Chờ giao kg</th><th class="n">Total FC KG</th><th class="n">SL vượt (+/-) KG</th><th class="n">FC/Sale</th><th>Lần giao (kg)</th><th>Cảnh báo</th></tr>'+L.slice(st.stPage*PG,(st.stPage+1)*PG).map(s=>`<tr class="click" data-store="${esc(s.code)}"><td><b>${esc(s.code)}</b> <span style="color:var(--muted)">${esc(s.name.replace(/^WM\+ /,''))}</span></td><td>${esc(s.N)}</td><td class="mono">${esc(s.lich)}</td><td class="n">${s.n}${s.flagCount&&s.flagCount!==s.n?' / '+s.flagCount:''}</td><td class="n">${nf(s.sale1w,1)}</td><td class="n">${pf(s.wStore)}</td><td class="n">${pf(s.gStore)}</td><td class="n">${nf(s.ton||0,1)}</td><td class="n" title="Chờ giao trong file: ${nf(s.cgAll||0,1)} kg · trừ vào FC (mã đang đặt): ${nf(s.__cg||0,1)} kg · mã CH không đặt: ${nf(s.cgOff||0,1)} kg">${s.__cg?nf(s.__cg,1):'·'}${s.cgOff>0.05?` <span class="w" style="font-size:.85em">+${nf(s.cgOff,1)}</span>`:''}</td><td class="n"><b>${nf(s.totalFC,1)}</b></td><td class="n">${sgn(s.totalFC-s.sale1w,1)}</td><td class="n" style="color:${s.sale1w&&s.totalFC/s.sale1w>1.5?'var(--crit)':'inherit'}">${s.sale1w?nf(s.totalFC/s.sale1w,2):'—'}</td><td class="mono" style="font-size:12px">${s.usedDays.map(d=>E.DAYVN[d]+' '+nf(s.dayKg[d],1)).join(' · ')}</td><td title="(FC ${nf(s.totalFC,1)} + Tồn dự kiến ${nf(supplyOf(s)-s.totalFC,1)}) / Sale 1W ${nf(s.sale1w,1)} = ${s.sale1w?nf(supplyOf(s)/s.sale1w,2):'—'}">${sttPill(s.__stt)}</td></tr>`).join('');
   markSort('#tSt');pager('#pgSt',L.length,st.stPage,p=>{st.stPage=p;renderStoresTbl()});
 }
 $('#qSt').addEventListener('input',()=>{st.stPage=0;renderStoresTbl()});STF.forEach(([id])=>$('#'+id).addEventListener('change',()=>{st.stPage=0;renderStoresTbl()}));
