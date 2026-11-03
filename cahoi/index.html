@@ -444,7 +444,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <label class="f">Cảnh báo FC lệch bán từ<input type="number" step="0.1" data-set="rDev"></label>
         <label class="f">CH Thừa khi (FC + Tồn dự kiến)/Sale trên (%)<input type="number" step="5" min="0" data-cfg="thuaPct"></label>
         <label class="f">CH Thiếu khi (FC + Tồn dự kiến)/Sale dưới (%)<input type="number" step="5" min="0" data-cfg="thieuPct"></label>
-        <label data-only="rcq" class="f" title="Min MOV SKUs per week: mã Trừ Tồn CG ≠ 1 được nâng lên tối thiểu số QC này mỗi tuần (mặc định 2; 0 = không áp dụng)">Min MOV SKUs per week (QC/tuần · mã không trừ tồn)<input type="number" step="1" min="0" data-cfg="wkQc"></label>
+        <label data-only="rcq" class="f" title="Min MOV SKUs per week: mã Trừ Tồn CG ≠ 1 được nâng lên tối thiểu (số này × Min) mỗi tuần, tức số lần giao đủ Min (mặc định 2; 0 = không áp dụng)">Min MOV SKUs per week (số lần Min/tuần · mã không trừ tồn)<input type="number" step="1" min="0" data-cfg="wkQc"></label>
         <label data-only="rcq" class="f">Số ngày từ chạy FC đến chuyến giao đầu<input type="number" step="1" min="0" data-cfg="leadDays"></label>
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="useStock"> Áp dụng cột "Trừ Tồn CG" (mã = 1: FC trừ Tồn + Chờ giao)</label>
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="movRaise"> Tổng tuần dưới MOV: gộp 1 lần giao và nâng lên đủ MOV</label>
@@ -738,8 +738,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
           if (!(mn > 0)) { q = cfg.fcMin0 ? Math.max(0, Math.round(units / qc + 1e-9) * qc) : 0; r.qRaw = q; r.qLo = 0; r.qCap = Infinity; } else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         // Số QC tối thiểu/tuần cho mã "Không trừ tồn" (Trừ Tồn CG ≠ 1): bảo đảm rau về đủ phủ các ngày trong tuần (shelf life)
-        //   sàn = đúng mức khai báo ở Cấu hình FC (wkQc QC/tuần); để trống / 0 = không áp dụng
-        if (cfg.wkQcOn && !cfg.minFloor && Number(x.block) !== 1 && Number(cfg.wkQc) > 0) { const needQ = Math.round(Number(cfg.wkQc)), lo = needQ * qc; if (q < lo - 1e-9) { r.wkUp = (lo - q) * qd; r.wkQ = needQ; q = lo; } }
+        //   Min MOV SKUs per week = số lần Min/tuần (mặc định 2): sàn = wkQc × Min mỗi lần (Min làm tròn lên theo QC; Min trống = 1 QC); 0 = không áp dụng
+        if (cfg.wkQcOn && !cfg.minFloor && Number(x.block) !== 1 && Number(cfg.wkQc) > 0) { const perQ = mn > 0 ? Math.max(1, Math.ceil(mn / qc - 1e-9)) : 1, needQ = Math.round(Number(cfg.wkQc)) * perQ, lo = needQ * qc; if (q < lo - 1e-9) { r.wkUp = (lo - q) * qd; r.wkQ = needQ; q = lo; } }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
       // 4) chia ngày theo tuyến giao, bảo đảm MOV/lần giao
@@ -790,7 +790,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       // cảnh báo dòng
       for (const r of R) { r.flags = [];
         if (r.cfg.length) r.flags.push(['CFG', 'crit', 'Danh mục thiếu: ' + r.cfg.join(', ')]);
-        if (r.wkUp) r.flags.push(['WK_QC', 'med', `Min MOV SKUs per week: nâng lên ${r.wkQ} QC/tuần (+${r.wkUp.toFixed(2)} kg) — mã không trừ tồn`]);
+        if (r.wkUp) r.flags.push(['WK_QC', 'med', `Min MOV SKUs per week: nâng lên ${cfg.wkQc} × Min = ${r.wkQ} QC/tuần (+${r.wkUp.toFixed(2)} kg) — mã không trừ tồn`]);
         if (r.hsdUp) r.flags.push(['HSD_UP', 'med', `HSD ${r.sku.hsd} ngày: tăng ${r.hsdUp.toFixed(2)} kg để giao đủ ${hk(r)} lần/tuần`]);
         if (r.hsdLow) r.flags.push(['HSD_LOW', 'high', `HSD ${r.sku.hsd} ngày cần ${r.hsdLow} lần giao/tuần nhưng SL chỉ đủ ${Math.round(r.pcs / (r.sku.qc || 1))} lần`]);
         if (r.waste >= cfg.rWaste && r.sale1w > 0) r.flags.push(['WASTE', 'high', `%Hủy ${(r.waste * 100).toFixed(0)}% — growth ${(r.growth * 100).toFixed(0)}%`]);
@@ -1083,8 +1083,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
           if (!(mn > 0)) { q = cfg.fcMin0 ? Math.max(0, Math.round(units / qc + 1e-9) * qc) : 0; r.qRaw = q; r.qLo = 0; r.qCap = Infinity; } else { const lo = Math.ceil(mn / qd / qc - 1e-9) * qc, cap = cfg.capX > 0 ? Math.max(lo, Math.floor(cfg.capX * mn / qd / qc + 1e-9) * qc) : Infinity; r.qRaw = Math.round(units / qc + 1e-9) * qc; r.qLo = lo; r.qCap = cap; q = Math.min(Math.max(r.qRaw, lo), cap); r.capped = q === cap && r.qRaw > cap; r.floored = q === lo && r.qRaw < lo; }
         } else { q = Math.round(units / qc + 1e-9) * qc; if (r.need > 0 && q < mn - 1e-9) q = Math.ceil(mn / qc - 1e-9) * qc; if (r.need <= 0) q = 0; }
         // Số QC tối thiểu/tuần cho mã "Không trừ tồn" (Trừ Tồn CG ≠ 1): bảo đảm rau về đủ phủ các ngày trong tuần (shelf life)
-        //   sàn = đúng mức khai báo ở Cấu hình FC (wkQc QC/tuần); để trống / 0 = không áp dụng
-        if (cfg.wkQcOn && !cfg.minFloor && Number(x.block) !== 1 && Number(cfg.wkQc) > 0) { const needQ = Math.round(Number(cfg.wkQc)), lo = needQ * qc; if (q < lo - 1e-9) { r.wkUp = (lo - q) * qd; r.wkQ = needQ; q = lo; } }
+        //   Min MOV SKUs per week = số lần Min/tuần (mặc định 2): sàn = wkQc × Min mỗi lần (Min làm tròn lên theo QC; Min trống = 1 QC); 0 = không áp dụng
+        if (cfg.wkQcOn && !cfg.minFloor && Number(x.block) !== 1 && Number(cfg.wkQc) > 0) { const perQ = mn > 0 ? Math.max(1, Math.ceil(mn / qc - 1e-9)) : 1, needQ = Math.round(Number(cfg.wkQc)) * perQ, lo = needQ * qc; if (q < lo - 1e-9) { r.wkUp = (lo - q) * qd; r.wkQ = needQ; q = lo; } }
         r.pcs = +q.toFixed(6); r.kg = r.pcs * qd; r.days = [0, 0, 0, 0, 0, 0, 0];
       }
       // 4) chia ngày theo tuyến giao, bảo đảm MOV/lần giao
@@ -1135,7 +1135,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
       // cảnh báo dòng
       for (const r of R) { r.flags = [];
         if (r.cfg.length) r.flags.push(['CFG', 'crit', 'Danh mục thiếu: ' + r.cfg.join(', ')]);
-        if (r.wkUp) r.flags.push(['WK_QC', 'med', `Min MOV SKUs per week: nâng lên ${r.wkQ} QC/tuần (+${r.wkUp.toFixed(2)} kg) — mã không trừ tồn`]);
+        if (r.wkUp) r.flags.push(['WK_QC', 'med', `Min MOV SKUs per week: nâng lên ${cfg.wkQc} × Min = ${r.wkQ} QC/tuần (+${r.wkUp.toFixed(2)} kg) — mã không trừ tồn`]);
         if (r.hsdUp) r.flags.push(['HSD_UP', 'med', `HSD ${r.sku.hsd} ngày: tăng ${r.hsdUp.toFixed(2)} kg để giao đủ ${hk(r)} lần/tuần`]);
         if (r.hsdLow) r.flags.push(['HSD_LOW', 'high', `HSD ${r.sku.hsd} ngày cần ${r.hsdLow} lần giao/tuần nhưng SL chỉ đủ ${Math.round(r.pcs / (r.sku.qc || 1))} lần`]);
         if (r.waste >= cfg.rWaste && r.sale1w > 0) r.flags.push(['WASTE', 'high', `%Hủy ${(r.waste * 100).toFixed(0)}% — growth ${(r.growth * 100).toFixed(0)}%`]);
@@ -1373,7 +1373,7 @@ const FLAG={
   S_MOVDAYS:['med','Giảm số lần giao','Để mỗi lần giao ≥ MOV'],
   S_HSD:['crit','Lịch không đủ cho HSD','Lịch tuyến ít ngày hơn số lần giao HSD yêu cầu'],
   S_HSDUP:['med','Tăng lần giao theo HSD','Mã HSD ngắn cần giao nhiều lần hơn lịch phân nhóm'],
-  WK_QC:['med','Min MOV SKUs per week','Mã không trừ tồn được nâng lên Min MOV SKUs per week (QC/tuần, Cấu hình FC) để rau về đủ các ngày giao'],
+  WK_QC:['med','Min MOV SKUs per week','Mã không trừ tồn được nâng lên Min MOV SKUs per week (số lần Min/tuần, Cấu hình FC) để rau về đủ các ngày giao'],
   HSD_UP:['med','Tăng SL theo HSD','Mã bán tốt, hủy thấp được tăng (trong Lock Max) để giao đủ lần theo HSD'],
   HSD_LOW:['high','SL không đủ lần giao HSD','SL FC ít hơn số lần giao HSD yêu cầu'],
   S_FREQUP:['med','Tăng tần suất giao','FC đủ cho nhiều lần giao hơn lịch phân nhóm → giao thêm ngày trong lịch tuyến'],
