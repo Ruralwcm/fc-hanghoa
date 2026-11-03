@@ -447,7 +447,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <label data-only="rcq" class="f">Số ngày từ chạy FC đến chuyến giao đầu<input type="number" step="1" min="0" data-cfg="leadDays"></label>
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="useStock"> Áp dụng cột "Trừ Tồn CG" (mã = 1: FC trừ Tồn + Chờ giao)</label>
         <label data-only="rcq" class="chk"><input type="checkbox" data-set="movRaise"> Tổng tuần dưới MOV: gộp 1 lần giao và nâng lên đủ MOV</label>
-        <label data-only="rcq" class="chk" title="Mỗi mã chia đều ra các ngày giao (mỗi lần ≥ 1 gói QC), ngày cách đều nhau trong tuần → độ phủ mã/tuần lớn nhất. Bật thì bỏ qua &quot;Min áp cho mỗi lần giao&quot;."><input type="checkbox" data-set="maxCover"> Phủ rau tối đa: căn đều mỗi mã ra các ngày về (mỗi lần ≥ 1 QC)</label>
+        <label data-only="rcq" class="chk" title="Mỗi mã chia ra nhiều ngày nhất mà mỗi lần giao vẫn ≥ Min (làm tròn theo QC); các ngày cách đều nhau trong tuần, SL mỗi lần chia đều."><input type="checkbox" data-set="maxCover"> Phủ rau tối đa: căn đều mỗi mã ra các ngày về (mỗi lần vẫn ≥ Min)</label>
         <label class="chk"><input type="checkbox" data-set="minPerDelivery"> Min áp cho mỗi lần giao (SKU nhỏ dồn vào ít lần giao hơn)</label>
         <label class="chk" title="Khi FC của CH đủ cho nhiều lần giao hơn lịch giao theo phân nhóm (mỗi lần vẫn đủ MOV/MOQ và Min), giao thêm các ngày có trong lịch tuyến (lịch về của tỉnh)"><input type="checkbox" data-set="maxFreq"> Tối đa tần suất giao hàng (giao thêm ngày trong lịch tuyến khi FC đủ)</label>
       </div></div></details>
@@ -468,7 +468,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div><span><b>Total FC KG mục tiêu</b> = Σ Sale 1W các SKU của CH × (1 + Growth[N, %hủy CH]) khi bảng Growth phân nhóm đang bật; tắt thì Growth = 0 (mặc định tắt).</span></div>
         <div><span><b>SL FC (KG)</b> = Sale 1W × (1 + Growth[nhóm SP, %hủy SKU]) (tắt bảng này thì Growth = 0), kẹp trong <span data-k="minPct"></span>%–<span data-k="maxPct"></span>% của Sale Mix × Total FC mục tiêu.</span></div>
         <div><span><b>SL FC (Pcs)</b> = KG ÷ Quy đổi, làm tròn theo bội số QC (≥ 0,5 QC thì lên), tối thiểu bằng Min. KG cuối = Pcs × Quy đổi. Total FC KG (cột H) = Σ KG cuối.</span></div>
-        <div><span><b>Phủ rau tối đa</b> (bật mặc định): mỗi mã chia ra nhiều ngày nhất có thể — số ngày = min(số lần giao, số gói QC), mỗi lần ≥ 1 gói; các ngày cách đều nhau trong tuần (vd 2 lần trên lịch T2/T4/T6/CN → T2 + T6), chọn độ lệch để cân tải nhóm hàng giữa các ngày; rau ăn lá dồn thêm T6/T7/CN theo %.</span></div>
+        <div><span><b>Phủ rau tối đa</b> (bật mặc định): mỗi mã chia ra nhiều ngày nhất có thể mà mỗi lần giao vẫn ≥ Min — số ngày = min(số lần giao, SL tuần ÷ Min mỗi lần); các ngày cách đều nhau trong tuần (vd 2 lần trên lịch T2/T4/T6/CN → T2 + T6), chọn độ lệch để cân tải nhóm hàng giữa các ngày; rau ăn lá dồn thêm T6/T7/CN theo %.</span></div>
         <div><span><b>Chia ngày</b>: chia đều theo các ngày trong lịch giao; mỗi lần giao của CH phải có tối thiểu <span data-k="mov"></span> QC (gói/kiện theo quy cách, cộng tất cả SKU); nếu tổng QC cả tuần ÷ số lần giao chưa đủ thì bớt lần giao (giữ các ngày cách đều). Mỗi SKU chia theo bội số QC, mỗi lần ≥ Min. Mọi nhóm hàng chia đều qua tất cả các lần giao để mỗi đợt về đều có đủ các nhóm (SKU nhỏ xoay vòng sang ngày nhóm đó còn thiếu). Riêng Rau ăn lá và Rau gia vị ăn lá: mỗi lần giao T6/T7/CN nhiều hơn <span data-k="wkUp"></span>% so với ngày thường.</span></div>
       </div></div>
 <div><h4 style="margin:8px 0 4px">Điểm cần lưu ý</h4><ol class="issues" id="issues"></ol></div></div></div></details>
@@ -763,7 +763,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         for (const r of order) { const qc = r.sku.qc || 1, qd = r.sku.qd || 1; let packs = Math.round(r.pcs / qc); const kH = Math.min(hk(r), nEff);
           // HSD: số gói chưa đủ giao mỗi kỳ HSD → tăng (trong trần Lock Max) cho mã bán tốt, hủy thấp; còn lại cảnh báo
           if (kH > 1 && packs < kH) { const capP = isFinite(r.qCap) ? Math.round(r.qCap / qc) : Infinity; const ok = r.sale1w > 0 && (r.waste || 0) < cfg.rWaste; const np = ok ? Math.min(kH, capP) : packs;
-            if (np > packs) { r.hsdUp = (np - packs) * qc * qd; packs = np; r.pcs = +(packs * qc).toFixed(6); r.kg = r.pcs * qd; } if (packs < kH) r.hsdLow = kH; } const mEff = r.minEff != null ? r.minEff : r.sku.min; const cov = cfg.maxCover && !cfg.minFloor && kH <= 1; const per = !cov && cfg.minPerDelivery && mEff ? Math.max(1, Math.ceil(mEff / qc - 1e-9)) : 1;
+            if (np > packs) { r.hsdUp = (np - packs) * qc * qd; packs = np; r.pcs = +(packs * qc).toFixed(6); r.kg = r.pcs * qd; } if (packs < kH) r.hsdLow = kH; } const mEff = r.minEff != null ? r.minEff : r.sku.min; const cov = cfg.maxCover && !cfg.minFloor && kH <= 1; const per = cfg.minPerDelivery && mEff ? Math.max(1, Math.ceil(mEff / qc - 1e-9)) : 1;
           // mỗi nhóm hàng cân đều theo các lần giao (đủ nhóm ở mọi lần giao); nhóm ăn lá: T6/T7/CN nặng hơn wkUp%
           const grp = r.sku.grp || ''; const lf = LEAFY.test(grp) && cfg.wkUp > 0; const wt = d => lf && WKND.has(d) ? 1 + cfg.wkUp / 100 : 1; const u = qc * qd;
           const GL = gMap(gl, grp), GC = gMap(gc, grp); const big = load.size ? Math.max(...load.values()) + 1 : 1;
@@ -1104,7 +1104,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         for (const r of order) { const qc = r.sku.qc || 1, qd = r.sku.qd || 1; let packs = Math.round(r.pcs / qc); const kH = Math.min(hk(r), nEff);
           // HSD: số gói chưa đủ giao mỗi kỳ HSD → tăng (trong trần Lock Max) cho mã bán tốt, hủy thấp; còn lại cảnh báo
           if (kH > 1 && packs < kH) { const capP = isFinite(r.qCap) ? Math.round(r.qCap / qc) : Infinity; const ok = r.sale1w > 0 && (r.waste || 0) < cfg.rWaste; const np = ok ? Math.min(kH, capP) : packs;
-            if (np > packs) { r.hsdUp = (np - packs) * qc * qd; packs = np; r.pcs = +(packs * qc).toFixed(6); r.kg = r.pcs * qd; } if (packs < kH) r.hsdLow = kH; } const mEff = r.minEff != null ? r.minEff : r.sku.min; const cov = cfg.maxCover && !cfg.minFloor && kH <= 1; const per = !cov && cfg.minPerDelivery && mEff ? Math.max(1, Math.ceil(mEff / qc - 1e-9)) : 1;
+            if (np > packs) { r.hsdUp = (np - packs) * qc * qd; packs = np; r.pcs = +(packs * qc).toFixed(6); r.kg = r.pcs * qd; } if (packs < kH) r.hsdLow = kH; } const mEff = r.minEff != null ? r.minEff : r.sku.min; const cov = cfg.maxCover && !cfg.minFloor && kH <= 1; const per = cfg.minPerDelivery && mEff ? Math.max(1, Math.ceil(mEff / qc - 1e-9)) : 1;
           // mỗi nhóm hàng cân đều theo các lần giao (đủ nhóm ở mọi lần giao); nhóm ăn lá: T6/T7/CN nặng hơn wkUp%
           const grp = r.sku.grp || ''; const lf = LEAFY.test(grp) && cfg.wkUp > 0; const wt = d => lf && WKND.has(d) ? 1 + cfg.wkUp / 100 : 1; const u = qc * qd;
           const GL = gMap(gl, grp), GC = gMap(gc, grp); const big = load.size ? Math.max(...load.values()) + 1 : 1;
