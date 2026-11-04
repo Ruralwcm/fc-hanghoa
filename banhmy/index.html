@@ -655,6 +655,12 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { pairs, stride: 8, hasCG: cgCol >= 0, stores: m.size, lines: rows.length - 2 };
   }
 
+  // Chuẩn hóa Data Sale về 1 dạng duy nhất: stride 8 = [CH, Article, Hủy, Tồn, Sale, Hủy LY, Sale LY, Chờ giao]
+  //   dạng cũ (stride 7, không có Chờ giao, thiếu trường stride) → chèn Chờ giao = 0
+  function normSale(SA) { if (!SA || !Array.isArray(SA.pairs)) return SA; const W = SA.stride || 7; if (W === 8) return SA;
+    const P = SA.pairs, out = []; for (let i = 0; i + W <= P.length; i += W) { for (let j = 0; j < 7; j++) out.push(j < W ? P[i + j] : 0); out.push(0); }
+    return Object.assign({}, SA, { pairs: out, stride: 8, hasCG: false }); }
+
   // ================= TÍNH FC =================
   const band = (w, b) => { b = b || BANDS; let j = 0; for (let k = 0; k < b.length; k++) if (w >= b[k] - 1e-9) j = k; return j; };
   const hk = r => { const h = Number(r.sku.hsd); return h > 0 && h < 7 ? Math.ceil(7 / h) : 1; };
@@ -667,6 +673,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
   function compute(MS, SA, cfgIn, opt) {
+    SA = normSale(SA);
     opt = opt || {};
     const cfg = Object.assign(defaultCfg(), MS.lichve ? MS.lichve.cfg : {}, cfgIn || {});
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
@@ -680,7 +687,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+    const SW = 8; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
       if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
@@ -868,7 +875,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'Shrinkage Q.ty']], [13, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [18, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, k) => h1[c + k] = t));
     return [h0, h1];
   }
-  const api = { saleTemplateAoa, DAYS, DAYVN, NG, BANDS, defaultGrowth, defaultCfg, evenBands, linRow, parseMasters, parseQuydoi, parseLichve, parseDanhmuc, parsePhannhom, parseSale, compute, dataFcAoa, mastersAoa, processFile, exportXlsx, FC_COLS, band, daysOf, BAD_WEC };
+  const api = { normSale, saleTemplateAoa, DAYS, DAYVN, NG, BANDS, defaultGrowth, defaultCfg, evenBands, linRow, parseMasters, parseQuydoi, parseLichve, parseDanhmuc, parsePhannhom, parseSale, compute, dataFcAoa, mastersAoa, processFile, exportXlsx, FC_COLS, band, daysOf, BAD_WEC };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FC4 = api;
 })(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : globalThis));
 </script>
@@ -1000,6 +1007,12 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     return { pairs, stride: 8, hasCG: cgCol >= 0, stores: m.size, lines: rows.length - 2 };
   }
 
+  // Chuẩn hóa Data Sale về 1 dạng duy nhất: stride 8 = [CH, Article, Hủy, Tồn, Sale, Hủy LY, Sale LY, Chờ giao]
+  //   dạng cũ (stride 7, không có Chờ giao, thiếu trường stride) → chèn Chờ giao = 0
+  function normSale(SA) { if (!SA || !Array.isArray(SA.pairs)) return SA; const W = SA.stride || 7; if (W === 8) return SA;
+    const P = SA.pairs, out = []; for (let i = 0; i + W <= P.length; i += W) { for (let j = 0; j < 7; j++) out.push(j < W ? P[i + j] : 0); out.push(0); }
+    return Object.assign({}, SA, { pairs: out, stride: 8, hasCG: false }); }
+
   // ================= TÍNH FC =================
   const band = (w, b) => { b = b || BANDS; let j = 0; for (let k = 0; k < b.length; k++) if (w >= b[k] - 1e-9) j = k; return j; };
   const hk = r => { const h = Number(r.sku.hsd); return h > 0 && h < 7 ? Math.ceil(7 / h) : 1; };
@@ -1012,6 +1025,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   const LEAFY = /ăn lá/i, WKND = new Set([4, 5, 6]);
 
   function compute(MS, SA, cfgIn, opt) {
+    SA = normSale(SA);
     opt = opt || {};
     const cfg = Object.assign(defaultCfg(), MS.lichve ? MS.lichve.cfg : {}, cfgIn || {});
     const QD = new Map(); for (const r of MS.quydoi.rows) QD.set(r[0], r);
@@ -1025,7 +1039,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     // 1) gộp sale về CH × Mã WEC (KG)
     const agg = new Map(); // store -> Map(wec -> [huy, ton, sale, huyLY, saleLY])
     const P = SA ? SA.pairs : [];
-    const SW = (SA && SA.stride) || 7; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
+    const SW = 8; for (let i = 0; i < P.length; i += SW) { const st = P[i], art = P[i + 1]; let q = QD.get(art); if (!q && dIdx.has(art)) { const x = DM[dIdx.get(art)]; q = [art, x.name, x.dvt, art, x.name, x.dvt, x.qd || 1]; issues.wecDirect = (issues.wecDirect || 0) + 1; } /* mã là Mã WEC (vd khối Chờ giao xuất theo WEC): SL theo ĐVT WEC × quy đổi KG của danh mục */ const cgq = SW > 7 ? (P[i + 7] || 0) : 0;
       if (!q || BAD_WEC.has(q[3]) || q[6] == null) { const u = issues.unmappedArt.get(art) || { qty: 0, cg: 0, art, name: q ? q[1] : '' }; u.qty += P[i + 4]; u.cg = (u.cg || 0) + cgq; issues.unmappedArt.set(art, u); if (cgq && sSet.has(st)) { issues.cg.noQD += cgq; issues.cg.noQDn++; } continue; }
       if (!sSet.has(st)) { if (!opt.province && !pnAll.has(st)) { issues.saleNoStore.set(st, (issues.saleNoStore.get(st) || 0) + P[i + 4] * q[6]); issues.cg.noStore += cgq * q[6]; } continue; }
       const w = q[3], f = q[6]; if (!dIdx.has(w)) { const u = issues.notInDM.get(w) || { wec: w, name: q[4] || q[1], kg: 0, cg: 0 }; u.kg += P[i + 4] * f; u.cg += cgq * f; issues.cg.notInDM += cgq * f; issues.notInDM.set(w, u); continue; }
@@ -1213,7 +1227,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     [[0, ['Store', 'Article', 'Shrinkage Q.ty']], [4, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [9, ['Store', 'Article', 'Shrinkage Q.ty']], [13, ['Store', 'Article', 'Closing Quantity', 'Sales Quantity']], [18, ['Store', 'Article', 'SL giao']]].forEach(([c, a]) => a.forEach((t, k) => h1[c + k] = t));
     return [h0, h1];
   }
-  const api = { saleTemplateAoa, DAYS, DAYVN, NG, BANDS, defaultGrowth, defaultCfg, evenBands, linRow, parseMasters, parseQuydoi, parseLichve, parseDanhmuc, parsePhannhom, parseSale, compute, dataFcAoa, mastersAoa, processFile, exportXlsx, FC_COLS, band, daysOf, BAD_WEC };
+  const api = { normSale, saleTemplateAoa, DAYS, DAYVN, NG, BANDS, defaultGrowth, defaultCfg, evenBands, linRow, parseMasters, parseQuydoi, parseLichve, parseDanhmuc, parsePhannhom, parseSale, compute, dataFcAoa, mastersAoa, processFile, exportXlsx, FC_COLS, band, daysOf, BAD_WEC };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FC4 = api;
 })(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : globalThis));
 </script>
@@ -1381,7 +1395,7 @@ const FLAG={
 const SEVTXT={crit:'Nghiêm trọng',high:'Cao',med:'Trung bình'},SEVO={crit:0,high:1,med:2};
 
 const DEF=JSON.parse($('#defaultData').textContent);
-let MS=clone(DEF.MS),SA=DEF.SA,SALELOG=DEF.log.filter(l=>/Data Sale/.test(l.msg)),SALEFILE=DEF.file+' (mẫu)',MLOG=DEF.log.filter(l=>!/Data Sale/.test(l.msg));
+let MS=clone(DEF.MS),SA=E.normSale(DEF.SA),SALELOG=DEF.log.filter(l=>/Data Sale/.test(l.msg)),SALEFILE=DEF.file+' (mẫu)',MLOG=DEF.log.filter(l=>!/Data Sale/.test(l.msg));
 const META={};MASTERS.forEach(m=>META[m]={src:'default',savedAt:null,dirty:false,remote:null});
 let RES=null,ROWS=[],OPT={province:''},db=null,DL=null,PENDING=null;
 const st={qdPage:0,pnPage:0,stPage:0,aType:'',aPage:0,dtPage:0,skPage:0,fPage:0,open:null};
@@ -1481,7 +1495,7 @@ async function readFile(file){
 }
 async function onSaleFile(file){
   const p=await readFile(file);if(!p)return;
-  if(p.sale){SA=p.sale;SALEFILE=file.name;SALELOG=p.log.filter(l=>/Data Sale/.test(l.msg));{const f=$('#fnSale');if(f)f.textContent=file.name}}
+  if(p.sale){SA=E.normSale(p.sale);SALEFILE=file.name;SALELOG=p.log.filter(l=>/Data Sale/.test(l.msg));{const f=$('#fnSale');if(f)f.textContent=file.name}}
   else toast('File không có sheet "3. Data Sale".');
   if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});
   if(ms.length){PENDING={masters:p.masters,log:p.log.filter(l=>!/Data Sale/.test(l.msg)),file:file.name};
@@ -1919,7 +1933,7 @@ const stamp=()=>new Date().toISOString().slice(0,10);
 $('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsx':'Template_Data_Sale.xlsx');
 // Lưu Data FC: toàn bộ dữ liệu đang thao tác (Sale + master + HUB/NCC + Data FC) thành 1 file Excel offline; mở lại bằng Import Sale
 $('#btnSaveWork')&&($('#btnSaveWork').onclick=()=>{try{const sh=E.mastersAoa(MS,RES,CH);const T=E.saleTemplateAoa(CH),rows=[...T];
-  if(SA&&SA.pairs){const P=SA.pairs,W=SA.stride||8,B={h:[],s:[],hy:[],sy:[],cg:[]};// mỗi khối dồn sát lên đầu cột của khối đó
+  if(SA&&SA.pairs){const S8=E.normSale(SA),P=S8.pairs,W=8,B={h:[],s:[],hy:[],sy:[],cg:[]};// mỗi khối dồn sát lên đầu cột của khối đó
     for(let i=0;i<P.length;i+=W){const st=P[i],a=P[i+1],huy=P[i+2],ton=P[i+3],sale=P[i+4],hly=P[i+5],sly=P[i+6],cg=P[i+7]||0;
       if(huy)B.h.push([st,a,huy]);if(ton||sale)B.s.push([st,a,ton,sale]);if(!CH&&hly)B.hy.push([st,a,hly]);if(!CH&&sly)B.sy.push([st,a,null,sly]);if(cg)B.cg.push([st,a,cg])}
     const blk=CH?[[0,B.h],[4,B.s],[9,B.cg]]:[[0,B.h],[4,B.s],[9,B.hy],[13,B.sy],[18,B.cg]],Wd=CH?12:21,n=Math.max(...blk.map(x=>x[1].length));
@@ -1995,7 +2009,7 @@ function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHT
 }
 if(CH)chInit();
 route();initDb();
-window.__fc4={get RES(){return RES},get MS(){return MS},META,recompute,save,setSaleRows(rows,name){const log=[];SA=E.parseSale(rows,log);SALEFILE=name||'test';SALELOG=log;recompute()}};
+window.__fc4={get RES(){return RES},get MS(){return MS},META,recompute,save,setSaleRows(rows,name){const log=[];SA=E.normSale(E.parseSale(rows,log));SALEFILE=name||'test';SALELOG=log;recompute()}};
 })();
 </script>
 
