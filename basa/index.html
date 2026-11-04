@@ -1954,8 +1954,12 @@ const SG={id:'1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk',mch3:AC.mch3,all:tru
 function sgCsv(t){const rows=[];let row=[],cur='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c;continue}
   if(c==='"'){q=true;continue}if(c===','){row.push(cur);cur='';continue}if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;row.push(cur);cur='';if(row.length>1||row[0]!=='')rows.push(row);row=[];continue}cur+=c}
   row.push(cur);if(row.length>1||row[0]!=='')rows.push(row);return rows}
-async function sgGet(q){const u='https://docs.google.com/spreadsheets/d/'+SG.id+'/gviz/tq?tqx=out:csv&'+q;const go=async x=>{const r=await fetch(x,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.text()};
-  try{return sgCsv(await go(u))}catch(e){return sgCsv(await go('https://corsproxy.io/?url='+encodeURIComponent(u)))}}
+// Đọc sheet: ưu tiên /export?format=csv (giữ nguyên giá trị, mã CH dạng số + chữ đều đúng);
+// gviz tự đoán kiểu cột → cột lẫn mã số (2797) và mã chữ (2AB4) sẽ bị rỗng phần thiểu số, chỉ dùng dự phòng
+async function sgGet(q){const base='https://docs.google.com/spreadsheets/d/'+SG.id,ex=base+'/export?format=csv&'+q,gv=base+'/gviz/tq?tqx=out:csv&'+q;
+  const go=async x=>{const r=await fetch(x,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(/^\s*<(!doctype|html)/i.test(t))throw new Error('không phải CSV');return t};
+  for(const u of [ex,'https://corsproxy.io/?url='+encodeURIComponent(ex)]){try{return sgCsv(await go(u))}catch(e){}}
+  SG.gviz=true;try{return sgCsv(await go(gv))}catch(e){return sgCsv(await go('https://corsproxy.io/?url='+encodeURIComponent(gv)))}}
 async function syncPn(manual,all){
   try{if(manual)busy(true,'Đang đọc Storeslist + PhanNhomCH ('+SG.mch3+') từ Sheet gốc…');
     if(CH)ensureHub();const [st,pn,hb]=await Promise.all([sgGet('gid=164583655'),sgGet('gid=879484655'),Promise.resolve([])]);
