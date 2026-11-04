@@ -743,9 +743,10 @@ function renderSrc(){['params','mov'].forEach(k=>{const el=$('#src-'+k);if(!el)r
 
 // ---------- SHEET GỐC ----------
 async function fetchCSV(gid){
-  const u=`https://docs.google.com/spreadsheets/d/${PROD.sheet}/gviz/tq?tqx=out:csv&gid=${gid}`;
-  const go=async url=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),45000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}finally{clearTimeout(t)}};
-  try{return await go(u)}catch(e){try{return await go('https://corsproxy.io/?url='+encodeURIComponent(u))}catch(e2){throw e}}
+  // ưu tiên /export?format=csv (giữ nguyên giá trị); gviz tự đoán kiểu cột làm rỗng mã CH dạng chữ (2AB4) khi cột lẫn mã số → chỉ dự phòng
+  const base=`https://docs.google.com/spreadsheets/d/${PROD.sheet}`,ex=`${base}/export?format=csv&gid=${gid}`,gv=`${base}/gviz/tq?tqx=out:csv&gid=${gid}`;
+  const go=async url=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),45000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);const x=await r.text();if(/^\s*<(!doctype|html)/i.test(x))throw new Error('không phải CSV');return x}finally{clearTimeout(t)}};
+  let err;for(const u of [ex,'https://corsproxy.io/?url='+encodeURIComponent(ex),gv,'https://corsproxy.io/?url='+encodeURIComponent(gv)]){try{return await go(u)}catch(e){err=err||e}}throw err;
 }
 async function loadMasters(){
   const log=[];$('#mState').textContent='Đang đọc Sheet gốc…';$('#mState').className='pill';$('#mLog').innerHTML='<div>Đang đọc Storelist, SKU, Phân nhóm…</div>';
