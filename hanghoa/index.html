@@ -924,11 +924,11 @@ function renderFc(){const R=ST.R,rows=R?R.rows:[];
 ['#fGdv','#fTinh','#fNcc','#fMov','#fPos'].forEach(s=>$(s).addEventListener('change',()=>{UI.fPage=0;renderFc()}));$('#fQ').addEventListener('input',()=>{UI.fPage=0;renderFc()});
 
 // ---------- XUẤT ----------
-async function exportSheets(sheets,filename){
+async function exportSheets(sheets,filename){const fmt=/\.xlsb$/i.test(filename)?'xlsb':'xlsx';
   if(!await ensureX()){toast('Chưa tải được thư viện Excel');return}
   busy(true,'Đang tạo file Excel…');await tick();
   const wb=XLSX.utils.book_new();for(const n in sheets)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sheets[n]),n.slice(0,31));
-  const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});busy(false);
+  const blob=new Blob([XLSX.write(wb,{bookType:fmt,type:'array',compression:true})],{type:fmt==='xlsb'?'application/vnd.ms-excel.sheet.binary.macroEnabled.12':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});busy(false);
   if(DL){try{await DL.save({filename,data:blob});toast('Đã lưu file');return}catch(e){if(e&&e.code==='declined'){toast('Đã hủy tải file');return}}}
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Đã tải file');
 }
@@ -936,8 +936,8 @@ $('#btnSaveWork').onclick=()=>{try{const NG=H.NG,P=ST.params||{};const head=['M�
   const mv=[];(ST.mov||[]).forEach(x=>{mv.push([x.ncc,'Tất cả',x.allTinh||0,x.pctMinMOV]);Object.entries(x.tinhMOV||{}).forEach(([t,v])=>mv.push([x.ncc,t,v,x.pctMinMOV]))});
   const src=ST.recapSrc||[],n=Math.max(src.length,mv.length),rows=[head];for(let i=0;i<n;i++){const o=src[i],p=o?(P[o.maSP]||{}):{},m2=mv[i]||['','','',''];rows.push([...(o?[o.maSP,o.tenSP,o.dvt,p.qc||o.qc,o.giaMua,o.giaThuong,o.giaKM,o.dienGiai,o.tgKM,o.ncc]:['','','','','','','','','','']),'','',...m2,...(o?[...NG.map(g=>p[g]??null),p.coverDay??null,p.lockMax??null,p.plusStock??null,p.plusCG??null,p.growth??null]:[])])}
   const sale=[['Store','Article','Sales Quantity','Closing Quantity','Chờ giao']];if(ST.sale&&ST.sale.map)for(const [k,v] of ST.sale.map){const [s2,a]=k.split('|');sale.push([s2,a,v.ban,v.ton,v.cg])}
-  const sh={SKUs:rows,Sale:sale};if(ST.R&&ST.R.rows&&ST.R.rows.length)Object.assign(sh,H.exportAoa(ST.R,ST.recap,ST.mov));exportSheets(sh,`Luu_FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Đã lưu file offline — mở lại bằng nút Import')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}};
-$('#btnExport').onclick=()=>{if(!ST.R||!ST.R.rows.length){toast('Chưa có dữ liệu FC');return}exportSheets(H.exportAoa(ST.R,ST.recap,ST.mov),`FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsx`)};
+  const sh={SKUs:rows,Sale:sale};if(ST.R&&ST.R.rows&&ST.R.rows.length)Object.assign(sh,H.exportAoa(ST.R,ST.recap,ST.mov));exportSheets(sh,`Luu_FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsb`);toast('Đã lưu file offline — mở lại bằng nút Import')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}};
+$('#btnExport').onclick=()=>{if(!ST.R||!ST.R.rows.length){toast('Chưa có dữ liệu FC');return}exportSheets(H.exportAoa(ST.R,ST.recap,ST.mov),`FC_HangHoa_${new Date().toISOString().slice(0,10)}.xlsb`)};
 
 // ---------- 1 TRANG: section, cỡ chữ, tóm tắt ----------
 const OPENK='fchh_open';

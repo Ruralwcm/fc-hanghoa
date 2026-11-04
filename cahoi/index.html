@@ -843,8 +843,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         return [x.wec, x.name, x.dvt, x.qc, x.hsd != null ? x.hsd : null, x.gia != null ? x.gia : null, c ? r4(c.sale) : null, c ? r4(c.wasteSku) : null, ...NG.flatMap((g, j) => { const sl = o ? o.s[j] : 0, hy = o ? o.h[j] : 0, bq = o && o.p[j] ? sl / o.p[j] : 0; return [o ? r4(bq) : null, sl ? r4(hy / sl) : null, x.minN && x.minN[g] > 0 ? x.minN[g] : null]; })]; });
       sh['4. Danh mục'] = [['DANH MỤC · Min theo nhóm N (Min > 0 = xác nhận đặt hàng; Sale BQ/CH, %Hủy chỉ để tham khảo)'], ['Mã WEC', 'Tên SKU', 'ĐVT', 'QC (kg)', 'HSD (ngày)', 'Giá', 'Sale L2W', '%Hủy L2W', ...NG.flatMap(g => ['Sale BQ/CH ' + g, '%Hủy ' + g, 'Min ' + g])], ...rows]; }
     else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
-      const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
-      sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
+      const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
+      sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
     const NC = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.ncc; if (fam && NC && NC.length) sh['NCC'] = [['NCC', 'Tỉnh', 'MOD mỗi CH/ngày (trống = mặc định)'], ...NC.flatMap(x => (x.tinh || []).map(t => [x.name, t, x.movT && x.movT[t] != null ? x.movT[t] : (x.mov > 0 ? x.mov : null)]))];
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (fam || (HB && Object.keys(HB).length)) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB || {}).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
@@ -865,7 +865,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const sp = pick(book, SHEET.sale); if (sp) { const t = Date.now(); sale = parseSale(sp.rows, log); post({ type: 'timing', what: 'Gộp Data Sale', ms: Date.now() - t }); }
     post({ type: 'parsed', file: name, masters, sale, log, sheets: want });
   }
-  function exportXlsx(XLSX, sheets) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: 'xlsx', compression: true }); }
+  function exportXlsx(XLSX, sheets, fmt) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: fmt === 'xlsb' ? 'xlsb' : 'xlsx', compression: true }); }
 
   function saleTemplateAoa(noLY) {
     if (noLY) { const h0 = new Array(12).fill(null), h1 = new Array(12).fill(null); h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'CHỜ GIAO';
@@ -1195,8 +1195,8 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         return [x.wec, x.name, x.dvt, x.qc, x.hsd != null ? x.hsd : null, x.gia != null ? x.gia : null, c ? r4(c.sale) : null, c ? r4(c.wasteSku) : null, ...NG.flatMap((g, j) => { const sl = o ? o.s[j] : 0, hy = o ? o.h[j] : 0, bq = o && o.p[j] ? sl / o.p[j] : 0; return [o ? r4(bq) : null, sl ? r4(hy / sl) : null, x.minN && x.minN[g] > 0 ? x.minN[g] : null]; })]; });
       sh['4. Danh mục'] = [['DANH MỤC · Min theo nhóm N (Min > 0 = xác nhận đặt hàng; Sale BQ/CH, %Hủy chỉ để tham khảo)'], ['Mã WEC', 'Tên SKU', 'ĐVT', 'QC (kg)', 'HSD (ngày)', 'Giá', 'Sale L2W', '%Hủy L2W', ...NG.flatMap(g => ['Sale BQ/CH ' + g, '%Hủy ' + g, 'Min ' + g])], ...rows]; }
     else if (MS.danhmuc) { const D = MS.danhmuc; const hasMinN = D.skus.some(x => x.minN); const head = new Array(23).fill(null); head[0] = 'DANH MỤC & TỶ TRỌNG NHÓM RCQ ';
-      const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), c ? r4(c.mixFC) : null, ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
-      sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, 'Sale Mix FC (tính)', ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
+      const rows = D.skus.map((x, i) => { const c = res ? res.dmCalc[i] : null; return [x.grp, x.wec, x.name, x.dvt, x.qc, x.min, x.qd, x.block, c ? r4(c.saleLY) : null, c ? r4(c.wasteLY) : null, c ? r4(c.mixLY) : null, c ? r4(c.sale) : null, c ? r4(c.mix) : null, c ? r4(c.wasteSku) : null, x.mixFix != null ? x.mixFix : null, ...x.flags.map(f => f ? 1 : 0), ...(hasMinN ? NG.map(g => x.minN && x.minN[g] != null ? x.minN[g] : null) : [])]; });
+      sh['4. Danh mục'] = [head, ['Nhóm Rau', 'Mã WEC', 'Tên WEC', 'ĐVT WEC', 'QC', 'Min', 'Quy đổi KG', 'Block Tồn CG', 'Sale LY2W', '%Hủy LY2W', 'Sale Mix LY2W', 'Sale L2W', 'Sale Mix L2W', '%Hủy L2W', 'Sale Mix FC (Fix)', ...NG, ...(hasMinN ? NG.map(g => 'Min ' + g) : [])], ...rows]; }
     // Phân nhóm CH luôn lấy từ Storelist (Sheet gốc) — không xuất/nhập qua file
     const NC = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.ncc; if (fam && NC && NC.length) sh['NCC'] = [['NCC', 'Tỉnh', 'MOD mỗi CH/ngày (trống = mặc định)'], ...NC.flatMap(x => (x.tinh || []).map(t => [x.name, t, x.movT && x.movT[t] != null ? x.movT[t] : (x.mov > 0 ? x.mov : null)]))];
     const HB = MS.lichve && MS.lichve.cfg && MS.lichve.cfg.hub; if (fam || (HB && Object.keys(HB).length)) sh['HUB'] = [['Mã CH', 'HUB cấp 1', 'HUB cấp 2', 'MOQ (trống = mặc định)'], ...Object.entries(HB || {}).map(([c, v]) => [c, v[0] || '', v[1] || '', v[2] == null ? null : v[2]])];
@@ -1217,7 +1217,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     const sp = pick(book, SHEET.sale); if (sp) { const t = Date.now(); sale = parseSale(sp.rows, log); post({ type: 'timing', what: 'Gộp Data Sale', ms: Date.now() - t }); }
     post({ type: 'parsed', file: name, masters, sale, log, sheets: want });
   }
-  function exportXlsx(XLSX, sheets) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: 'xlsx', compression: true }); }
+  function exportXlsx(XLSX, sheets, fmt) { const wb = XLSX.utils.book_new(); for (const [nm, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa, { dense: true }), nm.slice(0, 31)); return XLSX.write(wb, { type: 'array', bookType: fmt === 'xlsb' ? 'xlsb' : 'xlsx', compression: true }); }
 
   function saleTemplateAoa(noLY) {
     if (noLY) { const h0 = new Array(12).fill(null), h1 = new Array(12).fill(null); h0[0] = 'HỦY L2W'; h0[4] = 'SALE L2W'; h0[9] = 'CHỜ GIAO';
@@ -1479,7 +1479,7 @@ function renderSrc(){MASTERS.forEach(m=>{const x=META[m],el=$('#src-'+m);if(!el)
 // ---------- ĐỌC FILE (Worker) ----------
 let worker=null,workerOk=null;
 function makeWorker(){if(workerOk===false)return null;if(worker)return worker;try{
-  const src=`try{importScripts('${XLSX_URL}')}catch(e){postMessage({type:'fatal',msg:e.message})}\n`+$('#engineSrc').textContent+`\nself.onmessage=e=>{const d=e.data;try{if(d.cmd==='read')FC4.processFile(XLSX,d.buf,d.name,m=>postMessage(m));else if(d.cmd==='export'){const o=FC4.exportXlsx(XLSX,d.sheets);const b=o.buffer?o.buffer:new Uint8Array(o).buffer;postMessage({type:'exported',buf:b},[b])}}catch(err){postMessage({type:'error',msg:String(err&&err.message||err)})}};`;
+  const src=`try{importScripts('${XLSX_URL}')}catch(e){postMessage({type:'fatal',msg:e.message})}\n`+$('#engineSrc').textContent+`\nself.onmessage=e=>{const d=e.data;try{if(d.cmd==='read')FC4.processFile(XLSX,d.buf,d.name,m=>postMessage(m));else if(d.cmd==='export'){const o=FC4.exportXlsx(XLSX,d.sheets,d.fmt);const b=o.buffer?o.buffer:new Uint8Array(o).buffer;postMessage({type:'exported',buf:b},[b])}}catch(err){postMessage({type:'error',msg:String(err&&err.message||err)})}};`;
   worker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));workerOk=true;return worker}catch(e){workerOk=false;return null}}
 function viaWorker(msg,transfer,onMsg,doneType){return new Promise((res,rej)=>{const w=makeWorker();if(!w){rej(new Error('no-worker'));return}
   const h=e=>{const m=e.data;if(m.type==='fatal'||m.type==='error'){w.removeEventListener('message',h);if(m.type==='fatal'){workerOk=false;worker=null}rej(new Error(m.msg));return}onMsg&&onMsg(m);if(m.type===doneType){w.removeEventListener('message',h);res(m)}};
@@ -1921,11 +1921,11 @@ function chInit(){
   hubBind();
 }
 // ---------- XUẤT ----------
-async function exportSheets(sheets,filename){
+async function exportSheets(sheets,filename){const fmt=/\.xlsb$/i.test(filename)?'xlsb':'xlsx';
   busy(true,'Đang tạo file Excel…');await tick();let buf;
-  try{const m=await viaWorker({cmd:'export',sheets},[],null,'exported');buf=m.buf}
-  catch(err){if(typeof XLSX==='undefined'){busy(false);toast('Chưa tải được thư viện Excel.');return}const o=E.exportXlsx(XLSX,sheets);buf=o.buffer||new Uint8Array(o).buffer}
-  busy(false);const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  try{const m=await viaWorker({cmd:'export',sheets,fmt},[],null,'exported');buf=m.buf}
+  catch(err){if(typeof XLSX==='undefined'){busy(false);toast('Chưa tải được thư viện Excel.');return}const o=E.exportXlsx(XLSX,sheets,fmt);buf=o.buffer||new Uint8Array(o).buffer}
+  busy(false);const blob=new Blob([buf],{type:fmt==='xlsb'?'application/vnd.ms-excel.sheet.binary.macroEnabled.12':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   if(!DL){try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Đã tải file')}catch(e){toast('Không tải được file')}return}
   try{await DL.save({filename,data:blob});toast('Đã lưu file')}catch(e){toast(e&&e.code==='declined'?'Đã hủy tải file':'Không tải được file ('+(e&&e.code||'lỗi')+')')}
 }
@@ -1939,8 +1939,8 @@ $('#btnSaveWork')&&($('#btnSaveWork').onclick=()=>{try{const sh=E.mastersAoa(MS,
     const blk=CH?[[0,B.h],[4,B.s],[9,B.cg]]:[[0,B.h],[4,B.s],[9,B.hy],[13,B.sy],[18,B.cg]],Wd=CH?12:21,n=Math.max(...blk.map(x=>x[1].length));
     for(let j=0;j<n;j++){const r=new Array(Wd).fill(null);blk.forEach(([c,L])=>{const x=L[j];if(x)x.forEach((v,k)=>r[c+k]=v)});rows.push(r)}}
   const out={'3. Data Sale':rows,...sh};if(RES&&RES.stores.length)out['5. Data FC']=E.dataFcAoa(RES,true);
-  exportSheets(out,`Luu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsx`);toast('Đã lưu file offline — mở lại bằng nút Import ở mục Sale')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}});
-$('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsx`);
+  exportSheets(out,`Luu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsb`);toast('Đã lưu file offline — mở lại bằng nút Import ở mục Sale')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}});
+$('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsb`);
 $('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Du_lieu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsx`);
 $('#cfgImport').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const p=await readFile(f);if(!p)return;if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});if(!ms.length){toast('File không có sheet dữ liệu nào (Quy đổi, Lịch về hàng, Danh mục, HUB) — không cập nhật gì');return}applyMasters(p.masters,p.log)});
 $('#cfgSave').onclick=async()=>{const d=MASTERS.filter(m=>META[m].dirty);if(!d.length){toast('Không có thay đổi cần lưu');return}for(const m of d)await save(m);recompute()};
