@@ -1963,9 +1963,11 @@ async function syncPn(manual,all){
     if(!Object.keys(nh).length)throw new Error('PhanNhomCH không có MCH3 "'+SG.mch3+'"');
     const stM=new Map(st.slice(1).map(r=>[K(r[0]),r]));const cur=new Map(MS.phannhom.rows.map(r=>[K(r[0]),r]));
     const HB={};(hb||[]).slice(1).forEach(r=>{const h=K(r[1]);if(h&&h!=='0')HB[K(r[0])]=h});
-    const useAll=all!=null?all:SG.all;const keys=useAll?[...new Set([...cur.keys(),...Object.keys(nh)])]:[...cur.keys()];
-    let add=0,chg=0,del=0;const out=[];
-    for(const k of keys){const s=stM.get(k),n=nh[k],old=cur.get(k);
+    const useAll=all!=null?all:SG.all;const actSt=st.slice(1).filter(r=>K(r[0])&&SL_ACTIVE(String(r[2]||''))).map(r=>K(r[0]));
+    // lấy đủ mọi CH đang hoạt động trong Storeslist; CH chưa có phân nhóm MCH3 trong PhanNhomCH → dùng cột Nhóm DT của Storeslist
+    const keys=useAll?[...new Set([...cur.keys(),...Object.keys(nh),...actSt])]:[...cur.keys()];
+    let add=0,chg=0,del=0,dt=0;const out=[];SG.dt=new Set();
+    for(const k of keys){const s=stM.get(k),old=cur.get(k);let n=nh[k];if(!n&&useAll&&s){const d=String(s[12]||'').trim().toUpperCase();if(/^N[1-8]$/.test(d)){n=d;dt++;SG.dt.add(k)}}
       if(!s||(s[2]&&!/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s[2]))||(!n&&(useAll||!old))){if(old)del++;continue}
       const row=old?old.slice():[k,'','','','',null,null,null,''];row[0]=k;
       if(s){row[1]=String(s[1]||row[1]||'').trim();row[2]=String(s[7]||row[2]||'').trim();row[3]=String(s[8]||row[3]||'').trim();row[4]=String(s[5]||row[4]||'').trim();row[5]=num(s[11]);row[6]=String(s[12]||'').trim();row[7]=num(spdM[k])}
@@ -1974,7 +1976,7 @@ async function syncPn(manual,all){
       out.push(row)}
     MS.phannhom.rows=out;SG.ok=true;SG.at=new Date();META.phannhom.src='sheet';META.phannhom.dirty=false;
     {const j=JSON.stringify(out);if(db&&j!==SG.saved){SG.saved=j;dbSave('phannhom').catch(()=>{})}}
-    if(manual)toast(`Storelist: ${ni(out.length)} CH · thêm ${add} · đổi ${chg} · bỏ ${del}`);
+    if(manual)toast(`Storelist: ${ni(out.length)} CH · thêm ${add} · đổi ${chg} · bỏ ${del}${dt?` · ${ni(dt)} CH chưa có phân nhóm ${SG.mch3} → dùng Nhóm DT`:''}`);
     recompute();renderSaveBar();try{TREE.render()}catch(_){}
     renderSrc();
   }catch(e){SG.ok=false;toast('Không đọc được Storelist trên Sheet gốc ('+(e.message||e)+'). Đang dùng phân nhóm lần đọc gần nhất.')}
@@ -2000,7 +2002,7 @@ function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHT
   set('growth',(c.useGSku!==false?'Nhóm SP: bật':'Nhóm SP: tắt')+(CH?'':' · Nhóm CH: '+(c.useGSt?'bật':'tắt')));
   const fl=E.NG.map((n,j)=>MS.danhmuc.skus.filter(x=>x.flags[j]).length);set('dm',`${MS.danhmuc.skus.length} SKU · N1–N8: ${fl.join('/')}`+(META.danhmuc.dirty?' · chưa lưu':''));
   {const c=TREE.count();set('sel',c==null?'<span style="color:var(--crit)">Chưa chọn CH nào</span>':`${RES?ni(RES.stores.length):0} CH được tính FC`);if(!$('#stTree').childElementCount||renderSums._pn!==MS.phannhom.rows.length){renderSums._pn=MS.phannhom.rows.length;TREE.render()}}
-  set('pn',`${ni(MS.phannhom.rows.length)} CH`);const bad=MS.quydoi.rows.filter(r=>E.BAD_WEC.has(r[3])||r[6]==null).length;set('qd',`${ni(MS.quydoi.rows.length)} Article${bad?` · <span style="color:var(--high)">${bad} lỗi</span>`:''}`);
+  set('pn',`${ni(MS.phannhom.rows.length)} CH${SG.dt&&SG.dt.size?` · <span style="color:var(--high)" title="CH chưa có dòng ${esc(SG.mch3)} trong PhanNhomCH — tạm dùng cột Nhóm DT của Storeslist">${ni(SG.dt.size)} theo Nhóm DT</span>`:''}`);const bad=MS.quydoi.rows.filter(r=>E.BAD_WEC.has(r[3])||r[6]==null).length;set('qd',`${ni(MS.quydoi.rows.length)} Article${bad?` · <span style="color:var(--high)">${bad} lỗi</span>`:''}`);
   const sale=S.reduce((a,s)=>a+s.sale1w,0),fc=S.reduce((a,s)=>a+s.totalFC,0),st={thua:0,du:0,thieu:0};S.forEach(s=>st[s.__stt]=(st[s.__stt]||0)+1);
   set('ov',`${ni(S.length)} CH · Sale 1W ${nf(sale,0)} kg · FC ${nf(fc,0)} kg · <span style="color:var(--crit)">${st.thua} thừa</span> / ${st.thieu} thiếu`);
   set('sk',`${MS.danhmuc.skus.length} SKU`);set('st',`${ni(S.length)} CH`);set('fc',`${ni(ROWS.length)} dòng CH × SKU`);
