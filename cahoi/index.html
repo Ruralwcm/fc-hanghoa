@@ -401,9 +401,9 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
   <div class="sp"></div>
   <div class="seg" id="fsSeg" role="group" aria-label="Cỡ chữ"><button type="button" data-v="10px" title="Chữ nhỏ">A−</button><button type="button" data-v="11px" title="Chữ vừa (mặc định)">A</button><button type="button" data-v="12px" title="Chữ lớn">A+</button></div>
   <button class="btn ghost ico" id="exAll" type="button" title="Mở tất cả section" aria-label="Mở tất cả">⊞</button><button class="btn ghost ico" id="coAll" type="button" title="Thu tất cả section" aria-label="Thu tất cả">⊟</button>
-  <span class="hgrp"><span class="hl">Sale</span><label class="btn imp" for="inSale">Import</label><button class="btn tpl" id="saleTpl" type="button" title="File mẫu Sale · Tồn · Chờ giao">Template</button></span><span class="hsep"></span><span class="hgrp"><span class="hl">Cấu hình</span><span class="btn upl imp" title="Nhập file Excel: sheet nào có (Quy đổi KG, Lịch về hàng, Danh mục) (Cá hồi/Basa/Bánh mỳ có thêm NCC, HUB) thì cập nhật dữ liệu đó, không có sheet thì giữ nguyên. Phân nhóm CH luôn lấy từ Storelist.">Import<input type="file" id="cfgImport" accept=".xlsx,.xlsb,.xlsm" aria-label="Import cấu hình từ Excel"></span><button class="btn tpl" id="cfgTpl" type="button" title="Xuất toàn bộ dữ liệu đang hiệu lực, mỗi loại 1 sheet">Template</button></span><span class="hsep"></span><button class="btn sav" id="cfgSave" type="button" title="Lưu tất cả thay đổi lên kho chung">Lưu</button><span class="hsep"></span><button class="btn" id="btnSaveWork" type="button" title="Lưu toàn bộ dữ liệu đang thao tác (Sale, master, HUB, Data FC) thành file Excel offline; mở lại bằng Import ở mục Sale">Lưu Data FC</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
+  <span class="hgrp"><span class="hl">Sale</span><label class="btn imp" for="inSale">Import</label><button class="btn tpl" id="saleTpl" type="button" title="File mẫu Sale · Tồn · Chờ giao">Template</button></span><span class="hsep"></span><span class="hgrp"><span class="hl">Cấu hình</span><span class="btn upl imp" title="Nhập file Excel: sheet nào có (Quy đổi KG, Lịch về hàng, Danh mục) (Cá hồi/Basa/Bánh mỳ có thêm NCC, HUB) thì cập nhật dữ liệu đó, không có sheet thì giữ nguyên. Phân nhóm CH luôn lấy từ Storelist.">Import<input type="file" id="cfgImport" accept=".xlsx,.xlsb,.xlsm,.xls" aria-label="Import cấu hình từ Excel"></span><button class="btn tpl" id="cfgTpl" type="button" title="Xuất toàn bộ dữ liệu đang hiệu lực, mỗi loại 1 sheet">Template</button></span><span class="hsep"></span><button class="btn sav" id="cfgSave" type="button" title="Lưu tất cả thay đổi lên kho chung">Lưu</button><span class="hsep"></span><button class="btn" id="btnSaveWork" type="button" title="Lưu toàn bộ dữ liệu đang thao tác (Sale, master, HUB, Data FC) thành file Excel offline; mở lại bằng Import ở mục Sale">Lưu Data FC</button><button class="btn pri" id="btnExport" type="button">Tải Data FC</button>
 </div></header>
-<input type="file" id="inSale" accept=".xlsx,.xlsb,.xlsm" hidden>
+<input type="file" id="inSale" accept=".xlsx,.xlsb,.xlsm,.xls" hidden>
 
 <div class="wrap2">
 <aside class="left">
@@ -1930,7 +1930,7 @@ async function exportSheets(sheets,filename){const fmt=/\.xlsb$/i.test(filename)
   try{await DL.save({filename,data:blob});toast('Đã lưu file')}catch(e){toast(e&&e.code==='declined'?'Đã hủy tải file':'Không tải được file ('+(e&&e.code||'lỗi')+')')}
 }
 const stamp=()=>new Date().toISOString().slice(0,10);
-$('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsx':'Template_Data_Sale.xlsx');
+$('#saleTpl').onclick=()=>exportSheets({'3. Data Sale':E.saleTemplateAoa(CH)},CH?'Template_Data_Sale_'+AC.short.replace(/\s/g,'')+'.xlsb':'Template_Data_Sale.xlsb');
 // Lưu Data FC: toàn bộ dữ liệu đang thao tác (Sale + master + HUB/NCC + Data FC) thành 1 file Excel offline; mở lại bằng Import Sale
 $('#btnSaveWork')&&($('#btnSaveWork').onclick=()=>{try{const sh=E.mastersAoa(MS,RES,CH);const T=E.saleTemplateAoa(CH),rows=[...T];
   if(SA&&SA.pairs){const S8=E.normSale(SA),P=S8.pairs,W=8,B={h:[],s:[],hy:[],sy:[],cg:[]};// mỗi khối dồn sát lên đầu cột của khối đó
@@ -1941,11 +1941,11 @@ $('#btnSaveWork')&&($('#btnSaveWork').onclick=()=>{try{const sh=E.mastersAoa(MS,
   const out={'3. Data Sale':rows,...sh};if(RES&&RES.stores.length)out['5. Data FC']=E.dataFcAoa(RES,true);
   exportSheets(out,`Luu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsb`);toast('Đã lưu file offline — mở lại bằng nút Import ở mục Sale')}catch(err){console.error(err);toast('Không lưu được: '+(err.message||err))}});
 $('#btnExport').onclick=()=>exportSheets({'5. Data FC':E.dataFcAoa(RES,true)},`Data_FC_${CH?AC.short.replace(/\s/g,'')+'_':''}${stamp()}.xlsb`);
-$('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Du_lieu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsx`);
+$('#cfgTpl').onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Du_lieu_FC_${CH?AC.short.replace(/\s/g,''):'RCQ'}_${stamp()}.xlsb`);
 $('#cfgImport').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const p=await readFile(f);if(!p)return;if(p.masters)delete p.masters.phannhom;const ms=Object.keys(p.masters||{});if(!ms.length){toast('File không có sheet dữ liệu nào (Quy đổi, Lịch về hàng, Danh mục, HUB) — không cập nhật gì');return}applyMasters(p.masters,p.log)});
 $('#cfgSave').onclick=async()=>{const d=MASTERS.filter(m=>META[m].dirty);if(!d.length){toast('Không có thay đổi cần lưu');return}for(const m of d)await save(m);recompute()};
-{const b=$('#btnExportM');if(b)b.onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Master_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsx`)};
-$$('[data-export]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.export,all=E.mastersAoa(MS,RES,CH),key={quydoi:'1.Quy đổi KG',lichve:'2. Lịch về hàng',danhmuc:'4. Danh mục',phannhom:'Phân nhóm'}[m];exportSheets({[key]:all[key]},`${key.replace(/[^\p{L}\p{N}]+/gu,'_')}_${stamp()}.xlsx`)}));
+{const b=$('#btnExportM');if(b)b.onclick=()=>exportSheets(E.mastersAoa(MS,RES,CH),`Master_FC_${CH?'CaHoi':'RCQ'}_${stamp()}.xlsb`)};
+$$('[data-export]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.export,all=E.mastersAoa(MS,RES,CH),key={quydoi:'1.Quy đổi KG',lichve:'2. Lịch về hàng',danhmuc:'4. Danh mục',phannhom:'Phân nhóm'}[m];exportSheets({[key]:all[key]},`${key.replace(/[^\p{L}\p{N}]+/gu,'_')}_${stamp()}.xlsb`)}));
 
 
 
