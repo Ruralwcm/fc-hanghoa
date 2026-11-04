@@ -390,6 +390,7 @@ th{background:color-mix(in srgb,var(--brand) 7%,var(--panel))!important;color:co
 .ovcol{display:flex;flex-direction:column;gap:0.7692rem;min-width:0}
 .fcs-thua{background:var(--crit-soft)!important;color:var(--crit)!important;font-weight:700}.fcs-thieu{background:var(--med-soft)!important;color:var(--med)!important;font-weight:700}.fcs-du{background:var(--ok-soft)!important;color:var(--okc)!important}
 #tHubView tr.hvh td{background:color-mix(in srgb,var(--brand) 4%,var(--panel));border-top:1px solid var(--line)}#tHubView .hpa{display:inline-flex;gap:0.3077rem;align-items:flex-start;white-space:normal;max-width:34em;font-size:.82rem}
+details.sec.pin>summary{cursor:default}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -486,7 +487,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     <div class="row"><input type="text" id="qDm" placeholder="Tìm Mã WEC / tên" aria-label="Tìm SKU"><select id="dmGrp" aria-label="Nhóm SP" data-only="rcq"><option value="">Tất cả nhóm SP</option></select><div class="seg" data-only="rcq" id="dmView" role="group" aria-label="Kiểu xem"><button type="button" data-v="short" aria-pressed="true">Rút gọn</button><button type="button" data-v="full" aria-pressed="false">Đầy đủ</button></div></div>
     <div class="tw" style="max-height:62vh"><table id="tDm"></table></div></div></details>
   <div class="gh"><h2>Recap</h2><span class="ln"></span></div>
-<details class="sec" id="s-ov"><summary><span class="chev">▶</span><span class="num">2</span><h3>Tổng quan</h3><span class="sum" id="sum-ov"></span></summary>
+<details class="sec pin" id="s-ov" open><summary title="Luôn hiển thị"><span class="chev" style="visibility:hidden">▶</span><span class="num">2</span><h3>Tổng quan</h3><span class="sum" id="sum-ov"></span></summary>
     <div class="body"><div class="row" style="justify-content:space-between"><p class="hint" id="ovSub" style="margin:0"></p><span class="hint" style="margin:0">Bấm 1 dòng ở bảng bên dưới để lọc chéo (bấm lại để bỏ)</span></div><div class="kpis" id="kpis"></div>
     <div class="xfbar" id="xfBar" hidden></div><div class="grid two" id="ovGrid" style="align-items:start;margin-top:8px"><div class="ovcol"><div data-only="ch"><h4 class="h4">Theo NCC</h4><div class="tw"><table id="tByNcc"></table></div></div><div><h4 class="h4">Theo nhóm SP</h4><div class="tw"><table id="tByG"></table></div></div><div><h4 class="h4">Theo GĐV</h4><div class="tw"><table id="tByD"></table></div></div></div><div class="ovcol"><div><h4 class="h4">Theo nhóm CH (N)</h4><div class="tw"><table id="tByN"></table></div></div><div><h4 class="h4">Theo tỉnh</h4><div class="tw"><table id="tByT"></table></div></div></div></div></div></details>
 <details class="sec gone" id="s-sk"><summary><span class="chev">▶</span><span class="num">3</span><h3>Theo SKU</h3><span class="sum" id="sum-sk"></span></summary>
@@ -1993,6 +1994,8 @@ $$('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const o={};$$('det
 $$('details.sec>summary .act').forEach(a=>a.addEventListener('click',e=>{if(!e.isTrusted)return;const t=e.target;if(!t.closest('button,select,input,label,.btn'))return;e.preventDefault();const f=t.matches('input[type=file]')?t:(t.closest('.btn')&&t.closest('.btn').querySelector('input[type=file]'));if(f)setTimeout(()=>f.click())}));
 {const b=$('#pnSync');if(b)b.addEventListener('click',()=>syncPn(true));const b2=$('#pnSyncAll');if(b2)b2.addEventListener('click',()=>syncPn(true,true));}
 {const vis=$$('.right details.sec').filter(d=>getComputedStyle(d).display!=='none');vis.forEach((d,i)=>{const n=d.querySelector('summary .num');if(n)n.textContent=i+1})}
+// Tổng quan (RECAP) luôn hiển thị: không thu gọn được
+$$('details.sec.pin').forEach(d=>{d.open=true;d.addEventListener('toggle',()=>{if(!d.open)d.open=true});d.querySelector('summary').addEventListener('click',e=>{if(!e.target.closest('button,select,input,label,a'))e.preventDefault()})});
 $('#exAll').onclick=()=>$$('details.sec').forEach(d=>d.open=true);$('#coAll').onclick=()=>$$('details.sec').forEach(d=>d.open=false);
 $$('#jump a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goSec(a.getAttribute('href').slice(1))}));
 {const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('#jump a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-90px 0px -65% 0px'});$$('.right details.sec').forEach(d=>io.observe(d))}
