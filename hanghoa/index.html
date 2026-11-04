@@ -810,7 +810,7 @@ function treeData(){const T={},inSale=ST.sale?new Set(ST.sale.stores):null;
 let _TR=null;function renderTree(){if(!_TR)_TR=StoreTree({el:$('#tree'),list:()=>{const inSale=ST.sale?new Set(ST.sale.stores):null;return Object.values(ST.stores).filter(s=>inSale?inSale.has(s.code):SL_ACTIVE(s.status)).map(s=>({c:s.code,n:s.name,m:s.mien,g:s.gdv,q:s.qlkv,t:s.tinh}))},get:()=>sel(),set:S=>{ST.cfg.sel2=[...S];lsSet('cfg',ST.cfg);_TR.render();later()}});_TR.render()}
 $('#selAll').onclick=()=>{renderTree();_TR.all()};
 $('#selNone').onclick=()=>{renderTree();_TR.none()};
-$('#btnTpl').onclick=()=>exportSheets(H.templateAoa(),'FC_HangHoa_Template.xlsx');
+$('#btnTpl').onclick=()=>exportSheets(H.templateAoa(),'FC_HangHoa_Template.xlsb');
 
 // ---------- 2 · THÔNG SỐ ----------
 const PF=[['qc','QC',1],['plusStock','+Stock',0],['plusCG','+CG',0],['lockMax','Lock',1],['coverDay','Cover',1],['growth','Growth%',1],['rank','Rank',1],['block','Block',0]];
@@ -965,7 +965,7 @@ function renderSums(){const R=ST.R,rows=R?R.rows:[],G=R?R.groups:[],c={};G.forEa
 }
 window.addEventListener('beforeunload',e=>{if(Object.values(META).some(m=>m.dirty)){e.preventDefault();e.returnValue=''}});
 initDb().then(loadMasters);
-window.__hh={ST,recompute,save,setData(o){if(o.stores)ST.stores=H.buildStores(H.parseCSV(o.stores));if(o.skus)ST.skus=H.buildSkus(H.parseCSV(o.skus));if(o.nhom)ST.nhom=H.buildNhom(H.parseCSV(o.nhom));ST.mOk=true;const log=[];if(o.tpl)applyTemplate(H.parseTemplate(o.tpl,log));if(o.sale){ST.sale=H.parseSale(o.sale,log);ST.saleFile='test.xlsx'}recompute();return log}};
+window.__hh={ST,recompute,save,setData(o){if(o.stores)ST.stores=H.buildStores(H.parseCSV(o.stores));if(o.skus)ST.skus=H.buildSkus(H.parseCSV(o.skus));if(o.nhom)ST.nhom=H.buildNhom(H.parseCSV(o.nhom));ST.mOk=true;const log=[];if(o.tpl)applyTemplate(H.parseTemplate(o.tpl,log));if(o.sale){ST.sale=H.parseSale(o.sale,log);ST.saleFile='test.xlsb'}recompute();return log}};
 })();
 </script>
 </body></html>
