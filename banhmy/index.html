@@ -461,7 +461,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × <b>Lock Max</b> (Cấu hình FC, mặc định 3). Min = 0: không đặt; bật "FC khi Min = 0" thì đặt theo ① (không sàn, không trần) nếu CH có bán.</span></div>
         <div><span><b>SL FC = min( max(①, ②), ③ )</b>.</span></div>
         <div><span><b>Chia ngày</b>: theo lịch giao tỉnh × N; mỗi lần giao ≥ Min của mã. Bật "Tối đa tần suất giao" thì giao thêm ngày trong lịch tuyến khi đủ.</span></div>
-        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; thiếu thì đi kèm xe tới HUB (ngày HUB đã có xe) hoặc gom cụm HUB cấp 1 → 2 cho đủ MOD; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
+        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; CH vệ tinh luôn giao qua HUB cấp 1 cả tuần (HUB cố định), cụm HUB cấp 1 thiếu MOD thì cả tuần qua HUB cấp 2; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
       </div></div>
 <div class="card" data-only="rcq"><h3>Chuỗi tính</h3><div class="flow">
         <div><span><b>Quy về KG</b>: Article → Mã WEC × Quy đổi KG (bước 1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing L2W, Chờ giao = khối CHỜ GIAO (cột S–U) trong file sale. Mã có "Trừ Tồn CG" = 1: Tồn dự kiến đầu tuần FC = Tồn + Chờ giao − (Sale 1W + Hủy 1W) × <span data-k="leadDays"></span> ngày ÷ 7 (không âm); FC = FC sau kẹp − Tồn dự kiến (không âm), rồi mới làm tròn QC / Min. Mã = 0 thì không trừ.</span></div>
@@ -1276,10 +1276,11 @@ const lsSelSet=(k,S)=>{try{localStorage.setItem(k,JSON.stringify([...S]))}catch(
   document.addEventListener('focusin',mark);document.addEventListener('pointerdown',mark)})();
 
 // ---------- MOQ CH & GOM HUB (dùng chung Cá hồi · Cá basa HTX · Bánh mỳ) ----------
-// Mỗi CH × ngày giao = 1 PO. PO ≥ MOQ → giao thẳng. Còn lại gom theo cụm HUB cấp 1 rồi cấp 2 (cụm gồm cả PO của chính CH HUB):
-//  - ngày đó đã có xe NCC tới HUB (PO của HUB giao thẳng, hoặc HUB đã nhận gom ở cấp trước) → CH thiếu đi kèm xe đó;
-//  - chưa có xe → gom khi ≥ 2 PO và tổng đủ MOQ của HUB.
-// Cụm vẫn thiếu: gom theo HUB cấp 2 (không có thì cấp 1 / chính CH); thiếu dưới autoUp → tự tăng FC cho đủ MOQ, còn lại theo lựa chọn.
+// Mỗi CH × ngày giao = 1 PO. HUB cố định cả tuần (đồng bộ triển khai lấy hàng), chỉ đổi khi tách / gộp HUB:
+//  - CH không thuộc HUB nào: giao thẳng; ngày nào < MOQ thì vào xử lý thiếu.
+//  - CH vệ tinh: luôn giao qua HUB cấp 1, kể cả ngày PO tự đủ MOQ; PO của chính CH HUB là giao thẳng.
+//  - Cụm HUB cấp 1 thiếu MOQ ở bất kỳ ngày giao nào → cả tuần cả cụm đi qua HUB cấp 2 (nếu có khai).
+// Cụm (HUB nhận × ngày) vẫn thiếu: thiếu dưới autoUp → tự tăng FC cho đủ MOQ, còn lại theo lựa chọn.
 const HUB_ST=['Giao thẳng','Gom HUB cấp 1','Gom HUB cấp 2','Tăng FC đủ MOQ','Thiếu MOQ'];
 function hubMod(RES,o){
   const GT=!!o.gt,val=x=>GT?x.gt:x.kg,H=o.hub||{},dec=o.dec||{},defMod=+o.defMod||0;
@@ -1304,18 +1305,14 @@ function hubMod(RES,o){
     const p=po[k]||(po[k]={store:S.code,name:S.name,tinh:S.tinh,day:d,kg:0,gt:0,refs:[]});const kg=u*qd;p.kg+=kg;p.gt+=kg*gia;p.refs.push([r,d,S])})}
   const POs=Object.values(po),hubs=[];
   POs.forEach(p=>{p.mod=modOf(p.store);if(!(p.mod>0)||val(p)>=p.mod-1e-9){p.st=0;p.dest=p.store}else{p.st=4;p.dest=''}});
-  // Khóa cụm: cấp 1 = HUB cấp 1 của CH, hoặc chính CH nếu CH là HUB cấp 1; cấp 2 = HUB cấp 2 của CH (không có thì HUB cấp 2 của HUB cấp 1), hoặc chính CH nếu là HUB cấp 2
-  const isH1=new Set(),isH2=new Set();Object.keys(H).forEach(c=>{const a=lv(c,0),b=lv(c,1);if(a)isH1.add(a);if(b)isH2.add(b)});
-  const key1=c=>lv(c,0)||(isH1.has(K(c))?K(c):''),key2=c=>lv(c,1)||(lv(c,0)&&lv(lv(c,0),1))||(isH2.has(K(c))?K(c):'');
-  const truck=new Map(),addT=(h,d,p)=>{const k=h+'|'+d;if(!truck.has(k))truck.set(k,[]);truck.get(k).push(p)};
-  POs.forEach(p=>{if(p.st===0)addT(K(p.store),p.day,p)});
-  [key1,key2].forEach((kf,L)=>{const grp={};
-    POs.forEach(p=>{if(p.st!==4)return;const h=kf(p.store);if(!h)return;const k=h+'|'+p.day;(grp[k]||(grp[k]={hub:h,lv:L+1,day:p.day,list:[]})).list.push(p)});
-    Object.values(grp).forEach(g=>{g.mod=modOf(g.hub);const an=(truck.get(g.hub+'|'+g.day)||[]).slice(),all=[...an.filter(p=>!g.list.includes(p)),...g.list];
-      g.kg=all.reduce((a,p)=>a+p.kg,0);g.gt=all.reduce((a,p)=>a+p.gt,0);g.anchor=an.length>0;
-      if(g.anchor||(g.list.length>1&&val(g)>=g.mod-1e-9)){g.list.forEach(p=>{p.st=L+1;p.dest=g.hub;addT(g.hub,g.day,p)});g.list=all;hubs.push(g)}})});
-  const sg={};
-  POs.forEach(p=>{if(p.st!==4)return;const hub=key2(p.store)||key1(p.store)||K(p.store);const k=hub+'|'+p.day;const g=sg[k]||(sg[k]={key:k,hub,day:p.day,kg:0,gt:0,list:[],mod:modOf(hub)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
+  // Tuyến cố định cả tuần theo cụm HUB cấp 1
+  const c1=c=>lv(c,0)||K(c),CL={};POs.forEach(p=>{const h=c1(p.store);(CL[h]||(CL[h]=[])).push(p)});
+  const route={};Object.entries(CL).forEach(([h,L])=>{const m=modOf(h),d={};L.forEach(p=>{d[p.day]=(d[p.day]||0)+val(p)});let r=h;
+    if(m>0&&Object.values(d).some(v=>v<m-1e-9)){const h2=lv(h,1)||L.map(p=>lv(p.store,1)).find(Boolean)||'';if(h2&&h2!==h)r=h2}route[h]=r});
+  const grp={};POs.forEach(p=>{const h=c1(p.store),dest=route[h],s=K(p.store);p.dest=dest;p.st=dest===s?0:dest===h?1:2;
+    const k=dest+'|'+p.day;const g=grp[k]||(grp[k]={key:k,hub:dest,day:p.day,kg:0,gt:0,list:[],mod:modOf(dest)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
+  const sg={};Object.values(grp).forEach(g=>{g.lv=Math.max(...g.list.map(p=>p.st));
+    if(g.mod>0&&val(g)<g.mod-1e-9){g.list.forEach(p=>{p.st=4;p.dest=''});sg[g.key]=g}else if(g.lv>0)hubs.push(g)});
   const shorts=Object.values(sg),auto=o.autoUp==null?0.2:+o.autoUp;
   shorts.forEach(g=>{g.need=Math.max(0,g.mod-val(g));g.needPct=val(g)>0?g.need/val(g):9;g.auto=!dec[g.key]&&g.needPct<auto-1e-9;
     g.choice=dec[g.key]||(g.auto?'up':(o.blockShort?'no':''));g.added=0;g.addedKg=0;g.addedGt=0;
@@ -1369,7 +1366,7 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
 (function(){
 'use strict';
 const APP=window.FC_APP||'rcq',CH=APP!=='rcq';document.documentElement.dataset.app=CH?'cahoi':'rcq';document.documentElement.dataset.ncc=APP;
-const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.1'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.1'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.1'}};
+const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.2'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.2'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.2'}};
 const AC=APPS[APP]||{ns:'rcq/',ls:'fc4_masters',mch3:'Rau củ'};
 const E=window.FC4,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
