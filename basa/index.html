@@ -461,7 +461,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × <b>Lock Max</b> (Cấu hình FC, mặc định 3). Min = 0: không đặt; bật "FC khi Min = 0" thì đặt theo ① (không sàn, không trần) nếu CH có bán.</span></div>
         <div><span><b>SL FC = min( max(①, ②), ③ )</b>.</span></div>
         <div><span><b>Chia ngày</b>: theo lịch giao tỉnh × N; mỗi lần giao ≥ Min của mã. Bật "Tối đa tần suất giao" thì giao thêm ngày trong lịch tuyến khi đủ.</span></div>
-        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; thiếu thì gom HUB cấp 1 → 2; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
+        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; thiếu thì đi kèm xe tới HUB (ngày HUB đã có xe) hoặc gom cụm HUB cấp 1 → 2 cho đủ MOD; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
       </div></div>
 <div class="card" data-only="rcq"><h3>Chuỗi tính</h3><div class="flow">
         <div><span><b>Quy về KG</b>: Article → Mã WEC × Quy đổi KG (bước 1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing L2W, Chờ giao = khối CHỜ GIAO (cột S–U) trong file sale. Mã có "Trừ Tồn CG" = 1: Tồn dự kiến đầu tuần FC = Tồn + Chờ giao − (Sale 1W + Hủy 1W) × <span data-k="leadDays"></span> ngày ÷ 7 (không âm); FC = FC sau kẹp − Tồn dự kiến (không âm), rồi mới làm tròn QC / Min. Mã = 0 thì không trừ.</span></div>
@@ -1276,7 +1276,9 @@ const lsSelSet=(k,S)=>{try{localStorage.setItem(k,JSON.stringify([...S]))}catch(
   document.addEventListener('focusin',mark);document.addEventListener('pointerdown',mark)})();
 
 // ---------- MOQ CH & GOM HUB (dùng chung Cá hồi · Cá basa HTX · Bánh mỳ) ----------
-// Mỗi CH × ngày giao = 1 PO. PO ≥ MOQ → giao thẳng. Còn lại gom theo HUB cấp 1 rồi cấp 2 (nhóm ≥ 2 CH và đủ MOQ của HUB).
+// Mỗi CH × ngày giao = 1 PO. PO ≥ MOQ → giao thẳng. Còn lại gom theo cụm HUB cấp 1 rồi cấp 2 (cụm gồm cả PO của chính CH HUB):
+//  - ngày đó đã có xe NCC tới HUB (PO của HUB giao thẳng, hoặc HUB đã nhận gom ở cấp trước) → CH thiếu đi kèm xe đó;
+//  - chưa có xe → gom khi ≥ 2 PO và tổng đủ MOQ của HUB.
 // Cụm vẫn thiếu: gom theo HUB cấp 2 (không có thì cấp 1 / chính CH); thiếu dưới autoUp → tự tăng FC cho đủ MOQ, còn lại theo lựa chọn.
 const HUB_ST=['Giao thẳng','Gom HUB cấp 1','Gom HUB cấp 2','Tăng FC đủ MOQ','Thiếu MOQ'];
 function hubMod(RES,o){
@@ -1302,15 +1304,18 @@ function hubMod(RES,o){
     const p=po[k]||(po[k]={store:S.code,name:S.name,tinh:S.tinh,day:d,kg:0,gt:0,refs:[]});const kg=u*qd;p.kg+=kg;p.gt+=kg*gia;p.refs.push([r,d,S])})}
   const POs=Object.values(po),hubs=[];
   POs.forEach(p=>{p.mod=modOf(p.store);if(!(p.mod>0)||val(p)>=p.mod-1e-9){p.st=0;p.dest=p.store}else{p.st=4;p.dest=''}});
-  let rest=POs.filter(p=>p.st===4);
-  for(let L=0;L<2;L++){const grp={};
-    rest.forEach(p=>{const h=lv(p.store,L);if(!h)return;const k=h+'|'+p.day;const g=grp[k]||(grp[k]={hub:h,lv:L+1,day:p.day,kg:0,gt:0,list:[]});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
-    Object.values(grp).forEach(g=>{g.mod=modOf(g.hub);
-      if(g.list.length>1&&val(g)>=g.mod-1e-9){g.list.forEach(p=>{p.st=L+1;p.dest=g.hub});hubs.push(g)}});
-    rest=rest.filter(p=>p.st===4)}
+  // Khóa cụm: cấp 1 = HUB cấp 1 của CH, hoặc chính CH nếu CH là HUB cấp 1; cấp 2 = HUB cấp 2 của CH (không có thì HUB cấp 2 của HUB cấp 1), hoặc chính CH nếu là HUB cấp 2
+  const isH1=new Set(),isH2=new Set();Object.keys(H).forEach(c=>{const a=lv(c,0),b=lv(c,1);if(a)isH1.add(a);if(b)isH2.add(b)});
+  const key1=c=>lv(c,0)||(isH1.has(K(c))?K(c):''),key2=c=>lv(c,1)||(lv(c,0)&&lv(lv(c,0),1))||(isH2.has(K(c))?K(c):'');
+  const truck=new Map(),addT=(h,d,p)=>{const k=h+'|'+d;if(!truck.has(k))truck.set(k,[]);truck.get(k).push(p)};
+  POs.forEach(p=>{if(p.st===0)addT(K(p.store),p.day,p)});
+  [key1,key2].forEach((kf,L)=>{const grp={};
+    POs.forEach(p=>{if(p.st!==4)return;const h=kf(p.store);if(!h)return;const k=h+'|'+p.day;(grp[k]||(grp[k]={hub:h,lv:L+1,day:p.day,list:[]})).list.push(p)});
+    Object.values(grp).forEach(g=>{g.mod=modOf(g.hub);const an=(truck.get(g.hub+'|'+g.day)||[]).slice(),all=[...an.filter(p=>!g.list.includes(p)),...g.list];
+      g.kg=all.reduce((a,p)=>a+p.kg,0);g.gt=all.reduce((a,p)=>a+p.gt,0);g.anchor=an.length>0;
+      if(g.anchor||(g.list.length>1&&val(g)>=g.mod-1e-9)){g.list.forEach(p=>{p.st=L+1;p.dest=g.hub;addT(g.hub,g.day,p)});g.list=all;hubs.push(g)}})});
   const sg={};
-  rest.forEach(p=>{const hub=lv(p.store,1)||lv(p.store,0)||K(p.store);const k=hub+'|'+p.day;const g=sg[k]||(sg[k]={key:k,hub,day:p.day,kg:0,gt:0,list:[],mod:modOf(hub)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
-  Object.values(sg).forEach(g=>{if(g.list.length>1&&val(g)>=g.mod-1e-9){g.lv=2;g.list.forEach(p=>{p.st=2;p.dest=g.hub});hubs.push(g);delete sg[g.key]}});
+  POs.forEach(p=>{if(p.st!==4)return;const hub=key2(p.store)||key1(p.store)||K(p.store);const k=hub+'|'+p.day;const g=sg[k]||(sg[k]={key:k,hub,day:p.day,kg:0,gt:0,list:[],mod:modOf(hub)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
   const shorts=Object.values(sg),auto=o.autoUp==null?0.2:+o.autoUp;
   shorts.forEach(g=>{g.need=Math.max(0,g.mod-val(g));g.needPct=val(g)>0?g.need/val(g):9;g.auto=!dec[g.key]&&g.needPct<auto-1e-9;
     g.choice=dec[g.key]||(g.auto?'up':(o.blockShort?'no':''));g.added=0;g.addedKg=0;g.addedGt=0;
@@ -1329,7 +1334,8 @@ function hubMod(RES,o){
 
 // ---------- ĐỀ XUẤT TÁCH / GỘP HUB theo vị trí (Storeslist: Vĩ độ, Kinh độ) ----------
 // Cụm HUB = HUB cấp 1 + các CH vệ tinh. Giá trị cụm/ngày = tổng đơn các CH trong cụm ngày đó; lấy ngày cao nhất.
-// Cụm < MOD → gộp vào cụm gần nhất (khoảng cách 2 HUB ≤ bán kính) cho đủ MOD. Cụm ≥ x × MOD (mặc định 4, tính từ 90%) → tách thành nhiều HUB, HUB mới là CH có tổng khoảng cách tới các CH trong nhóm nhỏ nhất.
+// Cụm < MOD → gộp vào cụm gần nhất (khoảng cách 2 HUB ≤ bán kính) cho đủ MOD. Cụm ≥ x × MOD (mặc định 4, tính từ 90%) → bóc dần CH / cụm CH (từ 1 CH, ưu tiên CH xa HUB) ra HUB riêng:
+// cụm mới đủ MOD/lần, bán kính ≤ R, mỗi CH gần HUB mới hơn HUB cũ, HUB cũ còn lại vẫn đủ MOD. HUB mới là CH có tổng khoảng cách tới các CH trong cụm nhỏ nhất.
 function kmDist(a,b){if(!a||!b||!isFinite(a.la)||!isFinite(b.la)||!isFinite(a.lo)||!isFinite(b.lo))return Infinity;const R=6371,r=Math.PI/180,dLa=(b.la-a.la)*r,dLo=(b.lo-a.lo)*r,x=Math.sin(dLa/2)**2+Math.cos(a.la*r)*Math.cos(b.la*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7], modOf, radius, splitX}
   const K=c=>String(c||'').toUpperCase(),H=o.hub||{},R=+o.radius||15,X=+o.splitX||4;
@@ -1345,13 +1351,16 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
   cl.forEach((ms,h)=>{const mod=o.modOf(h);if(!(mod>0))return;const pk=peak(ms);
     const wk=val(ms).reduce((a,b)=>a+b,0);
     if(wk>=0.9*X*mod&&ms.length>=2&&ms.every(c=>isFinite((o.pos(c)||{}).la))){
-      let k=Math.min(ms.length,Math.max(2,Math.floor(wk/(2*mod))));let res=null;
-      for(;k>=2;k--){ // k-medoids
-        let meds=[ms.reduce((a,b)=>peak([b])>peak([a])?b:a)];while(meds.length<k){let far=null,fd=-1;ms.forEach(c=>{const d=Math.min(...meds.map(m=>kmDist(o.pos(c),o.pos(m))));if(d>fd){fd=d;far=c}});meds.push(far)}
-        let grp;for(let it=0;it<12;it++){grp=meds.map(()=>[]);ms.forEach(c=>{let bi=0,bd=Infinity;meds.forEach((m,i)=>{const d=kmDist(o.pos(c),o.pos(m));if(d<bd){bd=d;bi=i}});grp[bi].push(c)});const nm=grp.map((g,i)=>g.length?medoid(g):meds[i]);if(nm.every((m,i)=>m===meds[i]))break;meds=nm}
-        const parts=grp.map((g,i)=>({hub:medoid(g),list:g})).filter(p=>p.list.length);parts.forEach(p=>{p.peak=peak(p.list);p.wk=val(p.list).reduce((a,b)=>a+b,0);p.km=radius(p.hub,p.list)});
-        if(parts.length>=2&&parts.every(p=>p.peak>=mod&&p.km<=R)){res=parts;break}}
-      if(res)splits.push({key:'S|'+h,hub:h,n:ms.length,peak:pk,wk,mod,parts:res})}
+      const d=(a,b)=>kmDist(o.pos(a),o.pos(b)),dh=c=>{const x=d(c,h);return isFinite(x)?x:0};
+      let rest=ms.slice();const parts=[];
+      ms.filter(c=>c!==h).sort((a,b)=>dh(b)-dh(a)).forEach(seed=>{if(!rest.includes(seed))return;
+        const G=[seed],cand=rest.filter(c=>c!==h&&c!==seed&&d(seed,c)<=R&&d(seed,c)<dh(c)).sort((a,b)=>d(seed,a)-d(seed,b));
+        while(peak(G)<mod&&cand.length)G.push(cand.shift());
+        if(peak(G)<mod)return;const nh=medoid(G);
+        if(radius(nh,G)>R||G.some(c=>c!==nh&&d(c,nh)>=dh(c)))return;
+        const remain=rest.filter(c=>!G.includes(c));if(!remain.length||peak(remain)<mod)return;
+        parts.push({hub:nh,list:G,peak:peak(G),wk:val(G).reduce((a,b)=>a+b,0),km:radius(nh,G)});rest=remain});
+      if(parts.length)splits.push({key:'S|'+h,hub:h,n:ms.length,peak:pk,wk,mod,parts,keep:{hub:h,list:rest,peak:peak(rest),km:radius(h,rest)}})}
     else if(wk<mod){let best=null,bd=Infinity;cl.forEach((m2,h2)=>{if(h2===h)return;const d=kmDist(o.pos(h),o.pos(h2));const w2=val(m2).reduce((a,b)=>a+b,0);if(d<=R&&d<bd&&wk+w2>=mod){bd=d;best=h2}});
       if(best)merges.push({key:'M|'+h,hub:h,n:ms.length,peak:pk,wk,mod,to:best,km:bd,list:ms})}});
   return {splits,merges,clusters:cl.size};
@@ -1360,7 +1369,7 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
 (function(){
 'use strict';
 const APP=window.FC_APP||'rcq',CH=APP!=='rcq';document.documentElement.dataset.app=CH?'cahoi':'rcq';document.documentElement.dataset.ncc=APP;
-const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.0'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.0'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.0'}};
+const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.1'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.1'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.1'}};
 const AC=APPS[APP]||{ns:'rcq/',ls:'fc4_masters',mch3:'Rau củ'};
 const E=window.FC4,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
@@ -1853,7 +1862,7 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   const lv1=k=>{const v=(H[K(k)]||[])[0];return v&&v!=='0'&&K(v)!==K(k)?K(v):''};const S=RES.stores,isHub=new Set(S.map(x=>lv1(x.code)).filter(Boolean));
   const st=new Map();M.POs.forEach(p=>{const k=K(p.store);const o=st.get(k)||{s:new Set(),gt:0};o.s.add(p.st);o.gt+=p.gt;st.set(k,o)});
   const shortOf=new Map();M.shorts.forEach(g=>g.list.forEach(p=>{const k=K(p.store);if(!shortOf.has(k))shortOf.set(k,new Set());shortOf.get(k).add(g)}));
-  const pos=k=>STL.map.get(K(k)),spM=new Map(HP.splits.map(x=>[K(x.hub),x])),mgM=new Map(HP.merges.map(x=>[K(x.hub),x])),hasPos=[...STL.map.values()].some(x=>isFinite(x.la));
+  const pos=k=>STL.map.get(K(k)),spM=new Map(HP.splits.map(x=>[K(x.hub),x])),mgM=new Map(HP.merges.map(x=>[K(x.hub),x])),spTo=new Map();HP.splits.forEach(s=>s.parts.forEach(p=>p.list.forEach(c=>spTo.set(K(c),K(p.hub)))));const hasPos=[...STL.map.values()].some(x=>isFinite(x.la));
   const CL=new Map();S.forEach(x=>{const k=K(x.code),h=lv1(k)||k;if(!CL.has(h))CL.set(h,[]);CL.get(h).push(x)});
   const DV=HP.DV,wkOf=L=>L.reduce((a,x)=>a+(DV.get(K(x.code))||[]).reduce((s,v)=>s+v,0),0),dayOf=L=>{const d=[0,0,0,0,0,0,0];L.forEach(x=>(DV.get(K(x.code))||[]).forEach((v,i)=>d[i]+=v));return d};
   const agg=L=>{const o={sale:0,huy:0,ton:0,cg:0,fc:0,gt:0,d:[0,0,0,0,0,0,0],st:{thua:0,du:0,thieu:0}};L.forEach(x=>{o.sale+=x.sale1w;o.huy+=x.huy1w;o.ton+=x.ton||0;o.cg+=x.__cg||0;o.fc+=x.totalFC;o.gt+=(st.get(K(x.code))||{}).gt||0;(x.dayKg||[]).forEach((v,i)=>o.d[i]+=v||0);o.st[x.__stt]=(o.st[x.__stt]||0)+1});return o};
@@ -1866,7 +1875,7 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   rows=rows.filter(r=>(!q||(r.h+' '+((pos(r.h)||{}).n||'')+' '+r.L.map(x=>x.code+' '+x.name).join(' ')).toLowerCase().includes(q))&&(!fl||(fl==='short'?r.sh.length:fl==='thua'?r.A.st.thua:fl==='thieu'?r.A.st.thieu:r.hs===fl)));
   const ordS={tach:0,huy:1,gop:2,du:3};rows.sort((a,b)=>ordS[a.hs]-ordS[b.hs]||b.wk-a.wk);
   const cnt={tach:0,gop:0,huy:0,du:0};[...CL.keys()].forEach(()=>{});rows.forEach(r=>cnt[r.hs]++);
-  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%), mỗi HUB mới đủ MOD/lần, bán kính ≤ ${R} km · Gộp khi tổng tuần < MOD và có HUB gần cho đủ. Mỗi HUB dàn sản lượng vào số lần giao = tổng tuần ÷ MOD (≥ số lần theo HSD); vẫn thiếu thì tăng FC mã bán chạy, hủy thấp (trong Lock Max). Tick đề xuất rồi bấm Xác nhận.`;
+  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%): bóc CH / cụm CH (từ 1 CH, ưu tiên CH xa HUB) ra HUB riêng khi đủ MOD/lần, bán kính ≤ ${R} km, gần HUB mới hơn HUB cũ và HUB cũ còn lại vẫn đủ MOD · Gộp khi tổng tuần < MOD và có HUB gần cho đủ. Mỗi HUB dàn sản lượng vào số lần giao = tổng tuần ÷ MOD (≥ số lần theo HSD); vẫn thiếu thì tăng FC mã bán chạy, hủy thấp (trong Lock Max). Tick đề xuất rồi bấm Xác nhận.`;
   const HS={tach:['high','Tách'],du:['stt-du','Đủ'],gop:['','Gộp'],huy:['crit','Hủy']};const nm=k=>{const x=pos(k);return String((x&&x.n)||(S.find(y=>K(y.code)===K(k))||{}).name||'').replace(/^WM\+\s*/,'')};
   const f=x=>gt?nf(x,0):nf(x,1),num=(x,d=1)=>x?nf(x,d):'·',P=40,pages=Math.max(1,Math.ceil(rows.length/P));if(HV.page>=pages)HV.page=0;
   const dd=d=>d.map((v,i)=>v>0?E.DAYVN[i]:'').filter(Boolean).join('·');
@@ -1875,14 +1884,14 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   const head=`<tr><th>Status HUB</th><th>Mã HUB / CH – Tên</th><th class="n">Số CH / PN</th><th class="n">Km HUB</th><th>Lịch giao</th><th class="n">Sale 1W</th><th class="n">Hủy 1W</th><th class="n">Tồn</th><th class="n">Chờ giao</th><th class="n">FC kg</th>${gt?'<th class="n">FC nghìn đ</th>':''}<th class="n">+/- Sale</th><th class="n" title="Tô màu: đỏ = FC vượt, xanh lá = đủ, xanh dương = thiếu (theo ngưỡng Thừa/Thiếu ở Cấu hình)">FC/Sale</th>${E.DAYVN.map(d=>`<th class="n">${d}</th>`).join('')}<th class="n">MOD/lần (${U})</th><th class="n" title="MOD/lần × số ngày giao có hàng">MOV tuần</th><th class="n" title="Tổng đơn tuần ÷ MOD/lần">Tuần / MOD</th><th>Gom</th><th>Đề xuất / Xử lý</th></tr>`;
   el.innerHTML=head+rows.slice(HV.page*P,(HV.page+1)*P).map(r=>{const multi=r.L.length>1,op=HV.all||HV.open.has(r.h);
     let act='';const sp=spM.get(r.h),mg=mgM.get(r.h);
-    if(sp)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(sp.key)}" ${HPSEL.has(sp.key)?'checked':''}> Tách thành ${sp.parts.map(p=>`<b>HUB ${esc(p.hub)}</b> – ${p.list.length} CH – ${nf(p.km,1)} km`).join('; ')}</label>`;
+    if(sp)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(sp.key)}" ${HPSEL.has(sp.key)?'checked':''}> Tách ra ${sp.parts.map(p=>`<b>HUB ${esc(p.hub)}</b> ${esc(nm(p.hub))} – ${p.list.length} CH${p.list.length>1?' ('+p.list.map(esc).join(', ')+')':''} – ${nf(p.km,1)} km`).join('; ')} · HUB ${esc(sp.hub)} giữ ${sp.keep.list.length} CH</label>`;
     else if(mg)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(mg.key)}" ${HPSEL.has(mg.key)?'checked':''}> Gộp vào <b>HUB ${esc(mg.to)}</b> ${esc(nm(mg.to))} – ${nf(mg.km,1)} km</label>`;
     if(r.sh.length){const keys=r.sh.map(g=>g.key).join(','),need=r.sh.reduce((a,g)=>a+g.need,0),cur=r.sh.every(g=>(c.dec||{})[g.key]===r.sh[0]&&0)?'':((c.dec||{})[r.sh[0].key]||'');
       act+=`${act?'<br>':''}<span class="smallnote">Thiếu MOD ${r.sh.length} lần (${f(need)} ${U})</span> <select class="hdec" data-keys="${esc(keys)}"><option value="">${r.sh.some(g=>g.auto)?'Tự tăng':'Chưa chọn'}</option><option value="up" ${cur==='up'?'selected':''}>Tăng FC đủ MOD</option><option value="no" ${cur==='no'?'selected':''}>Không đặt</option></select>`}
     const lab=`${multi?`<span class="tg">${op?'▾':'▸'}</span> `:''}<b>${esc(r.h)}</b> – ${esc(nm(r.h))}`;
     let h=line({cls:'hvh'+(multi?' click':''),attr:`data-h="${esc(r.h)}"`,status:`<span class="pill ${HS[r.hs][0]}">${HS[r.hs][1]}</span>`,lab,n:r.L.length,km:multi?nf(r.km,1):'—',lich:dd(r.d),A:r.A,mod:r.mod,mov:r.mod*r.nd,x:r.mod?r.wk/r.mod:null,gom:gs(new Set(r.L.flatMap(x=>[...((st.get(K(x.code))||{}).s||[])]))),act});
     if(multi&&op)h+=r.L.slice().sort((a,b)=>(K(a.code)===r.h?-1:K(b.code)===r.h?1:b.totalFC-a.totalFC)).map(x=>{const k=K(x.code),A=agg([x]),d=DV.get(k)||[0,0,0,0,0,0,0],wk=d.reduce((a,b)=>a+b,0),m=mo(k),km=k===r.h?'HUB':(()=>{const z=kmDist(pos(r.h),pos(k));return isFinite(z)?nf(z,1):'—'})();
-      return line({cls:'hvs',lab:`<span style="padding-left:18px">${esc(x.code)}</span> – <span class="smallnote">${esc(String(x.name||'').replace(/^WM\+\s*/,''))}</span>`,n:esc(x.N),km,lich:esc(x.lich||''),A,mod:m,mov:m*d.filter(v=>v>0).length,x:m?wk/m:null,gom:gs((st.get(k)||{}).s||new Set())})}).join('');
+      return line({cls:'hvs',lab:`<span style="padding-left:18px">${esc(x.code)}</span> – <span class="smallnote">${esc(String(x.name||'').replace(/^WM\+\s*/,''))}</span>${spTo.has(k)?` <span class="pill high">${spTo.get(k)===k?'HUB mới':'Tách → HUB '+esc(spTo.get(k))}</span>`:''}`,n:esc(x.N),km,lich:esc(x.lich||''),A,mod:m,mov:m*d.filter(v=>v>0).length,x:m?wk/m:null,gom:gs((st.get(k)||{}).s||new Set())})}).join('');
     return h}).join('')||`<tr><td colspan="24" class="smallnote">Không có HUB phù hợp.</td></tr>`;
   pager('#pgHv',rows.length,HV.page,p=>{HV.page=p;renderHubView()},P);$('#hpApply').disabled=!HPSEL.size}
 $('#tHubView')&&$('#tHubView').addEventListener('click',e=>{if(e.target.closest('input,select,label'))return;const tr=e.target.closest('tr.hvh.click');if(!tr)return;const h=tr.dataset.h;HV.open.has(h)?HV.open.delete(h):HV.open.add(h);renderHubView()});
@@ -1892,9 +1901,11 @@ $('#hvQ')&&$('#hvQ').addEventListener('input',()=>{HV.page=0;renderHubView()});$
 $('#hvOpen')&&$('#hvOpen').addEventListener('click',e=>{HV.all=!HV.all;HV.open.clear();e.target.textContent=HV.all?'Thu hết':'Mở hết';renderHubView()});
 ['#hR','#hX'].forEach(id=>{const el=$(id);if(el)el.addEventListener('change',()=>{const v=Number(el.value);if(!isFinite(v)||v<=0)return;MS.lichve.cfg[id==='#hR'?'hubR':'hubSplitX']=v;markDirty('lichve');HPSEL.clear();renderHubPlan();renderHubView()})});
 $('#hpApply')&&$('#hpApply').addEventListener('click',()=>{if(!HP)return;const c=MS.lichve.cfg,H=c.hub=c.hub||{},K=x=>String(x).toUpperCase(),get=k=>H[K(k)]||['','',null];let ns=0,nm=0;
-  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),'',o[2]]}))});
-  HP.merges.filter(m=>HPSEL.has(m.key)).forEach(m=>{nm++;m.list.forEach(k=>{const o=get(k);H[K(k)]=[K(m.to),o[1]||'',o[2]]})});
-  HPSEL.clear();markDirty('lichve');toast(`Đã cập nhật danh sách HUB: tách ${ns}, gộp ${nm} — bấm Lưu để lưu chung`);recompute()});
+  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),o[1]||'',o[2]]}))});
+  // Gộp nối chuỗi (A → B, B → C) dồn thẳng về HUB cuối; vòng (A → B, B → A) thì bỏ qua
+  const msel=HP.merges.filter(m=>HPSEL.has(m.key)),to=new Map(msel.map(m=>[K(m.hub),K(m.to)])),fin=h=>{const seen=new Set([h]);let t=to.get(h);while(to.has(t)&&!seen.has(t)){seen.add(t);t=to.get(t)}return seen.has(t)?'':t};let nx=0;
+  msel.forEach(m=>{const h=K(m.hub),t=fin(h);if(!t){nx++;return}nm++;const set=k=>{const o=get(k);H[K(k)]=[t,o[1]||'',o[2]]};m.list.forEach(set);set(h);Object.keys(H).forEach(k=>{if(K(H[k][0])===h)set(k)})});
+  HPSEL.clear();markDirty('lichve');toast(`Đã cập nhật danh sách HUB: tách ${ns}, gộp ${nm}${nx?`, bỏ ${nx} gộp vòng`:''} — bấm Lưu để lưu chung`);recompute()});
 function renderMov(){
   const M=RES.mod,c=MS.lichve.cfg,U=AC.gt?'nghìn đ':'kg',v=x=>AC.gt?x.gt:x.kg,fv=x=>AC.gt?nf(x,0):nf(x,1);
   $('#modUnit').textContent=U;const setv=(id,val)=>{const el=$(id);if(el&&document.activeElement!==el)el.value=val};
@@ -1914,7 +1925,7 @@ function hubBind(){const c=()=>MS.lichve.cfg,num=e=>{const x=parseFloat(String(e
   $('#tShort').addEventListener('change',e=>{const t=e.target.closest('.hdec');if(!t)return;const d=c().dec=c().dec||{};if(t.value)d[t.dataset.k]=t.value;else delete d[t.dataset.k];markDirty('lichve')})}
 
 function chInit(){
-  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 31/10/2026 · by HaoDT</span>';
+  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 07/11/2026 · by HaoDT</span>';
   const RL=[[/Nhóm rau/g,'Mã SP'],[/nhóm rau/g,'mã SP'],[/Rau Củ Quả|RCQ/g,AC.short],[/\(FC \+ Tồn dự kiến\)/g,'FC'],[/FC \+ Tồn dự kiến/g,'FC'],[/sau kẹp Min\/Max, /g,''],[/Tồn & Chờ giao/g,'Tồn & Hủy'],[/nhóm SP \(MCH4\) × %hủy SKU/g,'mã quy đổi (Mã WEC) × %hủy mã quy đổi'],[/Nhóm SP: (bật|tắt)/g,'Mã quy đổi: $1']];
   const fix=n=>{if(!n)return;if(n.nodeType===3){let v=n.nodeValue,o=v;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)n.nodeValue=v;return}if(n.nodeType!==1)return;const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){let v=t.nodeValue,o=v;if(!/hóm rau|RCQ|Rau Củ|Tồn dự kiến|kẹp Min|Chờ giao|MCH4|Nhóm SP: /.test(v))continue;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)t.nodeValue=v}};
   fix(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fix))).observe(document.body,{childList:true,subtree:true});
