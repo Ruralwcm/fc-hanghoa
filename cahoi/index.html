@@ -1309,7 +1309,7 @@ function hubMod(RES,o){
   const c1=c=>lv(c,0)||K(c),CL={};POs.forEach(p=>{const h=c1(p.store);(CL[h]||(CL[h]=[])).push(p)});
   const route={};Object.entries(CL).forEach(([h,L])=>{const m=modOf(h),d={};L.forEach(p=>{d[p.day]=(d[p.day]||0)+val(p)});let r=h;
     if(m>0&&Object.values(d).some(v=>v<m-1e-9)){const h2=lv(h,1)||L.map(p=>lv(p.store,1)).find(Boolean)||'';if(h2&&h2!==h)r=h2}route[h]=r});
-  const grp={};POs.forEach(p=>{const h=c1(p.store),dest=route[h],s=K(p.store);p.dest=dest;p.st=dest===s?0:dest===h?1:2;
+  const grp={};POs.forEach(p=>{const h=c1(p.store),dest=route[h],s=K(p.store);p.dest=p.route=dest;p.st=dest===s?0:dest===h?1:2;
     const k=dest+'|'+p.day;const g=grp[k]||(grp[k]={key:k,hub:dest,day:p.day,kg:0,gt:0,list:[],mod:modOf(dest)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
   const sg={};Object.values(grp).forEach(g=>{g.lv=Math.max(...g.list.map(p=>p.st));
     if(g.mod>0&&val(g)<g.mod-1e-9){g.list.forEach(p=>{p.st=4;p.dest=''});sg[g.key]=g}else if(g.lv>0)hubs.push(g)});
@@ -1325,7 +1325,7 @@ function hubMod(RES,o){
   const touched=new Set();POs.forEach(p=>p.refs.forEach(([r,,S])=>{if(r.boost||r.blocked)touched.add(S)}));
   for(const S of touched){for(const r of S.rows){if(!(r.boost||r.blocked))continue;r.pcs=+r.days.reduce((a,b)=>a+b,0).toFixed(6);r.kg=r.pcs*(r.sku.qd||1)}
     S.totalFC=S.rows.reduce((a,r)=>a+r.kg,0);S.dayKg=[0,0,0,0,0,0,0];S.rows.forEach(r=>r.days.forEach((u,d)=>S.dayKg[d]+=u*(r.sku.qd||1)))}
-  POs.forEach(p=>p.refs.forEach(([r])=>{(r.hst=r.hst||new Set()).add(p.st);if(p.dest&&p.dest!==p.store)(r.hdest=r.hdest||new Set()).add(p.dest)}));
+  POs.forEach(p=>p.refs.forEach(([r])=>{(r.hst=r.hst||new Set()).add(p.st);const dh=p.dest||p.route;if(dh)(r.hdest=r.hdest||new Set()).add(dh)})); // giao thẳng = HUB 1 CH: điền chính CH
   return {POs,hubs,shorts,gt:GT};
 }
 
@@ -1366,7 +1366,7 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
 (function(){
 'use strict';
 const APP=window.FC_APP||'rcq',CH=APP!=='rcq';document.documentElement.dataset.app=CH?'cahoi':'rcq';document.documentElement.dataset.ncc=APP;
-const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.2'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.2'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.2'}};
+const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.3'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.3'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.3'}};
 const AC=APPS[APP]||{ns:'rcq/',ls:'fc4_masters',mch3:'Rau củ'};
 const E=window.FC4,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
@@ -1922,7 +1922,7 @@ function hubBind(){const c=()=>MS.lichve.cfg,num=e=>{const x=parseFloat(String(e
   $('#tShort').addEventListener('change',e=>{const t=e.target.closest('.hdec');if(!t)return;const d=c().dec=c().dec||{};if(t.value)d[t.dataset.k]=t.value;else delete d[t.dataset.k];markDirty('lichve')})}
 
 function chInit(){
-  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 07/11/2026 · by HaoDT</span>';
+  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 08/11/2026 · by HaoDT</span>';
   const RL=[[/Nhóm rau/g,'Mã SP'],[/nhóm rau/g,'mã SP'],[/Rau Củ Quả|RCQ/g,AC.short],[/\(FC \+ Tồn dự kiến\)/g,'FC'],[/FC \+ Tồn dự kiến/g,'FC'],[/sau kẹp Min\/Max, /g,''],[/Tồn & Chờ giao/g,'Tồn & Hủy'],[/nhóm SP \(MCH4\) × %hủy SKU/g,'mã quy đổi (Mã WEC) × %hủy mã quy đổi'],[/Nhóm SP: (bật|tắt)/g,'Mã quy đổi: $1']];
   const fix=n=>{if(!n)return;if(n.nodeType===3){let v=n.nodeValue,o=v;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)n.nodeValue=v;return}if(n.nodeType!==1)return;const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){let v=t.nodeValue,o=v;if(!/hóm rau|RCQ|Rau Củ|Tồn dự kiến|kẹp Min|Chờ giao|MCH4|Nhóm SP: /.test(v))continue;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)t.nodeValue=v}};
   fix(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fix))).observe(document.body,{childList:true,subtree:true});
