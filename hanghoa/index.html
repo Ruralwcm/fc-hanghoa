@@ -529,7 +529,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
 
   // Storeslist: A Mã SAP · B Tên · C Tình trạng · D Khai trương · E Miền · F Tỉnh · G Huyện · H QLKV · I GĐV
   function buildStores(rows) { const m = {}; for (let i = 1; i < rows.length; i++) { const r = rows[i]; const k = key(r[0]); if (!k) continue;
-      const tinh = S(r[5]); m[k] = { code: k, name: S(r[1]), status: S(r[2]), mien: mienOf(tinh, r[4]), tinh, huyen: S(r[6]), qlkv: S(r[7]), gdv: S(r[8]) }; }
+      const tinh = S(r[10]); m[k] = { code: k, name: S(r[4]), status: S(r[5]), mien: mienOf(tinh, r[7]), tinh, huyen: S(r[11]), qlkv: S(r[31]), gdv: S(r[35]) }; }
     return m; }
   // SKUs: A Article · B Tên · C Base Unit · D MCH2 · E MCH3 · F MCH4 · G COGS
   function buildSkus(rows) { const m = {}; for (let i = 1; i < rows.length; i++) { const r = rows[i]; const k = key(r[0]); if (!k) continue;
@@ -648,7 +648,7 @@ const mienOfT=t=>MIEN_MAP[nT(t)]||(t?'Miền Nam':'Khác');
 const SL_ACTIVE=s=>!s||/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s);
 /* Storeslist (Sheet gốc gid 164583655): A Mã · B Tên · C Tình trạng · D Khai trương · E Miền · F Tỉnh · G Huyện · H QLKV · I GĐV · L SPD · M Nhóm DT */
 const STL={map:new Map(),at:null};
-function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[1]||'').trim(),st:String(r[2]||'').trim(),m:String(r[4]||'').trim()||mienOfT(r[5]),t:String(r[5]||'').trim(),q:String(r[7]||'').trim(),g:String(r[8]||'').trim(),spd:r[11],ndt:String(r[12]||'').trim(),la:parseFloat(String(r[9]||'').replace(',','.')),lo:parseFloat(String(r[10]||'').replace(',','.'))})});STL.at=new Date();return STL.map}
+function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[4]||'').trim(),st:String(r[5]||'').trim(),m:String(r[7]||'').trim()||mienOfT(r[10]),t:String(r[10]||'').trim(),q:String(r[31]||'').trim(),g:String(r[35]||'').trim(),spd:r[103],ndt:String(r[104]||'').trim(),la:parseFloat(String(r[16]||'').replace(',','.')),lo:parseFloat(String(r[17]||'').replace(',','.'))})});STL.at=new Date();return STL.map}
 /* opt: {el, list:()=>[{c,n,m,g,q}], get:()=>Set(mã CH), set:(Set)=>void} — lá là từng CH */
 function StoreTree(opt){
   const el=opt.el,open=new Set(),E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
