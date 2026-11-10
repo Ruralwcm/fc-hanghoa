@@ -1242,7 +1242,7 @@ const mienOfT=t=>MIEN_MAP[nT(t)]||(t?'Miền Nam':'Khác');
 const SL_ACTIVE=s=>!s||/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s);
 /* Storeslist (Sheet gốc gid 164583655): A Mã · B Tên · C Tình trạng · D Khai trương · E Miền · F Tỉnh · G Huyện · H QLKV · I GĐV · L SPD · M Nhóm DT */
 const STL={map:new Map(),at:null};
-function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[1]||'').trim(),st:String(r[2]||'').trim(),m:String(r[4]||'').trim()||mienOfT(r[5]),t:String(r[5]||'').trim(),q:String(r[7]||'').trim(),g:String(r[8]||'').trim(),spd:r[11],ndt:String(r[12]||'').trim(),la:parseFloat(String(r[9]||'').replace(',','.')),lo:parseFloat(String(r[10]||'').replace(',','.'))})});STL.at=new Date();return STL.map}
+function stlLoad(rows){const K=v=>String(v||'').trim().toUpperCase();STL.map=new Map();(rows||[]).slice(1).forEach(r=>{const c=K(r[0]);if(!c)return;STL.map.set(c,{c,n:String(r[4]||'').trim(),st:String(r[5]||'').trim(),m:String(r[7]||'').trim()||mienOfT(r[10]),t:String(r[10]||'').trim(),q:String(r[31]||'').trim(),g:String(r[35]||'').trim(),spd:r[103],ndt:String(r[104]||'').trim(),la:parseFloat(String(r[16]||'').replace(',','.')),lo:parseFloat(String(r[17]||'').replace(',','.'))})});STL.at=new Date();return STL.map}
 /* opt: {el, list:()=>[{c,n,m,g,q}], get:()=>Set(mã CH), set:(Set)=>void} — lá là từng CH */
 function StoreTree(opt){
   const el=opt.el,open=new Set(),E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1975,14 +1975,14 @@ async function syncPn(manual,all){
     if(!Object.keys(nh).length)throw new Error('PhanNhomCH không có MCH3 "'+SG.mch3+'"');
     const stM=new Map(st.slice(1).map(r=>[K(r[0]),r]));const cur=new Map(MS.phannhom.rows.map(r=>[K(r[0]),r]));
     const HB={};(hb||[]).slice(1).forEach(r=>{const h=K(r[1]);if(h&&h!=='0')HB[K(r[0])]=h});
-    const useAll=all!=null?all:SG.all;const actSt=st.slice(1).filter(r=>K(r[0])&&SL_ACTIVE(String(r[2]||''))).map(r=>K(r[0]));
+    const useAll=all!=null?all:SG.all;const actSt=st.slice(1).filter(r=>K(r[0])&&SL_ACTIVE(String(r[5]||''))).map(r=>K(r[0]));
     // lấy đủ mọi CH đang hoạt động trong Storeslist; CH chưa có phân nhóm MCH3 trong PhanNhomCH → dùng cột Nhóm DT của Storeslist
     const keys=useAll?[...new Set([...cur.keys(),...Object.keys(nh),...actSt])]:[...cur.keys()];
     let add=0,chg=0,del=0,dt=0;const out=[];SG.dt=new Set();
-    for(const k of keys){const s=stM.get(k),old=cur.get(k);let n=nh[k];if(!n&&useAll&&s){const d=String(s[12]||'').trim().toUpperCase();if(/^N[1-8]$/.test(d)){n=d;dt++;SG.dt.add(k)}}
-      if(!s||(s[2]&&!/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s[2]))||(!n&&(useAll||!old))){if(old)del++;continue}
+    for(const k of keys){const s=stM.get(k),old=cur.get(k);let n=nh[k];if(!n&&useAll&&s){const d=String(s[104]||'').trim().toUpperCase();if(/^N[1-8]$/.test(d)){n=d;dt++;SG.dt.add(k)}}
+      if(!s||(s[5]&&!/^(?!.*(ngừng|dừng|không|đóng)).*hoạt động/i.test(s[5]))||(!n&&(useAll||!old))){if(old)del++;continue}
       const row=old?old.slice():[k,'','','','',null,null,null,''];row[0]=k;
-      if(s){row[1]=String(s[1]||row[1]||'').trim();row[2]=String(s[7]||row[2]||'').trim();row[3]=String(s[8]||row[3]||'').trim();row[4]=String(s[5]||row[4]||'').trim();row[5]=num(s[11]);row[6]=String(s[12]||'').trim();row[7]=num(spdM[k])}
+      if(s){row[1]=String(s[4]||row[1]||'').trim();row[2]=String(s[31]||row[2]||'').trim();row[3]=String(s[35]||row[3]||'').trim();row[4]=String(s[10]||row[4]||'').trim();row[5]=num(s[103]);row[6]=String(s[104]||'').trim();row[7]=num(spdM[k])}
       if(n)row[8]=n;
       if(!old)add++;else if(old[8]!==row[8]||old[1]!==row[1]||old[2]!==row[2]||old[3]!==row[3]||old[4]!==row[4])chg++;
       out.push(row)}
