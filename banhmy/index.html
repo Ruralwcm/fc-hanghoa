@@ -461,7 +461,7 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
         <div><span><b>② Sàn = Min</b> của nhóm N (kg, làm tròn lên bội số QC) — có Min là đặt, kể cả CH chưa bán. <b>③ Trần</b> = Min × <b>Lock Max</b> (Cấu hình FC, mặc định 3). Min = 0: không đặt; bật "FC khi Min = 0" thì đặt theo ① (không sàn, không trần) nếu CH có bán.</span></div>
         <div><span><b>SL FC = min( max(①, ②), ③ )</b>.</span></div>
         <div><span><b>Chia ngày</b>: theo lịch giao tỉnh × N; mỗi lần giao ≥ Min của mã. Bật "Tối đa tần suất giao" thì giao thêm ngày trong lịch tuyến khi đủ.</span></div>
-        <div><span><b>MOQ & gom HUB</b>: mỗi CH × ngày ≥ MOD (HUB → NCC × tỉnh → mặc định) thì giao thẳng; CH vệ tinh luôn giao qua HUB cấp 1 cả tuần (HUB cố định), cụm HUB cấp 1 thiếu MOD thì cả tuần qua HUB cấp 2; cụm còn thiếu dưới x% thì tăng FC cho đủ.</span></div>
+        <div><span><b>MOQ & gom HUB</b>: xét cả tuần, từng cấp CH → HUB cấp 1 → HUB cấp 2. Điểm nhận đạt khi tổng tuần ≥ ngưỡng % × số lần giao tối thiểu × MOD (MOD lấy theo HUB → NCC × tỉnh → mặc định). CH đạt thì giao thẳng (nếu phần còn lại của cụm tại HUB vẫn đạt); không đạt thì về HUB cấp 1; cụm tại HUB cấp 1 không đạt thì cả cụm lên HUB cấp 2. Đạt ngưỡng mà lần giao chưa đủ MOD thì tăng FC cho đủ tại chỗ, không chuyển HUB. Tuyến đã chốt chỉ đổi khi xác nhận ở Review MOV &amp; HUB › Thay đổi tuyến (có Tracklog).</span></div>
       </div></div>
 <div class="card" data-only="rcq"><h3>Chuỗi tính</h3><div class="flow">
         <div><span><b>Quy về KG</b>: Article → Mã WEC × Quy đổi KG (bước 1). Sale 1W = Sale L2W ÷ 2; Hủy 1W = Hủy L2W ÷ 2; Tồn = Closing L2W, Chờ giao = khối CHỜ GIAO (cột S–U) trong file sale. Mã có "Trừ Tồn CG" = 1: Tồn dự kiến đầu tuần FC = Tồn + Chờ giao − (Sale 1W + Hủy 1W) × <span data-k="leadDays"></span> ngày ÷ 7 (không âm); FC = FC sau kẹp − Tồn dự kiến (không âm), rồi mới làm tròn QC / Min. Mã = 0 thì không trừ.</span></div>
@@ -505,10 +505,18 @@ body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:
     </div>
     </div>
     <div id="cbMov" data-only="ch"><div class="kpis" id="hKpi"></div>
-    <div class="row fl hubcfg" style="gap:14px;margin:8px 0"><span hidden><b id="modUnit">kg</b><input type="number" id="hMod"></span><label class="chk">Tự tăng FC khi thiếu dưới (%) <input type="number" id="hAuto" step="1" min="0" style="width:60px"></label><label class="chk">Cụm thiếu chưa chọn <select id="hBlock"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt hàng</option></select></label><label class="chk">Bán kính HUB (km) <input type="number" id="hR" step="1" min="1" style="width:56px"></label><label class="chk">Tách khi cụm ≥ <input type="number" id="hX" step="0.5" min="1" style="width:52px"> × MOD/tuần</label><button class="btn sm pri" id="hpApply" type="button" disabled>Xác nhận đề xuất đã chọn</button></div>
+    <div class="row fl hubcfg" style="gap:14px;margin:8px 0"><span hidden><b id="modUnit">kg</b><input type="number" id="hMod"></span><span hidden><input type="number" id="hAuto"></span><label class="chk" title="Một điểm nhận (CH, HUB cấp 1, HUB cấp 2) đạt từ mức này của MOV thì được tăng FC cho đủ MOV ngay tại cấp đó, không chuyển HUB. Dưới mức này thì chuyển lên cấp trên.">Bổ sung tại chỗ khi đạt ≥ <input type="number" id="hThr" step="5" min="0" max="100" style="width:60px"> % MOV</label><label class="chk" title="Số ngày giữa 2 lần review thay đổi tuyến HUB">Kỳ review HUB (ngày) <input type="number" id="hRevDays" step="1" min="1" style="width:56px"></label><label class="chk">Cụm thiếu chưa chọn <select id="hBlock"><option value="0">Giữ nguyên số đặt</option><option value="1">Không đặt hàng</option></select></label><label class="chk">Bán kính HUB (km) <input type="number" id="hR" step="1" min="1" style="width:56px"></label><label class="chk">Tách khi cụm ≥ <input type="number" id="hX" step="0.5" min="1" style="width:52px"> × MOD/tuần</label><button class="btn sm pri" id="hpApply" type="button" disabled>Xác nhận đề xuất đã chọn</button></div>
+    <div class="row fl" style="gap:12px;margin:8px 0;align-items:center"><div class="seg" id="hTabs" role="group" aria-label="Review HUB"><button type="button" data-t="a" aria-pressed="true">Cụm HUB</button><button type="button" data-t="b" aria-pressed="false">Thay đổi tuyến <span id="hChgN"></span></button><button type="button" data-t="c" aria-pressed="false">Tracklog <span id="hLogN"></span></button></div><span class="smallnote" id="hRevInfo" style="white-space:normal"></span></div>
+    <div id="hPaneA">
     <p class="hint" id="hpNote"></p>
     <div class="row fl" style="gap:10px;margin:4px 0"><input type="text" id="hvQ" placeholder="Tìm mã / tên HUB, CH" aria-label="Tìm HUB"><select id="hvF" aria-label="Lọc"><option value="">Tất cả HUB</option><option value="tach">HUB cần tách</option><option value="gop">HUB cần gộp</option><option value="huy">HUB hủy</option><option value="short">HUB còn thiếu MOD</option><option value="thua">Có CH FC vượt</option><option value="thieu">Có CH FC thiếu</option></select><button class="btn sm" id="hvOpen" type="button">Mở hết</button></div>
     <div class="tw" style="max-height:680px"><table id="tHubView"></table></div><div class="pager" id="pgHv"></div>
+    </div>
+    <div id="hPaneB" hidden><p class="hint" id="hrNote"></p>
+    <div class="row fl" style="gap:10px;margin:4px 0"><input type="text" id="hrQ" placeholder="Tìm mã / tên CH, HUB" aria-label="Tìm thay đổi tuyến"><select id="hrF" aria-label="Lọc loại thay đổi"><option value="">Tất cả thay đổi</option><option value="0">Chuyển sang giao thẳng</option><option value="1">Về HUB cấp 1</option><option value="2">Lên HUB cấp 2</option></select><input type="text" id="hrBy" placeholder="Người review" aria-label="Người review" style="width:150px"><button class="btn sm" id="hrAll" type="button">Chọn / bỏ chọn tất cả</button><button class="btn sm pri" id="hrApply" type="button" disabled>Xác nhận thay đổi đã chọn</button><button class="btn sm pri" id="hrLock" type="button">Chốt tuyến HUB</button></div>
+    <div class="tw" style="max-height:680px"><table id="tHubRev"></table></div><div class="pager" id="pgHr"></div></div>
+    <div id="hPaneC" hidden><div class="row fl" style="gap:10px;margin:4px 0"><input type="text" id="hlQ" placeholder="Tìm trong tracklog" aria-label="Tìm trong tracklog"><button class="btn sm" id="hlExport" type="button">Xuất CSV</button></div>
+    <div class="tw" style="max-height:680px"><table id="tHubLog"></table></div><div class="pager" id="pgHl"></div></div>
     <div hidden><table id="tHub"></table><table id="tShort"></table><table id="tHubPlan"></table></div></div>
     <div id="cbDt" data-only="rcq">
     <p class="smallnote" style="margin:0 0 8px">Dự kiến thừa = FC đặt + Tồn dự kiến đầu tuần − Nhu cầu tuần (sau kẹp biên). Chỉ liệt kê dòng dư từ 0,1 kg.</p>
@@ -1276,45 +1284,70 @@ const lsSelSet=(k,S)=>{try{localStorage.setItem(k,JSON.stringify([...S]))}catch(
   document.addEventListener('focusin',mark);document.addEventListener('pointerdown',mark)})();
 
 // ---------- MOQ CH & GOM HUB (dùng chung Cá hồi · Cá basa HTX · Bánh mỳ) ----------
-// Mỗi CH × ngày giao = 1 PO. HUB cố định cả tuần (đồng bộ triển khai lấy hàng), chỉ đổi khi tách / gộp HUB:
-//  - CH không thuộc HUB nào: giao thẳng; ngày nào < MOQ thì vào xử lý thiếu.
-//  - CH vệ tinh: luôn giao qua HUB cấp 1, kể cả ngày PO tự đủ MOQ; PO của chính CH HUB là giao thẳng.
-//  - Cụm HUB cấp 1 thiếu MOQ ở bất kỳ ngày giao nào → cả tuần cả cụm đi qua HUB cấp 2 (nếu có khai).
-// Cụm (HUB nhận × ngày) vẫn thiếu: thiếu dưới autoUp → tự tăng FC cho đủ MOQ, còn lại theo lựa chọn.
+// Xét theo CẢ TUẦN, từng cấp một: CH → HUB cấp 1 → HUB cấp 2. Một điểm nhận "đạt" khi
+//   tổng tuần ≥ ngưỡng % × số lần giao tối thiểu (theo HSD) × MOV của điểm đó.
+//  - CH vệ tinh đạt → giao thẳng về CH cả tuần, với điều kiện phần còn lại của cụm tại HUB vẫn đạt (không tách CH làm cụm thiếu). Không đạt → dồn về HUB cấp 1 (cùng hàng của chính CH HUB).
+//  - Cụm tại HUB cấp 1 đạt → giao HUB cấp 1. Không đạt → cả cụm lên HUB cấp 2 (nếu có khai), cộng dồn với các cụm khác cùng về đó.
+//  - Đạt ngưỡng nhưng chưa đủ MOV ở lần giao nào → tăng FC cho đủ tại chỗ, không chuyển HUB. Dưới ngưỡng ở cấp cuối → Thiếu MOQ (chọn xử lý).
+// Tuyến đã chốt (o.lock: {CH: điểm nhận}; CH không ghi = về HUB cấp 1 / chính nó) được giữ nguyên cho tới khi review; quy tắc trên chỉ sinh ĐỀ XUẤT (prop) để so với tuyến chốt.
 const HUB_ST=['Giao thẳng','Gom HUB cấp 1','Gom HUB cấp 2','Tăng FC đủ MOQ','Thiếu MOQ'];
 function hubMod(RES,o){
   const GT=!!o.gt,val=x=>GT?x.gt:x.kg,H=o.hub||{},dec=o.dec||{},defMod=+o.defMod||0;
   const K=c=>String(c||'').toUpperCase();
   const lv=(c,i)=>{const v=(H[K(c)]||[])[i];return v&&v!=='0'&&K(v)!==K(c)?K(v):''};
   const modOf=o.modOf||(c=>{const v=(H[K(c)]||[])[2];return v!=null&&v!==''&&isFinite(+v)?+v:defMod});
-  // Dàn sản lượng theo cụm HUB: số lần giao của cụm = tổng tuần ÷ MOD (≥ số lần HSD yêu cầu, ≤ số ngày giao có thể) → mọi CH trong cụm giao cùng các ngày đó
-  if(o.rebalance!==false){const dOf=c=>String(c||'').split('').map(d=>d==='8'?6:Number(d)-2).filter(d=>d>=0&&d<7);
-    const CL=new Map();RES.stores.forEach(S=>{const h=lv(S.code,0)||K(S.code);if(!CL.has(h))CL.set(h,[]);CL.get(h).push(S)});
-    CL.forEach((L,h)=>{const mod=modOf(h);if(!(mod>0))return;const V=L.reduce((a,S)=>a+S.rows.reduce((b,r)=>b+(r.kg||0)*(GT?(r.sku.gia||0)/1000:1),0),0);if(!(V>0))return;
-      const allow=S=>{const a=new Set([...dOf(S.lich),...(S.usedDays||[])]);return a};const U=new Set();L.forEach(S=>allow(S).forEach(d=>U.add(d)));const Us=[...U].sort((a,b)=>a-b);if(!Us.length)return;
-      const nMin=Math.max(1,...L.flatMap(S=>S.rows.filter(r=>r.pcs>0).map(r=>{const x=Number(r.sku.hsd);return x>0&&x<7?Math.ceil(7/x):1})));
+  const thr=Math.min(1,Math.max(0,o.thr==null||!isFinite(+o.thr)?0.8:+o.thr)),lock=o.lock&&typeof o.lock==='object'?o.lock:null;
+  const dOf=c=>String(c||'').split('').map(d=>d==='8'?6:Number(d)-2).filter(d=>d>=0&&d<7);
+  // 1) Giá trị tuần, số lần giao tối thiểu theo HSD và các ngày có thể giao của từng CH
+  const ST=new Map();RES.stores.forEach(S=>{const V=S.rows.reduce((b,r)=>b+(r.kg||0)*(GT?(r.sku.gia||0)/1000:1),0);
+    const nH=Math.max(1,...S.rows.filter(r=>r.pcs>0).map(r=>{const x=Number(r.sku.hsd);return x>0&&x<7?Math.ceil(7/x):1}));
+    ST.set(K(S.code),{S,V,nH,A:new Set([...dOf(S.lich),...(S.usedDays||[])])})});
+  const ev=(list,at)=>{const U=new Set();let V=0,nH=1;list.forEach(k=>{const x=ST.get(k);V+=x.V;nH=Math.max(nH,x.nH);x.A.forEach(d=>U.add(d))});
+    const n=Math.max(1,Math.min(U.size||1,nH)),mod=modOf(at),need=thr*n*mod;return {at,V,n,mod,need,cnt:list.length,ok:!(mod>0)||V>=need-1e-9}};
+  // 2) Tuyến đề xuất theo quy tắc MOV tuần
+  const prop={},info={},pool={},nReq={};
+  ST.forEach((x,s)=>{if(!(x.V>0))return;const h=lv(s,0),e=ev([s],s);info[s]={own:e};nReq[s]=e.n;(pool[h||s]||(pool[h||s]=[])).push(s)});
+  // CH vệ tinh đạt MOV tuần được tách ra giao thẳng (CH lớn trước) khi phần còn lại của cụm tại HUB vẫn đạt; cụm vốn đã không đạt thì CH đạt cứ giao thẳng
+  Object.keys(pool).forEach(h=>{let L=pool[h];const all=ev(L,h).ok;
+    L.filter(s=>s!==h&&info[s].own.ok).sort((a,b)=>ST.get(b).V-ST.get(a).V).forEach(s=>{const rest=L.filter(k=>k!==s);
+      if(!all||!rest.length||ev(rest,h).ok){prop[s]=s;L=rest}else info[s].keep=1});
+    if(L.length)pool[h]=L;else delete pool[h]});
+  Object.entries(pool).forEach(([h,L])=>{const solo=L.length===1&&L[0]===h,e=solo?info[h].own:ev(L,h);let d=h;
+    if(!e.ok){const h2=lv(h,1)||L.map(s=>lv(s,1)).find(Boolean)||'';if(h2&&h2!==h)d=h2}
+    L.forEach(s=>{prop[s]=d;info[s].grp=e})});
+  {const at={};Object.entries(prop).forEach(([s,d])=>(at[d]||(at[d]=[])).push(s));
+    Object.entries(prop).forEach(([s,d])=>{if(d!==s&&d!==lv(s,0))info[s].top=ev(at[d],d)})}
+  // 3) Tuyến áp dụng: tuyến đã chốt (nếu còn hợp lệ với danh sách HUB), CH chưa chốt thì theo đề xuất
+  const valid=(s,d)=>{const h=lv(s,0);return d===s||d===h||d===lv(s,1)||(!!h&&d===lv(h,1))||d===prop[s]};
+  const route={},pend=[];ST.forEach((x,s)=>{if(!(x.V>0))return;const l=lock?(lock[s]?K(lock[s]):(lv(s,0)||s)):'';if(l&&valid(s,l))route[s]=l;else{route[s]=prop[s];if(lock)pend.push(s)}});
+  // 4) Dàn sản lượng theo điểm nhận: số lần giao = tổng tuần ÷ MOD (≥ số lần HSD yêu cầu, ≤ số ngày giao có thể) → mọi CH cùng điểm nhận giao cùng các ngày đó
+  if(o.rebalance!==false){
+    const CL=new Map();ST.forEach((x,s)=>{const h=route[s]||lv(s,0)||s;if(!CL.has(h))CL.set(h,[]);CL.get(h).push(x)});
+    CL.forEach((L,h)=>{const mod=modOf(h);if(!(mod>0))return;const V=L.reduce((a,x)=>a+x.V,0);if(!(V>0))return;
+      const U=new Set();L.forEach(x=>x.A.forEach(d=>U.add(d)));const Us=[...U].sort((a,b)=>a-b);if(!Us.length)return;
+      const nMin=Math.max(1,...L.map(x=>x.nH));
       const n=Math.max(1,Math.min(Us.length,Math.max(nMin,Math.floor(V/mod+1e-9))));const pick=[];for(let j=0;j<n;j++)pick.push(Us[Math.min(Us.length-1,Math.round(j*Us.length/n))]);const P=[...new Set(pick)];
-      L.forEach(S=>{const A=allow(S);let ds=P.filter(d=>A.has(d));if(!ds.length){const near=[...A].sort((a,b)=>Math.abs(a-P[0])-Math.abs(b-P[0]))[0];ds=near!=null?[near]:[]}if(!ds.length)return;
+      const load=[0,0,0,0,0,0,0];
+      L.forEach(({S,A})=>{let ds=P.filter(d=>A.has(d));if(!ds.length){const near=[...A].sort((a,b)=>Math.abs(a-P[0])-Math.abs(b-P[0]))[0];ds=near!=null?[near]:[]}if(!ds.length)return;
         let ch=false;S.rows.forEach(r=>{if(!(r.pcs>0))return;const qc=r.sku.qc||1,packs=Math.round(r.pcs/qc);const mEff=r.minEff||0,per=Math.max(1,Math.ceil(mEff/qc-1e-9));const x=Number(r.sku.hsd),kH=x>0&&x<7?Math.min(ds.length,Math.ceil(7/x)):1;
-          const k=Math.max(1,Math.min(ds.length,Math.max(Math.min(kH,packs),Math.floor(packs/per))));const use=[];for(let j=0;j<k;j++)use.push(ds[Math.min(ds.length-1,Math.round(j*ds.length/k))]);const u=[...new Set(use)];
-          const nd=[0,0,0,0,0,0,0];const base=Math.floor(packs/u.length);let rem=packs-base*u.length;u.forEach(d=>{nd[d]=base+(rem>0?1:0);if(rem>0)rem--});const nv=nd.map(p=>+(p*qc).toFixed(6));
+          const k=Math.max(1,Math.min(ds.length,Math.max(Math.min(kH,packs),Math.floor(packs/per))));
+          // k ngày cách đều, chọn pha rơi vào các ngày đang nhẹ nhất của điểm nhận → các lần giao đều nhau, tránh dồn hàng vào ngày đầu làm ngày sau thiếu MOV
+          let u=null,bs=Infinity;for(let o2=0;o2<ds.length;o2++){const c=[...new Set(Array.from({length:k},(_,j)=>ds[(o2+Math.min(ds.length-1,Math.round(j*ds.length/k)))%ds.length]))];const sc=c.reduce((a,d)=>a+load[d],0)/c.length;if(sc<bs-1e-9){bs=sc;u=c}}
+          const w=qc*(r.sku.qd||1)*(GT?(r.sku.gia||0)/1000:1),nd=[0,0,0,0,0,0,0],base=Math.floor(packs/u.length);let rem=packs-base*u.length;u.forEach(d=>{nd[d]=base});u.slice().sort((a,b)=>load[a]-load[b]||a-b).forEach(d=>{if(rem>0){nd[d]++;rem--}});u.forEach(d=>{load[d]+=nd[d]*w});const nv=nd.map(p=>+(p*qc).toFixed(6));
           if(nv.some((v,i)=>v!==(r.days[i]||0))){r.days=nv;ch=true}});
         if(ch){S.usedDays=[...new Set(S.rows.flatMap(r=>r.days.map((v,i)=>v>0?i:-1)).filter(i=>i>=0))].sort((a,b)=>a-b);S.dayKg=[0,0,0,0,0,0,0];S.rows.forEach(r=>r.days.forEach((u2,d)=>S.dayKg[d]+=u2*(r.sku.qd||1)))}})})}
+  // 5) PO = CH × ngày giao; gom theo (điểm nhận × ngày)
   const po={};
   for(const S of RES.stores)for(const r of S.rows){const qd=r.sku.qd||1,gia=(r.sku.gia||0)/1000;(r.days||[]).forEach((u,d)=>{if(!(u>0))return;const k=S.code+'|'+d;
     const p=po[k]||(po[k]={store:S.code,name:S.name,tinh:S.tinh,day:d,kg:0,gt:0,refs:[]});const kg=u*qd;p.kg+=kg;p.gt+=kg*gia;p.refs.push([r,d,S])})}
   const POs=Object.values(po),hubs=[];
-  POs.forEach(p=>{p.mod=modOf(p.store);if(!(p.mod>0)||val(p)>=p.mod-1e-9){p.st=0;p.dest=p.store}else{p.st=4;p.dest=''}});
-  // Tuyến cố định cả tuần theo cụm HUB cấp 1
-  const c1=c=>lv(c,0)||K(c),CL={};POs.forEach(p=>{const h=c1(p.store);(CL[h]||(CL[h]=[])).push(p)});
-  const route={};Object.entries(CL).forEach(([h,L])=>{const m=modOf(h),d={};L.forEach(p=>{d[p.day]=(d[p.day]||0)+val(p)});let r=h;
-    if(m>0&&Object.values(d).some(v=>v<m-1e-9)){const h2=lv(h,1)||L.map(p=>lv(p.store,1)).find(Boolean)||'';if(h2&&h2!==h)r=h2}route[h]=r});
-  const grp={};POs.forEach(p=>{const h=c1(p.store),dest=route[h],s=K(p.store);p.dest=p.route=dest;p.st=dest===s?0:dest===h?1:2;
+  const grp={};POs.forEach(p=>{const s=K(p.store),dest=route[s]||s;p.mod=modOf(p.store);p.dest=p.route=dest;p.st=dest===s?0:dest===lv(s,0)?1:2;
     const k=dest+'|'+p.day;const g=grp[k]||(grp[k]={key:k,hub:dest,day:p.day,kg:0,gt:0,list:[],mod:modOf(dest)});g.kg+=p.kg;g.gt+=p.gt;g.list.push(p)});
   const sg={};Object.values(grp).forEach(g=>{g.lv=Math.max(...g.list.map(p=>p.st));
     if(g.mod>0&&val(g)<g.mod-1e-9){g.list.forEach(p=>{p.st=4;p.dest=''});sg[g.key]=g}else if(g.lv>0)hubs.push(g)});
-  const shorts=Object.values(sg),auto=o.autoUp==null?0.2:+o.autoUp;
-  shorts.forEach(g=>{g.need=Math.max(0,g.mod-val(g));g.needPct=val(g)>0?g.need/val(g):9;g.auto=!dec[g.key]&&g.needPct<auto-1e-9;
+  // 6) Lần giao chưa đủ MOV: đạt ngưỡng → tự tăng FC cho đủ tại chỗ; dưới ngưỡng → theo lựa chọn
+  const shorts=Object.values(sg);
+  shorts.forEach(g=>{g.need=Math.max(0,g.mod-val(g));g.needPct=val(g)>0?g.need/val(g):9;g.auto=!dec[g.key]&&val(g)>=thr*g.mod-1e-9;
     g.choice=dec[g.key]||(g.auto?'up':(o.blockShort?'no':''));g.added=0;g.addedKg=0;g.addedGt=0;
     if(g.choice==='up'){const rw=o.rWaste!=null?+o.rWaste:0.4,sc=x=>(x[0].sale1w||0)*(1-Math.min(1,x[0].waste||0)),okR=x=>(x[0].waste||0)<rw&&(x[0].sale1w||0)>0;const per=g.list.map(p=>{const el=p.refs.filter(okR);return (el.length?el:p.refs.slice()).sort((a,b)=>sc(b)-sc(a)||b[0].days[b[1]]-a[0].days[a[1]])});let guard=0,idx=0;
       while(g.added<g.need-1e-9&&guard<20000){const j=idx%per.length,R=per[j];idx++;guard++;if(!R.length)continue;const [r,d]=R[0];if(isFinite(r.qCap)&&r.days.reduce((a,v)=>a+v,0)+(r.sku.qc||1)>r.qCap+1e-9){R.shift();if(per.every(x=>!x.length))break;continue}const qc=r.sku.qc||1,qd=r.sku.qd||1,gia=(r.sku.gia||0)/1000,kg=qc*qd;
@@ -1326,22 +1359,22 @@ function hubMod(RES,o){
   for(const S of touched){for(const r of S.rows){if(!(r.boost||r.blocked))continue;r.pcs=+r.days.reduce((a,b)=>a+b,0).toFixed(6);r.kg=r.pcs*(r.sku.qd||1)}
     S.totalFC=S.rows.reduce((a,r)=>a+r.kg,0);S.dayKg=[0,0,0,0,0,0,0];S.rows.forEach(r=>r.days.forEach((u,d)=>S.dayKg[d]+=u*(r.sku.qd||1)))}
   POs.forEach(p=>p.refs.forEach(([r])=>{(r.hst=r.hst||new Set()).add(p.st);const dh=p.dest||p.route;if(dh)(r.hdest=r.hdest||new Set()).add(dh)})); // giao thẳng = HUB 1 CH: điền chính CH
-  return {POs,hubs,shorts,gt:GT};
+  return {POs,hubs,shorts,gt:GT,route,prop,info,nReq,thr,locked:!!lock,pend};
 }
 
 // ---------- ĐỀ XUẤT TÁCH / GỘP HUB theo vị trí (Storeslist: Vĩ độ, Kinh độ) ----------
 // Cụm HUB = HUB cấp 1 + các CH vệ tinh. Giá trị cụm/ngày = tổng đơn các CH trong cụm ngày đó; lấy ngày cao nhất.
 // Cụm < MOD → gộp vào cụm gần nhất (khoảng cách 2 HUB ≤ bán kính) cho đủ MOD. Cụm ≥ x × MOD (mặc định 4, tính từ 90%) → bóc dần CH / cụm CH (từ 1 CH, ưu tiên CH xa HUB) ra HUB riêng:
-// cụm mới đủ MOD/lần, bán kính ≤ R, mỗi CH gần HUB mới hơn HUB cũ, HUB cũ còn lại vẫn đủ MOD. HUB mới là CH có tổng khoảng cách tới các CH trong cụm nhỏ nhất.
+// cụm mới và HUB cũ còn lại đều đạt MOV tuần sau khi bù theo ngưỡng (tổng tuần ≥ ngưỡng × số lần giao tối thiểu × MOD), bán kính ≤ R, mỗi CH gần HUB mới hơn HUB cũ, HUB cũ còn lại vẫn đủ MOD. HUB mới là CH có tổng khoảng cách tới các CH trong cụm nhỏ nhất.
 function kmDist(a,b){if(!a||!b||!isFinite(a.la)||!isFinite(b.la)||!isFinite(a.lo)||!isFinite(b.lo))return Infinity;const R=6371,r=Math.PI/180,dLa=(b.la-a.la)*r,dLo=(b.lo-a.lo)*r,x=Math.sin(dLa/2)**2+Math.cos(a.la*r)*Math.cos(b.la*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
-function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7], modOf, radius, splitX}
+function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7], modOf, radius, splitX, thr, nOf:code=>số lần giao tối thiểu, skip:code=>CH vệ tinh đã giao thẳng}
   const K=c=>String(c||'').toUpperCase(),H=o.hub||{},R=+o.radius||15,X=+o.splitX||4;
   const lv1=c=>{const v=(H[K(c)]||[])[0];return v&&v!=='0'&&K(v)!==K(c)?K(v):''};
-  const hubs=new Set(o.codes.map(lv1).filter(Boolean));
-  const cl=new Map();o.codes.forEach(c=>{c=K(c);const h=lv1(c)||(hubs.has(c)?c:'');if(!h)return;if(!cl.has(h))cl.set(h,[]);cl.get(h).push(c)});
+  const hubs=new Set(o.codes.map(lv1).filter(Boolean));const thr=o.thr==null?1:+o.thr,nOf=o.nOf||(()=>1);
+  const cl=new Map();o.codes.forEach(c=>{c=K(c);const h=lv1(c)||(hubs.has(c)?c:'');if(!h)return;if(h!==c&&o.skip&&o.skip(c))return;if(!cl.has(h))cl.set(h,[]);cl.get(h).push(c)});
   cl.forEach((m,h)=>{if(!m.includes(h)&&o.codes.map(K).includes(h))m.push(h)});
   const val=ms=>{const d=[0,0,0,0,0,0,0];ms.forEach(c=>(o.dayVal(c)||[]).forEach((v,i)=>d[i]+=v||0));return d};
-  const peak=ms=>Math.max(...val(ms));
+  const peak=ms=>Math.max(...val(ms));const wkv=ms=>val(ms).reduce((a,b)=>a+b,0),okG=(ms,mod)=>wkv(ms)>=thr*mod*Math.max(1,...ms.map(c=>nOf(c)||1))-1e-9;
   const medoid=ms=>{let best=ms[0],bs=Infinity;ms.forEach(a=>{let s=0;ms.forEach(b=>s+=Math.min(kmDist(o.pos(a),o.pos(b)),999));if(s<bs){bs=s;best=a}});return best};
   const radius=(h,ms)=>Math.max(0,...ms.map(c=>{const d=kmDist(o.pos(h),o.pos(c));return isFinite(d)?d:0}));
   const splits=[],merges=[];
@@ -1352,13 +1385,13 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
       let rest=ms.slice();const parts=[];
       ms.filter(c=>c!==h).sort((a,b)=>dh(b)-dh(a)).forEach(seed=>{if(!rest.includes(seed))return;
         const G=[seed],cand=rest.filter(c=>c!==h&&c!==seed&&d(seed,c)<=R&&d(seed,c)<dh(c)).sort((a,b)=>d(seed,a)-d(seed,b));
-        while(peak(G)<mod&&cand.length)G.push(cand.shift());
-        if(peak(G)<mod)return;const nh=medoid(G);
+        while(!okG(G,mod)&&cand.length)G.push(cand.shift());
+        if(!okG(G,mod))return;const nh=medoid(G);if(!okG(G,o.modOf(nh)||mod))return;
         if(radius(nh,G)>R||G.some(c=>c!==nh&&d(c,nh)>=dh(c)))return;
-        const remain=rest.filter(c=>!G.includes(c));if(!remain.length||peak(remain)<mod)return;
+        const remain=rest.filter(c=>!G.includes(c));if(!remain.length||!okG(remain,mod))return;
         parts.push({hub:nh,list:G,peak:peak(G),wk:val(G).reduce((a,b)=>a+b,0),km:radius(nh,G)});rest=remain});
       if(parts.length)splits.push({key:'S|'+h,hub:h,n:ms.length,peak:pk,wk,mod,parts,keep:{hub:h,list:rest,peak:peak(rest),km:radius(h,rest)}})}
-    else if(wk<mod){let best=null,bd=Infinity;cl.forEach((m2,h2)=>{if(h2===h)return;const d=kmDist(o.pos(h),o.pos(h2));const w2=val(m2).reduce((a,b)=>a+b,0);if(d<=R&&d<bd&&wk+w2>=mod){bd=d;best=h2}});
+    else if(!okG(ms,mod)){let best=null,bd=Infinity;cl.forEach((m2,h2)=>{if(h2===h)return;const d=kmDist(o.pos(h),o.pos(h2));const w2=val(m2).reduce((a,b)=>a+b,0);if(d<=R&&d<bd&&okG(ms.concat(m2),o.modOf(h2)||mod)){bd=d;best=h2}});
       if(best)merges.push({key:'M|'+h,hub:h,n:ms.length,peak:pk,wk,mod,to:best,km:bd,list:ms})}});
   return {splits,merges,clusters:cl.size};
 }
@@ -1366,7 +1399,7 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
 (function(){
 'use strict';
 const APP=window.FC_APP||'rcq',CH=APP!=='rcq';document.documentElement.dataset.app=CH?'cahoi':'rcq';document.documentElement.dataset.ncc=APP;
-const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.3'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.3'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.3'}};
+const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.3'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.3'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.4',date:'11/11/2026'}};
 const AC=APPS[APP]||{ns:'rcq/',ls:'fc4_masters',mch3:'Rau củ'};
 const E=window.FC4,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
@@ -1531,7 +1564,7 @@ function recompute(){
   const t=performance.now();
   if(CH){ensureHub();(MS.danhmuc.skus||[]).forEach(x=>{const mn=x.minN||{};x.flags=E.NG.map(g=>+mn[g]>0)})}
   try{RES=E.compute(MS,SA,CH?{gKey:'wec',minFloor:true,capX:MS.lichve.cfg.capX!=null?+MS.lichve.cfg.capX:3,mov:0,movRaise:false}:{},{province:OPT.province||null,sel:STSEL(),moq:CH?{gt:!!AC.gt,of:moqOf()}:null})}catch(err){console.error(err);toast('Lỗi tính FC: '+err.message);return}
-  if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{rWaste:RES.cfg.rWaste,modOf:moqOf(),gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
+  if(CH){const c=MS.lichve.cfg;try{RES.mod=hubMod(RES,{rWaste:RES.cfg.rWaste,modOf:moqOf(),gt:AC.gt,hub:c.hub||{},defMod:c.modDef!=null?+c.modDef:AC.modDef,autoUp:c.autoUp!=null?+c.autoUp:0.2,thr:c.hubThr!=null?+c.hubThr:0.8,lock:c.hubLock?(c.hubRoute||{}):null,blockShort:+c.blockShort||0,dec:c.dec||{}})}catch(err){console.error(err);RES.mod=null}}
   ROWS=[];for(const S of RES.stores)for(const r of S.rows)ROWS.push({S,r});
   perf('Tính FC',performance.now()-t,ni(ROWS.length)+' dòng CH × SKU');st.aIdx=null;
   whenIdle(renderAll);
@@ -1854,7 +1887,7 @@ function renderNcc(){const N=nccList(),cfg=MS.lichve.cfg;
 let HP=null;const HPSEL=new Set();const HV={open:new Set(),page:0,all:false};
 function renderHubPlan(){const c=MS.lichve.cfg,v=x=>AC.gt?x.gt:x.kg;{const r=$('#hR'),x=$('#hX');if(r&&document.activeElement!==r)r.value=c.hubR??15;if(x&&document.activeElement!==x)x.value=c.hubSplitX??4}
   const DV=new Map();RES.mod.POs.forEach(p=>{const k=String(p.store).toUpperCase();const a=DV.get(k)||[0,0,0,0,0,0,0];a[p.day]+=v(p);DV.set(k,a)});
-  HP=hubPlan({codes:RES.stores.map(s=>s.code),pos:k=>STL.map.get(String(k).toUpperCase()),hub:c.hub||{},dayVal:k=>DV.get(String(k).toUpperCase()),modOf:moqOf(),radius:c.hubR??15,splitX:c.hubSplitX??4});HP.DV=DV}
+  HP=hubPlan({codes:RES.stores.map(s=>s.code),pos:k=>STL.map.get(String(k).toUpperCase()),hub:c.hub||{},dayVal:k=>DV.get(String(k).toUpperCase()),modOf:moqOf(),radius:c.hubR??15,splitX:c.hubSplitX??4,thr:RES.mod.thr,nOf:k=>(RES.mod.nReq||{})[String(k).toUpperCase()]||1,skip:k=>{k=String(k).toUpperCase();return (RES.mod.route||{})[k]===k}});HP.DV=DV}
 function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;if(!HP)renderHubPlan();const c=MS.lichve.cfg,H=c.hub||{},K=x=>String(x||'').toUpperCase(),M=RES.mod,gt=!!AC.gt,U=gt?'nghìn đ':'kg',mo=moqOf(),X=c.hubSplitX??4,R=c.hubR??15;
   const lv1=k=>{const v=(H[K(k)]||[])[0];return v&&v!=='0'&&K(v)!==K(k)?K(v):''};const S=RES.stores,isHub=new Set(S.map(x=>lv1(x.code)).filter(Boolean));
   const st=new Map();M.POs.forEach(p=>{const k=K(p.store);const o=st.get(k)||{s:new Set(),gt:0};o.s.add(p.st);o.gt+=p.gt;st.set(k,o)});
@@ -1872,7 +1905,7 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   rows=rows.filter(r=>(!q||(r.h+' '+((pos(r.h)||{}).n||'')+' '+r.L.map(x=>x.code+' '+x.name).join(' ')).toLowerCase().includes(q))&&(!fl||(fl==='short'?r.sh.length:fl==='thua'?r.A.st.thua:fl==='thieu'?r.A.st.thieu:r.hs===fl)));
   const ordS={tach:0,huy:1,gop:2,du:3};rows.sort((a,b)=>ordS[a.hs]-ordS[b.hs]||b.wk-a.wk);
   const cnt={tach:0,gop:0,huy:0,du:0};[...CL.keys()].forEach(()=>{});rows.forEach(r=>cnt[r.hs]++);
-  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%): bóc CH / cụm CH (từ 1 CH, ưu tiên CH xa HUB) ra HUB riêng khi đủ MOD/lần, bán kính ≤ ${R} km, gần HUB mới hơn HUB cũ và HUB cũ còn lại vẫn đủ MOD · Gộp khi tổng tuần < MOD và có HUB gần cho đủ. Mỗi HUB dàn sản lượng vào số lần giao = tổng tuần ÷ MOD (≥ số lần theo HSD); vẫn thiếu thì tăng FC mã bán chạy, hủy thấp (trong Lock Max). Tick đề xuất rồi bấm Xác nhận.`;
+  $('#hpNote').innerHTML=(hasPos?'':'<b>Chưa có tọa độ CH</b> (Vĩ độ, Kinh độ trong Storeslist) — bấm "Tải lại" ở mục Phân nhóm CH để có đề xuất tách / gộp. ')+`${ni(rows.length)} HUB: <span class="pill high">${cnt.tach} Tách</span> <span class="pill stt-du">${cnt.du} Đủ</span> <span class="pill">${cnt.gop} Gộp</span> <span class="pill crit">${cnt.huy} Hủy</span> · Tách khi tổng tuần ≥ ${X} × MOD (từ 90%): bóc CH / cụm CH (từ 1 CH, ưu tiên CH xa HUB) ra HUB riêng khi cụm mới đạt MOV tuần sau bù theo ngưỡng (≥ ${Math.round(M.thr*100)}% × số lần giao × MOD), bán kính ≤ ${R} km, gần HUB mới hơn HUB cũ và HUB cũ còn lại cũng đạt · Gộp khi cụm không đạt và có HUB gần cho đủ · CH vệ tinh đã giao thẳng không tính vào cụm. Mỗi HUB dàn sản lượng vào số lần giao = tổng tuần ÷ MOD (≥ số lần theo HSD); vẫn thiếu thì tăng FC mã bán chạy, hủy thấp (trong Lock Max). Tick đề xuất rồi bấm Xác nhận.`;
   const HS={tach:['high','Tách'],du:['stt-du','Đủ'],gop:['','Gộp'],huy:['crit','Hủy']};const nm=k=>{const x=pos(k);return String((x&&x.n)||(S.find(y=>K(y.code)===K(k))||{}).name||'').replace(/^WM\+\s*/,'')};
   const f=x=>gt?nf(x,0):nf(x,1),num=(x,d=1)=>x?nf(x,d):'·',P=40,pages=Math.max(1,Math.ceil(rows.length/P));if(HV.page>=pages)HV.page=0;
   const dd=d=>d.map((v,i)=>v>0?E.DAYVN[i]:'').filter(Boolean).join('·');
@@ -1897,18 +1930,21 @@ $('#tHubView')&&$('#tHubView').addEventListener('change',e=>{const t=e.target;if
 $('#hvQ')&&$('#hvQ').addEventListener('input',()=>{HV.page=0;renderHubView()});$('#hvF')&&$('#hvF').addEventListener('change',()=>{HV.page=0;renderHubView()});
 $('#hvOpen')&&$('#hvOpen').addEventListener('click',e=>{HV.all=!HV.all;HV.open.clear();e.target.textContent=HV.all?'Thu hết':'Mở hết';renderHubView()});
 ['#hR','#hX'].forEach(id=>{const el=$(id);if(el)el.addEventListener('change',()=>{const v=Number(el.value);if(!isFinite(v)||v<=0)return;MS.lichve.cfg[id==='#hR'?'hubR':'hubSplitX']=v;markDirty('lichve');HPSEL.clear();renderHubPlan();renderHubView()})});
-$('#hpApply')&&$('#hpApply').addEventListener('click',()=>{if(!HP)return;const c=MS.lichve.cfg,H=c.hub=c.hub||{},K=x=>String(x).toUpperCase(),get=k=>H[K(k)]||['','',null];let ns=0,nm=0;
-  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),o[1]||'',o[2]]}))});
+$('#hpApply')&&$('#hpApply').addEventListener('click',()=>{if(!HP)return;const c=MS.lichve.cfg,H=c.hub=c.hub||{},K=x=>String(x).toUpperCase(),get=k=>H[K(k)]||['','',null];let ns=0,nm=0;const aff=new Map(),old=(RES.mod&&RES.mod.route)||{};
+  HP.splits.filter(sp=>HPSEL.has(sp.key)).forEach(sp=>{ns++;sp.parts.forEach(p=>p.list.forEach(k=>{const o=get(k);H[K(k)]=[K(k)===K(p.hub)?'':K(p.hub),o[1]||'',o[2]];aff.set(K(k),`Tách HUB ${K(sp.hub)} → HUB mới ${K(p.hub)} (${p.list.length} CH)`)}))});
   // Gộp nối chuỗi (A → B, B → C) dồn thẳng về HUB cuối; vòng (A → B, B → A) thì bỏ qua
   const msel=HP.merges.filter(m=>HPSEL.has(m.key)),to=new Map(msel.map(m=>[K(m.hub),K(m.to)])),fin=h=>{const seen=new Set([h]);let t=to.get(h);while(to.has(t)&&!seen.has(t)){seen.add(t);t=to.get(t)}return seen.has(t)?'':t};let nx=0;
-  msel.forEach(m=>{const h=K(m.hub),t=fin(h);if(!t){nx++;return}nm++;const set=k=>{const o=get(k);H[K(k)]=[t,o[1]||'',o[2]]};m.list.forEach(set);set(h);Object.keys(H).forEach(k=>{if(K(H[k][0])===h)set(k)})});
-  HPSEL.clear();markDirty('lichve');toast(`Đã cập nhật danh sách HUB: tách ${ns}, gộp ${nm}${nx?`, bỏ ${nx} gộp vòng`:''} — bấm Lưu để lưu chung`);recompute()});
+  msel.forEach(m=>{const h=K(m.hub),t=fin(h);if(!t){nx++;return}nm++;const set=k=>{const o=get(k);H[K(k)]=[t,o[1]||'',o[2]];aff.set(K(k),`Gộp HUB ${h} vào HUB ${t}`)};m.list.forEach(set);set(h);Object.keys(H).forEach(k=>{if(K(H[k][0])===h)set(k)})});
+  if(c.hubRoute)aff.forEach((w,k)=>{delete c.hubRoute[k]});
+  HPSEL.clear();markDirty('lichve');toast(`Đã cập nhật danh sách HUB: tách ${ns}, gộp ${nm}${nx?`, bỏ ${nx} gộp vòng`:''} — đã ghi Tracklog`);recompute();
+  if(aff.size&&RES.mod){const ts=new Date().toISOString(),by=hBy();aff.forEach((w,k)=>{HLOG.push([ts,by,k,old[k]||'',RES.mod.route[k]||hDef(k),w,Math.round((((RES.mod.info||{})[k]||{}).own||{}).V||0),'Tách / gộp HUB'])});c.hubRevAt=ts;save('lichve');hubLogSave()}});
 function renderMov(){
   const M=RES.mod,c=MS.lichve.cfg,U=AC.gt?'nghìn đ':'kg',v=x=>AC.gt?x.gt:x.kg,fv=x=>AC.gt?nf(x,0):nf(x,1);
   $('#modUnit').textContent=U;const setv=(id,val)=>{const el=$(id);if(el&&document.activeElement!==el)el.value=val};
   setv('#hMod',c.modDef!=null?c.modDef:AC.modDef);setv('#hAuto',Math.round((c.autoUp!=null?+c.autoUp:0.2)*100));{const el=$('#hBlock');if(el)el.value=String(+c.blockShort||0)}
-  if(!M){$('#hKpi').innerHTML='';$('#tHub').innerHTML='';$('#tShort').innerHTML='';return}
+  if(!M){$('#hKpi').innerHTML='';$('#tHub').innerHTML='';$('#tShort').innerHTML='';try{renderHubRev()}catch(err){}return}
   try{renderHubPlan();renderHubView()}catch(err){console.error(err)}
+  try{renderHubRev()}catch(err){console.error(err)}
   const cnt=[0,0,0,0,0],sum=[0,0,0,0,0];M.POs.forEach(p=>{cnt[p.st]++;sum[p.st]+=v(p)});
   $('#hKpi').innerHTML=HUB_ST.map((t,i)=>`<div class="kpi ${i===4&&cnt[4]?'bad':''}"><div class="l">${t}</div><div class="v">${ni(cnt[i])} PO</div><div class="d">${fv(sum[i])} ${U}</div></div>`).join('');
   const dn=d=>E.DAYVN[d],nm=c=>{const r=MS.phannhom.rows.find(x=>x[0]===c);return r?String(r[1]).replace(/^WM\+ /,''):''};
@@ -1921,12 +1957,83 @@ function hubBind(){const c=()=>MS.lichve.cfg,num=e=>{const x=parseFloat(String(e
   $('#hBlock').addEventListener('change',e=>{c().blockShort=+e.target.value;markDirty('lichve')});
   $('#tShort').addEventListener('change',e=>{const t=e.target.closest('.hdec');if(!t)return;const d=c().dec=c().dec||{};if(t.value)d[t.dataset.k]=t.value;else delete d[t.dataset.k];markDirty('lichve')})}
 
+// ---------- Review thay đổi tuyến HUB (so với tuyến đã chốt) & Tracklog ----------
+// cfg.hubLock = đã chốt tuyến; cfg.hubRoute = {CH: điểm nhận} chỉ ghi CH khác mặc định (mặc định = HUB cấp 1, hoặc chính CH nếu không có HUB).
+// Tracklog lưu riêng (master/hublog) để không làm nặng master Lịch giao.
+const HR={sel:new Set(),page:0,lpage:0,tab:'a'};let HLOG=[];
+const hK=x=>String(x||'').toUpperCase();
+const hLv1=k=>{const v=((MS.lichve.cfg.hub||{})[hK(k)]||[])[0];return v&&v!=='0'&&hK(v)!==hK(k)?hK(v):''};
+const hDef=k=>hLv1(k)||hK(k);
+const hNm=k=>{const x=STL.map.get(hK(k));const s=(x&&x.n)||(((RES&&RES.stores)||[]).find(y=>hK(y.code)===hK(k))||{}).name||'';return String(s).replace(/^WM\+\s*/,'')};
+const hLock=()=>{const c=MS.lichve.cfg;return c.hubLock?(c.hubRoute||{}):null};
+const hBy=()=>{try{return localStorage.getItem('fc_hub_reviewer')||''}catch(e){return ''}};
+function hRouteTxt(s,d){s=hK(s);d=hK(d);if(!d)return '—';if(d===s)return 'Giao thẳng';return (d===hLv1(s)?'HUB cấp 1 ':'HUB cấp 2 ')+d}
+function hubChanges(){const M=RES&&RES.mod,L=hLock();if(!M||!M.prop||!L)return [];
+  return Object.keys(M.prop).map(s=>{const to=M.prop[s],from=L[s]?hK(L[s]):hDef(s);if(from===to)return null;const i=M.info[s]||{},lv=to===s?0:to===hLv1(s)?1:2,e=lv===0?i.own:lv===1?i.grp:(i.top||i.grp);return {s,from,to,i,lv,e:e||i.own||{}}}).filter(Boolean)}
+function hubWhy(x){const M=RES.mod,i=x.i||{},f=v=>AC.gt?nf(v,0):nf(v,1),t=Math.round(M.thr*100);
+  const one=(e,lab)=>`${lab} ${f(e.V)} ${e.ok?'≥':'<'} ${f(e.need)} (${e.n} lần × MOV ${f(e.mod)} × ${t}%)`;const P=[];
+  if(i.own)P.push(one(i.own,'CH tuần'));if(i.keep&&x.lv===1)P.push('giữ tại HUB vì tách ra thì cụm còn lại không đạt');
+  if(x.lv>=1&&i.grp&&i.grp!==i.own)P.push(one(i.grp,`Cụm tại HUB ${i.grp.at} (${i.grp.cnt} CH)`));
+  if(x.lv===2&&i.top)P.push(one(i.top,`Cộng dồn tại HUB cấp 2 ${i.top.at} (${i.top.cnt} CH)`));
+  return P.join(' · ')}
+async function hubLogLoad(){try{if(db){const d=await db.doc('master/hublog').get();HLOG=d.exists?JSON.parse(JSON.stringify(d.data().rows||[])):[]}else HLOG=JSON.parse(localStorage.getItem(AC.ls+'_hublog')||'[]')}catch(e){HLOG=HLOG||[]}try{renderHubRev()}catch(e){}}
+async function hubLogSave(){if(HLOG.length>1500)HLOG.splice(0,HLOG.length-1500);try{if(db)await db.doc('master/hublog').set({rows:HLOG,savedAt:new Date().toISOString()});else localStorage.setItem(AC.ls+'_hublog',JSON.stringify(HLOG))}catch(e){toast('Chưa lưu được tracklog HUB: '+(e.message||e.code||'lỗi'))}}
+// list: [{s,from,to,why,v}] → ghi tuyến chốt + tracklog, lưu chung luôn
+function hubCommit(list,kind){const c=MS.lichve.cfg,L=c.hubRoute=c.hubRoute||{},t=new Date().toISOString(),by=hBy();c.hubLock=1;
+  list.forEach(x=>{if(x.s!=='*'){if(x.to===hDef(x.s))delete L[x.s];else L[x.s]=x.to}HLOG.push([t,by,x.s,x.from,x.to,x.why||'',Math.round(x.v||0),kind||'Review'])});
+  c.hubRevAt=t;HR.sel.clear();markDirty('lichve');save('lichve');hubLogSave()}
+function hubTab(t){HR.tab=t;$$('#hTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));[['a','#hPaneA'],['b','#hPaneB'],['c','#hPaneC']].forEach(([k,id])=>{const el=$(id);if(el)el.hidden=k!==t})}
+function renderHubRev(){const M=RES&&RES.mod,el=$('#tHubRev');if(!el)return;const c=MS.lichve.cfg,L=hLock(),U=AC.gt?'nghìn đ':'kg',f=v=>AC.gt?nf(v,0):nf(v,1);
+  {const a=$('#hThr'),b=$('#hRevDays'),y=$('#hrBy');if(a&&document.activeElement!==a)a.value=Math.round((c.hubThr!=null?+c.hubThr:0.8)*100);if(b&&document.activeElement!==b)b.value=c.hubRevDays??14;if(y&&document.activeElement!==y)y.value=hBy()}
+  const ch=M?hubChanges():[],days=+(c.hubRevDays??14),at=c.hubRevAt?new Date(c.hubRevAt):null,age=at?Math.floor((Date.now()-at)/864e5):null,due=age!=null&&age>=days;
+  $('#hChgN').textContent=L?`(${ni(ch.length)})`:'';$('#hLogN').textContent=`(${ni(HLOG.length)})`;
+  $('#hRevInfo').innerHTML=!L?'<span class="pill high">Chưa chốt tuyến HUB</span> FC đang chạy theo tuyến đề xuất của tuần này. Mở tab Thay đổi tuyến để chốt.'
+    :`Tuyến chốt ${at?at.toLocaleDateString('vi-VN'):'—'}${age!=null?` (${age} ngày trước)`:''} · kỳ review ${days} ngày ${due?'<span class="pill high">Đến kỳ review</span>':age!=null?`· còn ${days-age} ngày`:''} · <b>${ni(ch.length)}</b> thay đổi đề xuất`;
+  $('#hrLock').style.display=L?'none':'';$('#hrApply').style.display=L?'':'none';$('#hrAll').style.display=L?'':'none';
+  if(!M){el.innerHTML='';return}
+  const t=Math.round(M.thr*100);
+  if(!L){const n=[0,0,0];Object.keys(M.prop).forEach(s=>{const d=M.prop[s];n[d===s?0:d===hLv1(s)?1:2]++});
+    $('#hrNote').innerHTML=`Chưa chốt tuyến nên mỗi lần tính FC, tuyến chạy theo đề xuất của quy tắc MOV tuần (ngưỡng ${t}%). Tuần này: <b>${ni(n[0])}</b> CH giao thẳng · <b>${ni(n[1])}</b> CH gom HUB cấp 1 · <b>${ni(n[2])}</b> CH lên HUB cấp 2. Bấm <b>Chốt tuyến HUB</b> để cố định; từ đó tuyến chỉ đổi khi anh xác nhận ở tab này, mọi thay đổi được ghi Tracklog.`;
+    el.innerHTML='';pager('#pgHr',0,0,()=>{},50);return}
+  $('#hrNote').innerHTML=`FC đang chạy theo <b>tuyến đã chốt</b>. Bảng dưới là các CH mà quy tắc MOV tuần này (ngưỡng ${t}%) đề xuất tuyến khác. Tick rồi bấm Xác nhận để đổi; chưa xác nhận thì giữ tuyến cũ (lần giao thiếu được bù theo ngưỡng hoặc báo Thiếu MOQ).`;
+  const q=($('#hrQ').value||'').trim().toLowerCase(),fl=$('#hrF').value;
+  let rows=ch.filter(x=>(fl===''||String(x.lv)===fl)&&(!q||(x.s+' '+hNm(x.s)+' '+x.from+' '+x.to+' '+hLv1(x.s)).toLowerCase().includes(q)));
+  rows.sort((a,b)=>a.lv-b.lv||String(hLv1(a.s)).localeCompare(hLv1(b.s))||(b.i.own?b.i.own.V:0)-(a.i.own?a.i.own.V:0));
+  const keys=new Set(ch.map(x=>x.s));[...HR.sel].forEach(k=>{if(!keys.has(k))HR.sel.delete(k)});HR.rows=rows;
+  const P=50,pages=Math.max(1,Math.ceil(rows.length/P));if(HR.page>=pages)HR.page=0;
+  const pl=['leaf','','high'];
+  el.innerHTML=`<tr><th></th><th>Mã CH – Tên</th><th>HUB cấp 1 (danh sách HUB)</th><th>Tuyến đang chốt</th><th>Đề xuất mới</th><th class="n">CH tuần (${U})</th><th class="n">Tại điểm nhận mới (${U})</th><th class="n">Mức cần (${U})</th><th>Lý do</th></tr>`+(rows.slice(HR.page*P,(HR.page+1)*P).map(x=>{const h1=hLv1(x.s);
+    return `<tr><td><input type="checkbox" data-s="${esc(x.s)}" ${HR.sel.has(x.s)?'checked':''} aria-label="Chọn ${esc(x.s)}"></td><td><b>${esc(x.s)}</b> – <span class="smallnote">${esc(hNm(x.s))}</span></td><td>${h1?`${esc(h1)} <span class="smallnote">${esc(hNm(h1))}</span>`:'<span class="smallnote">Không thuộc HUB</span>'}</td><td>${esc(hRouteTxt(x.s,x.from))}</td><td><span class="pill ${pl[x.lv]}">${esc(hRouteTxt(x.s,x.to))}</span>${x.lv?` <span class="smallnote">${esc(hNm(x.to))}</span>`:''}</td><td class="n">${x.i.own?f(x.i.own.V):'—'}</td><td class="n">${x.e.V!=null?f(x.e.V):'—'}</td><td class="n">${x.e.need!=null?f(x.e.need):'—'}</td><td class="smallnote" style="white-space:normal;min-width:22em">${esc(hubWhy(x))}</td></tr>`}).join('')||'<tr><td colspan="9" class="smallnote">Không có thay đổi tuyến nào được đề xuất — tuyến đã chốt đang khớp quy tắc MOV tuần này.</td></tr>');
+  pager('#pgHr',rows.length,HR.page,p=>{HR.page=p;renderHubRev()},P);$('#hrApply').disabled=!HR.sel.size;$('#hrApply').textContent=`Xác nhận thay đổi đã chọn${HR.sel.size?` (${HR.sel.size})`:''}`;
+  renderHubLog()}
+function renderHubLog(){const el=$('#tHubLog');if(!el)return;const q=($('#hlQ').value||'').trim().toLowerCase(),f=v=>AC.gt?nf(v,0):nf(v,1);
+  const txt=(s,d)=>s==='*'?String(d||''):hRouteTxt(s,d);
+  let rows=HLOG.slice().reverse().filter(r=>!q||r.join(' ').toLowerCase().includes(q)||hNm(r[2]).toLowerCase().includes(q));const P=50,pages=Math.max(1,Math.ceil(rows.length/P));if(HR.lpage>=pages)HR.lpage=0;
+  el.innerHTML='<tr><th>Thời gian</th><th>Loại</th><th>Người review</th><th>Mã CH – Tên</th><th>Từ</th><th>Sang</th><th class="n">Giá trị tuần</th><th>Lý do</th></tr>'+(rows.slice(HR.lpage*P,(HR.lpage+1)*P).map(r=>`<tr><td class="mono">${esc(new Date(r[0]).toLocaleString('vi-VN'))}</td><td>${esc(r[7]||'Review')}</td><td>${esc(r[1]||'—')}</td><td>${r[2]==='*'?'Tất cả CH':`<b>${esc(r[2])}</b> – <span class="smallnote">${esc(hNm(r[2]))}</span>`}</td><td>${esc(txt(r[2],r[3]))}</td><td>${esc(txt(r[2],r[4]))}</td><td class="n">${r[6]?f(r[6]):'—'}</td><td class="smallnote" style="white-space:normal;min-width:22em">${esc(r[5])}</td></tr>`).join('')||'<tr><td colspan="8" class="smallnote">Chưa có thay đổi tuyến HUB nào được ghi.</td></tr>');
+  pager('#pgHl',rows.length,HR.lpage,p=>{HR.lpage=p;renderHubLog()},P)}
+function hubRevBind(){if(!$('#hTabs'))return;const c=()=>MS.lichve.cfg;
+  $('#hTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b)hubTab(b.dataset.t)});
+  $('#hThr').addEventListener('change',e=>{const x=parseFloat(String(e.target.value).replace(',','.'));c().hubThr=isFinite(x)?Math.min(100,Math.max(0,x))/100:0.8;markDirty('lichve')});
+  $('#hRevDays').addEventListener('change',e=>{const x=parseInt(e.target.value,10);c().hubRevDays=isFinite(x)&&x>0?x:14;markDirty('lichve')});
+  $('#hrBy').addEventListener('change',e=>{try{localStorage.setItem('fc_hub_reviewer',e.target.value.trim())}catch(err){}});
+  $('#hrQ').addEventListener('input',()=>{HR.page=0;renderHubRev()});$('#hrF').addEventListener('change',()=>{HR.page=0;renderHubRev()});$('#hlQ').addEventListener('input',()=>{HR.lpage=0;renderHubLog()});
+  $('#tHubRev').addEventListener('change',e=>{const s=e.target.dataset&&e.target.dataset.s;if(!s)return;e.target.checked?HR.sel.add(s):HR.sel.delete(s);$('#hrApply').disabled=!HR.sel.size;$('#hrApply').textContent=`Xác nhận thay đổi đã chọn${HR.sel.size?` (${HR.sel.size})`:''}`});
+  $('#hrAll').addEventListener('click',()=>{const R=HR.rows||[],all=R.length&&R.every(x=>HR.sel.has(x.s));R.forEach(x=>all?HR.sel.delete(x.s):HR.sel.add(x.s));renderHubRev()});
+  $('#hrApply').addEventListener('click',()=>{const list=hubChanges().filter(x=>HR.sel.has(x.s)).map(x=>({s:x.s,from:x.from,to:x.to,why:hubWhy(x),v:x.i.own?x.i.own.V:0}));if(!list.length)return;hubCommit(list,'Review');toast(`Đã đổi tuyến ${list.length} CH và ghi Tracklog`)});
+  $('#hrLock').addEventListener('click',()=>{const M=RES&&RES.mod;if(!M||!M.prop||!Object.keys(M.prop).length){toast('Chưa có số FC (chưa import Sale) nên chưa chốt được tuyến HUB');return}const c0=c(),n=[0,0,0];c0.hubRoute={};Object.keys(M.prop).forEach(s=>{const d=M.prop[s];n[d===s?0:d===hLv1(s)?1:2]++;if(d!==hDef(s))c0.hubRoute[s]=d});
+    hubCommit([{s:'*',from:'Chưa chốt',to:`${ni(n[0]+n[1]+n[2])} CH`,why:`Chốt tuyến lần đầu (ngưỡng ${Math.round(M.thr*100)}%): ${ni(n[0])} giao thẳng · ${ni(n[1])} HUB cấp 1 · ${ni(n[2])} HUB cấp 2`,v:0}],'Chốt tuyến');toast('Đã chốt tuyến HUB — từ giờ tuyến chỉ đổi khi xác nhận ở tab Thay đổi tuyến')});
+  $('#hlExport').addEventListener('click',()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',txt=(s,d)=>s==='*'?String(d||''):hRouteTxt(s,d);
+    const csv='﻿'+[['Thời gian','Loại','Người review','Mã CH','Tên CH','Từ','Sang','Giá trị tuần','Lý do'],...HLOG.map(r=>[new Date(r[0]).toLocaleString('vi-VN'),r[7]||'Review',r[1],r[2]==='*'?'Tất cả':r[2],r[2]==='*'?'':hNm(r[2]),txt(r[2],r[3]),txt(r[2],r[4]),r[6]||'',r[5]])].map(r=>r.map(q).join(',')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),fn='Tracklog_HUB_'+(AC.short||'FC').replace(/\s+/g,'')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    if(DL){DL.save({filename:fn,data:blob}).then(()=>toast('Đã lưu file')).catch(()=>toast('Không tải được file'));return}
+    try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}catch(e){toast('Không tải được file')}})}
+
 function chInit(){
-  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · 08/11/2026 · by HaoDT</span>';
+  document.title=AC.title;const b=$('.brand');if(b)b.innerHTML='<b>'+AC.title+'</b><span class="sub">Dự báo đặt hàng tuần · Sale/Tồn/Hủy L2W · gom HUB</span><span class="ver">· <b>'+AC.ver+'</b> · '+(AC.date||'08/11/2026')+' · by HaoDT</span>';
   const RL=[[/Nhóm rau/g,'Mã SP'],[/nhóm rau/g,'mã SP'],[/Rau Củ Quả|RCQ/g,AC.short],[/\(FC \+ Tồn dự kiến\)/g,'FC'],[/FC \+ Tồn dự kiến/g,'FC'],[/sau kẹp Min\/Max, /g,''],[/Tồn & Chờ giao/g,'Tồn & Hủy'],[/nhóm SP \(MCH4\) × %hủy SKU/g,'mã quy đổi (Mã WEC) × %hủy mã quy đổi'],[/Nhóm SP: (bật|tắt)/g,'Mã quy đổi: $1']];
   const fix=n=>{if(!n)return;if(n.nodeType===3){let v=n.nodeValue,o=v;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)n.nodeValue=v;return}if(n.nodeType!==1)return;const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){let v=t.nodeValue,o=v;if(!/hóm rau|RCQ|Rau Củ|Tồn dự kiến|kẹp Min|Chờ giao|MCH4|Nhóm SP: /.test(v))continue;RL.forEach(([a,c])=>v=v.replace(a,c));if(v!==o)t.nodeValue=v}};
   fix(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fix))).observe(document.body,{childList:true,subtree:true});
-  hubBind();
+  hubBind();hubRevBind();
 }
 // ---------- XUẤT ----------
 async function exportSheets(sheets,filename){const fmt=/\.xlsb$/i.test(filename)?'xlsb':'xlsx';
@@ -2024,7 +2131,7 @@ function renderSums(){const set=(id,h)=>{const el=$('#sum-'+id);if(el)el.innerHT
   else{const k=$('#dtKpi');set('cb',k&&k.querySelector('.kpi .v')?k.querySelector('.kpi .v').textContent+' · '+(k.querySelector('.kpi .l')?.textContent||''):'')}
 }
 if(CH)chInit();
-route();initDb();
+route();initDb().then(()=>{if(CH)hubLogLoad()});
 window.__fc4={get RES(){return RES},get MS(){return MS},META,recompute,save,setSaleRows(rows,name){const log=[];SA=E.normSale(E.parseSale(rows,log));SALEFILE=name||'test';SALELOG=log;recompute()}};
 })();
 </script>
