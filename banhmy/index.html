@@ -389,7 +389,7 @@ th{background:color-mix(in srgb,var(--brand) 7%,var(--panel))!important;color:co
 .gone{display:none!important}
 .ovcol{display:flex;flex-direction:column;gap:0.7692rem;min-width:0}
 .fcs-thua{background:var(--crit-soft)!important;color:var(--crit)!important;font-weight:700}.fcs-thieu{background:var(--med-soft)!important;color:var(--med)!important;font-weight:700}.fcs-du{background:var(--ok-soft)!important;color:var(--okc)!important}
-#tHubView tr.hvh td{background:color-mix(in srgb,var(--brand) 4%,var(--panel));border-top:1px solid var(--line)}#tHubView .hpa{display:inline-flex;gap:0.3077rem;align-items:flex-start;white-space:normal;max-width:34em;font-size:.82rem}
+#tHubView tr.hvh td{background:color-mix(in srgb,var(--brand) 4%,var(--panel));border-top:1px solid var(--line)}#tHubView tr.hvg td{background:color-mix(in srgb,var(--ink,#444) 5%,var(--panel));font-weight:600;border-top:1px dashed var(--line)}#tHubView .hpa{display:inline-flex;gap:0.3077rem;align-items:flex-start;white-space:normal;max-width:34em;font-size:.82rem}
 
 :root{--f-mono:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif!important}
 body,table,td,th,input,select,.mono,.kpi .v,.kp .v,.kp2 .v{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"zero" 0}
@@ -1399,7 +1399,7 @@ function hubPlan(o){ // o: {codes:[], pos:code=>{la,lo}, hub:{}, dayVal:code=>[7
 (function(){
 'use strict';
 const APP=window.FC_APP||'rcq',CH=APP!=='rcq';document.documentElement.dataset.app=CH?'cahoi':'rcq';document.documentElement.dataset.ncc=APP;
-const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.3'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.3'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.4',date:'11/11/2026'}};
+const APPS={cahoi:{title:'FC Cá Hồi',short:'Cá Hồi',ns:'cahoi/',ls:'fc4ch_masters',mch3:'Thủy hải sản',gt:false,modDef:0,ver:'v4.3'},basa:{title:'FC Cá Basa HTX',short:'Cá basa',ns:'fcbasa/',ls:'fc4basa_masters',mch3:'Thủy hải sản',gt:false,modDef:20,ver:'v2.3'},banhmy:{title:'FC Bánh mỳ Sapo',short:'Bánh mỳ',ns:'fcbanhmy/',ls:'fc4banhmy_masters',mch3:'Bánh mỳ',gt:true,modDef:1000,ver:'v2.5',date:'11/11/2026'}};
 const AC=APPS[APP]||{ns:'rcq/',ls:'fc4_masters',mch3:'Rau củ'};
 const E=window.FC4,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
@@ -1914,14 +1914,22 @@ function renderHubView(){const el=$('#tHubView');if(!el||!RES||!RES.mod)return;i
   const head=`<tr><th>Status HUB</th><th>Mã HUB / CH – Tên</th><th class="n">Số CH / PN</th><th class="n">Km HUB</th><th>Lịch giao</th><th class="n">Sale 1W</th><th class="n">Hủy 1W</th><th class="n">Tồn</th><th class="n">Chờ giao</th><th class="n">FC kg</th>${gt?'<th class="n">FC nghìn đ</th>':''}<th class="n">+/- Sale</th><th class="n" title="Tô màu: đỏ = FC vượt, xanh lá = đủ, xanh dương = thiếu (theo ngưỡng Thừa/Thiếu ở Cấu hình)">FC/Sale</th>${E.DAYVN.map(d=>`<th class="n">${d}</th>`).join('')}<th class="n">MOD/lần (${U})</th><th class="n" title="MOD/lần × số ngày giao có hàng">MOV tuần</th><th class="n" title="Tổng đơn tuần ÷ MOD/lần">Tuần / MOD</th><th>Gom</th><th>Đề xuất / Xử lý</th></tr>`;
   el.innerHTML=head+rows.slice(HV.page*P,(HV.page+1)*P).map(r=>{const multi=r.L.length>1,op=HV.all||HV.open.has(r.h);
     let act='';const sp=spM.get(r.h),mg=mgM.get(r.h);
-    if(sp)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(sp.key)}" ${HPSEL.has(sp.key)?'checked':''}> Tách ra ${sp.parts.map(p=>`<b>HUB ${esc(p.hub)}</b> ${esc(nm(p.hub))} – ${p.list.length} CH${p.list.length>1?' ('+p.list.map(esc).join(', ')+')':''} – ${nf(p.km,1)} km`).join('; ')} · HUB ${esc(sp.hub)} giữ ${sp.keep.list.length} CH</label>`;
+    if(sp)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(sp.key)}" ${HPSEL.has(sp.key)?'checked':''}> Tách ra ${sp.parts.length} HUB mới: ${sp.parts.map(p=>`<b>${esc(p.hub)}</b> (${p.list.length} CH)`).join(', ')} · HUB ${esc(sp.hub)} giữ ${sp.keep.list.length} CH</label>`;
     else if(mg)act=`<label class="hpa"><input type="checkbox" data-hp="${esc(mg.key)}" ${HPSEL.has(mg.key)?'checked':''}> Gộp vào <b>HUB ${esc(mg.to)}</b> ${esc(nm(mg.to))} – ${nf(mg.km,1)} km</label>`;
     if(r.sh.length){const keys=r.sh.map(g=>g.key).join(','),need=r.sh.reduce((a,g)=>a+g.need,0),cur=r.sh.every(g=>(c.dec||{})[g.key]===r.sh[0]&&0)?'':((c.dec||{})[r.sh[0].key]||'');
       act+=`${act?'<br>':''}<span class="smallnote">Thiếu MOD ${r.sh.length} lần (${f(need)} ${U})</span> <select class="hdec" data-keys="${esc(keys)}"><option value="">${r.sh.some(g=>g.auto)?'Tự tăng':'Chưa chọn'}</option><option value="up" ${cur==='up'?'selected':''}>Tăng FC đủ MOD</option><option value="no" ${cur==='no'?'selected':''}>Không đặt</option></select>`}
     const lab=`${multi?`<span class="tg">${op?'▾':'▸'}</span> `:''}<b>${esc(r.h)}</b> – ${esc(nm(r.h))}`;
     let h=line({cls:'hvh'+(multi?' click':''),attr:`data-h="${esc(r.h)}"`,status:`<span class="pill ${HS[r.hs][0]}">${HS[r.hs][1]}</span>`,lab,n:r.L.length,km:multi?nf(r.km,1):'—',lich:dd(r.d),A:r.A,mod:r.mod,mov:r.mod*r.nd,x:r.mod?r.wk/r.mod:null,gom:gs(new Set(r.L.flatMap(x=>[...((st.get(K(x.code))||{}).s||[])]))),act});
-    if(multi&&op)h+=r.L.slice().sort((a,b)=>(K(a.code)===r.h?-1:K(b.code)===r.h?1:b.totalFC-a.totalFC)).map(x=>{const k=K(x.code),A=agg([x]),d=DV.get(k)||[0,0,0,0,0,0,0],wk=d.reduce((a,b)=>a+b,0),m=mo(k),km=k===r.h?'HUB':(()=>{const z=kmDist(pos(r.h),pos(k));return isFinite(z)?nf(z,1):'—'})();
-      return line({cls:'hvs',lab:`<span style="padding-left:18px">${esc(x.code)}</span> – <span class="smallnote">${esc(String(x.name||'').replace(/^WM\+\s*/,''))}</span>${spTo.has(k)?` <span class="pill high">${spTo.get(k)===k?'HUB mới':'Tách → HUB '+esc(spTo.get(k))}</span>`:''}`,n:esc(x.N),km,lich:esc(x.lich||''),A,mod:m,mov:m*d.filter(v=>v>0).length,x:m?wk/m:null,gom:gs((st.get(k)||{}).s||new Set())})}).join('');
+    if(multi&&op){const by=new Map(r.L.map(x=>[K(x.code),x])),pick=L=>L.map(c=>by.get(K(c))).filter(Boolean),rt=M.route||{},G=[];
+      const child=(x,hub)=>{const k=K(x.code),A=agg([x]),d=DV.get(k)||[0,0,0,0,0,0,0],wk=d.reduce((a,b)=>a+b,0),m=mo(k),km=k===hub?'HUB':(()=>{const z=kmDist(pos(hub),pos(k));return isFinite(z)?nf(z,1):'—'})();
+        return line({cls:'hvs',lab:`<span style="padding-left:34px">${esc(x.code)}</span> – <span class="smallnote">${esc(String(x.name||'').replace(/^WM\+\s*/,''))}</span>${k===hub&&hub!==r.h?' <span class="pill high">HUB mới</span>':''}`,n:esc(x.N),km,lich:esc(x.lich||''),A,mod:m,mov:m*d.filter(v=>v>0).length,x:m?wk/m:null,gom:gs((st.get(k)||{}).s||new Set())})};
+      if(sp){G.push({t:`Giữ tại <b>HUB ${esc(r.h)}</b>`,L:pick(sp.keep.list),hub:r.h});sp.parts.forEach(p=>G.push({t:`<span class="pill high">Đề xuất tách</span> gom về <b>HUB mới ${esc(p.hub)}</b> ${esc(nm(p.hub))} · bán kính ${nf(p.km,1)} km`,L:pick(p.list),hub:K(p.hub)}))}
+      else G.push({t:`Gom tại <b>HUB ${esc(r.h)}</b>${mg?` · <span class="pill">Đề xuất gộp</span> vào HUB ${esc(mg.to)}`:''}`,L:r.L.filter(x=>{const k=K(x.code);return k===r.h||rt[k]!==k}),hub:r.h});
+      const used=new Set(G.flatMap(g=>g.L.map(x=>K(x.code)))),rest=r.L.filter(x=>!used.has(K(x.code))),dir=rest.filter(x=>rt[K(x.code)]===K(x.code)),oth=rest.filter(x=>rt[K(x.code)]!==K(x.code));
+      if(oth.length)G[0].L=G[0].L.concat(oth);if(dir.length)G.push({t:'Giao thẳng về CH <span class="smallnote">(đạt MOV tuần, không tính vào cụm)</span>',L:dir,hub:''});
+      const GG=G.filter(g=>g.L.length);
+      h+=GG.map(g=>{const d=dayOf(g.L),wk=d.reduce((a,b)=>a+b,0),m=g.hub?mo(g.hub):0,L=g.L.slice().sort((a,b)=>(K(a.code)===g.hub?-1:K(b.code)===g.hub?1:b.totalFC-a.totalFC));
+        return (GG.length>1?line({cls:'hvg',lab:`<span style="padding-left:16px">${g.t}</span>`,n:g.L.length+' CH',km:'',lich:dd(d),A:agg(g.L),mod:m,mov:m*d.filter(v=>v>0).length,x:m?wk/m:null,gom:''}):'')+L.map(x=>child(x,g.hub||r.h)).join('')}).join('')}
     return h}).join('')||`<tr><td colspan="24" class="smallnote">Không có HUB phù hợp.</td></tr>`;
   pager('#pgHv',rows.length,HV.page,p=>{HV.page=p;renderHubView()},P);$('#hpApply').disabled=!HPSEL.size}
 $('#tHubView')&&$('#tHubView').addEventListener('click',e=>{if(e.target.closest('input,select,label'))return;const tr=e.target.closest('tr.hvh.click');if(!tr)return;const h=tr.dataset.h;HV.open.has(h)?HV.open.delete(h):HV.open.add(h);renderHubView()});
